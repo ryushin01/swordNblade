@@ -11,6 +11,7 @@
  *
  * 화면 글자가 바뀌면 다시 실행합니다. `--check`는 1에 빠진 글자가 있으면 실패합니다(단위 테스트에서 씀).
  * 조각 파일은 글자가 바뀌어도 그대로라 없는 것만 만듭니다. 원본 글꼴을 바꿨으면 `--all`로 모두 다시 만듭니다.
+ * 설정의 글꼴에 `license`(라이선스 원문 경로)가 있으면 만든 파일 옆에 원문을 함께 둡니다(`--check`는 빠졌는지 확인).
  */
 import fontverter from 'fontverter';
 import { Blob, Face } from 'harfbuzzjs';
@@ -217,6 +218,19 @@ for (const font of config.fonts) {
         });
     }
     console.log(`${family} ${weight}: 화면 글자 ${ui.size}자 (${(uiFont.length / 1024).toFixed(1)}KB)`);
+  }
+
+  // 글꼴 라이선스 원문(OFL.txt 등)을 만든 파일 옆에 둠. OFL은 글꼴을 다시 배포할 때 라이선스를 함께 두도록 정함
+  if (font.license) {
+    const name = path.basename(font.license);
+    if (CHECK) {
+      for (const d of new Set([dir, restDir]))
+        if (!existsSync(path.join(d, name)))
+          missing.push(`${family}: ${path.relative(ROOT, path.join(d, name))} 라이선스 파일이 없습니다`);
+    } else {
+      const text = await readFile(path.join(ROOT, font.license));
+      for (const d of new Set([dir, restDir])) await writeFile(path.join(d, name), text);
+    }
   }
 
   if (CHECK) continue;

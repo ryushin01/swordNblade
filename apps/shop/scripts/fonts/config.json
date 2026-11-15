@@ -11,7 +11,8 @@
       "rename": true,
       "weights": {
         "400": "scripts/fonts/kopub-batang/KoPubBatang-Regular.ttf"
-      }
+      },
+      "license": "scripts/fonts/kopub-batang/OFL.txt"
     }
   ]
 }

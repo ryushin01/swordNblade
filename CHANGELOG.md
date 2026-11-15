@@ -3,7 +3,7 @@
 ## 0.15.0 - 2026-11-15
 
 - 쇼핑몰 한글 KoPub바탕을 Google Fonts의 SIL OFL 1.1판으로 바꿈. 받았던 파일은 재배포 조건(서체 라이선스 약관)을 확인하지 못해, 같은 글꼴을 OFL로 배포하는 판으로 출처를 옮김. 글자 모양은 같음
-- OFL판은 줄여 쓸 수 있어 통파일(1.8MB) 대신 화면 글자 파일(약 130KB) + 나머지 글자 조각으로 실음(`pnpm --filter @snb/shop fonts`, 공통 스크립트 `scripts/build-fonts.mjs`). OFL 예약 이름 때문에 줄인 파일은 SnbBatang이라는 이름으로 씀. 화면 글자 파일에 빠진 글자가 없는지 단위 테스트로 확인
+- OFL판은 줄여 쓸 수 있어 통파일(1.8MB) 대신 화면 글자 파일(약 130KB) + 나머지 글자 조각으로 실음(`pnpm --filter @snb/shop fonts`, 공통 스크립트 `scripts/build-fonts.mjs`). OFL 예약 이름 때문에 줄인 파일은 SnbBatang이라는 이름으로 쓰고, 만든 파일 옆에 OFL 원문(`OFL.txt`)을 함께 둠. 화면 글자 파일에 빠진 글자나 라이선스 원문이 없는지 단위 테스트로 확인
 - 통파일 때문에 넣었던 칼날 로딩 화면(`FontLoader`)을 걷어 내고, 나머지 조각은 `RestFonts`가 페이지를 다 받은 뒤 붙임
 - 쇼핑몰 Lighthouse 성능 기준을 0.8 → 0.9로 되돌림(로컬 측정 네 화면 모두 1.0). 글꼴 CSS가 늘어 CSS 크기 예산을 10 → 12kB로 올림
 

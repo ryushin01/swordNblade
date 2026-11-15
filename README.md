@@ -1,7 +1,7 @@
 # Sword & Blade - 도검의 벽
 
 [![CI](https://github.com/ryushin01/swordnblade/actions/workflows/ci.yml/badge.svg)](https://github.com/ryushin01/swordnblade/actions/workflows/ci.yml)
-![version](https://img.shields.io/badge/version-0.12.4-7a4a35)
+![version](https://img.shields.io/badge/version-0.13.0-7a4a35)
 ![Storybook](https://img.shields.io/badge/Storybook-10-FF4785?logo=storybook&logoColor=white)
 
 동양 도검부터 신화 속 검까지, 석고 벽에 새긴 부조처럼 진열한 도검 쇼핑몰과 관리자 화면입니다. 배송 국가에 따라 관세·부가세를 미리 계산합니다.
@@ -76,7 +76,7 @@
 |---|---|
 | 구성 | pnpm 워크스페이스, Turborepo, Feature-Sliced Design v2.1 (Steiger로 검사) |
 | 프레임워크 | Next.js 16 (App Router, multi-zones), React 19, TypeScript 6 |
-| 쇼핑몰 UI | Tailwind CSS 4, shadcn/ui(Button, Sonner), lucide-react, SSGOI(화면 전환), Cormorant Garamond(영문), 운영체제 명조체(한글), 나눔손글씨 붓(칼 이름에 쓰인 247자만) |
+| 쇼핑몰 UI | Tailwind CSS 4, shadcn/ui(Button, Sonner), lucide-react, SSGOI(화면 전환), Spectral(영문), Pirata One(영어 화면 큰 제목), KoPub바탕(한글), 나눔손글씨 붓(칼 이름에 쓰인 247자만) |
 | 어드민 UI | Ant Design 6, @ant-design/icons |
 | 상태·데이터 | TanStack Query 5, Zustand 5, MSW 3 (Mock API), next-intl 4 (한국어·영어) |
 | 품질 | ESLint(Next.js 규칙, import 정렬), Prettier, husky + lint-staged, Vitest 5 + Testing Library, Storybook 10 스토리 테스트(실제 브라우저 + axe), Playwright + axe(프로덕션 빌드·배포 사이트 E2E), eslint-plugin-jsx-a11y, size-limit, Lighthouse CI |
@@ -128,11 +128,24 @@ docs/          문서와 스크린샷
 | [시퀀스 다이어그램](docs/sequence-diagrams.md) | 쇼핑몰·어드민 데이터 공유, 관세 미리 계산과 주문, 회원 로그인과 내 주문 |
 | [버전 기록](CHANGELOG.md) | 버전별 변경 내용 |
 
+## 웹 폰트
+
+| 글꼴 | 쓰는 곳 | 굵기 |
+|---|---|---|
+| Spectral | 영문·숫자 (제목·본문) | 400·500·600·700 |
+| Pirata One | 영어 화면의 큰 제목(h1·h2) | 400 |
+| KoPub바탕 | 한글 (제목·본문) | 400 (굵은 글씨는 브라우저가 두껍게 그림) |
+| 나눔손글씨 붓 | 칼 이름의 한글 | 400 |
+
+저작자·라이선스·원본은 아래 출처 표에 있습니다. 모두 같은 사이트에서 제공합니다. KoPub바탕은 수정할 수 없는 글꼴이라 받은 파일(1.8MB)을 통째로 쓰고(`apps/shop/public/fonts/kopub-batang`), 첫 화면을 막지 않게 페이지를 다 받은 뒤 붙입니다.
+
 ## 출처
 
 | 자료 | 저작자 | 사용 허락 | 원본 |
 |---|---|---|---|
-| Cormorant Garamond 글꼴 | The Cormorant Project Authors | SIL OFL 1.1 | [CatharsisFonts/Cormorant](https://github.com/CatharsisFonts/Cormorant) |
+| Spectral 글꼴 | Production Type | SIL OFL 1.1 | [Google Fonts](https://fonts.google.com/specimen/Spectral) |
+| Pirata One 글꼴 | Rodrigo Fuenzalida, Nicolas Massi | SIL OFL 1.1 | [Google Fonts](https://fonts.google.com/specimen/Pirata+One) |
+| KoPub바탕 글꼴 | 문화체육관광부, 한국출판인회의 | 무료(웹 사용 가능, 수정·판매 금지) | [눈누](https://noonnu.cc/font_page/32) |
 | Nanum Brush Script(나눔손글씨 붓) 글꼴 (쓰는 글자만 남긴 `sword-brush.woff2`) | NHN(네이버), 디자인 산돌커뮤니케이션 | SIL OFL 1.1 | [Google Fonts](https://fonts.google.com/specimen/Nanum+Brush+Script) |
 
 도검 일러스트는 이미지 파일 없이 코드(SVG)로 그렸습니다.

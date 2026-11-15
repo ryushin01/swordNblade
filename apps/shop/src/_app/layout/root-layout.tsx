@@ -1,4 +1,4 @@
-import { Cormorant_Garamond } from 'next/font/google';
+import { Pirata_One, Spectral } from 'next/font/google';
 import localFont from 'next/font/local';
 import { notFound } from 'next/navigation';
 import { hasLocale, NextIntlClientProvider } from 'next-intl';
@@ -13,6 +13,7 @@ import { SiteHeader } from '@/widgets/site-header';
 import { Providers } from '../query-client/providers';
 import { PageTransitions } from '../transitions/page-transitions';
 import { RouteBoundary } from '../transitions/route-boundary';
+import { DeferredFonts } from './deferred-fonts';
 
 import type { Metadata, Viewport } from 'next';
 import type { ReactNode } from 'react';
@@ -30,12 +31,14 @@ const swordBrush = localFont({
   declarations: [{ prop: 'size-adjust', value: '125%' }],
 });
 
-const cormorant = Cormorant_Garamond({
+// 영문·숫자 본문과 제목은 Spectral, 영어 화면의 큰 제목만 다크 판타지 글꼴 Pirata One(굵기 하나).
+const spectral = Spectral({
   subsets: ['latin'],
-  weight: ['400', '500', '600'],
-  variable: '--font-cormorant',
+  weight: ['400', '500', '600', '700'],
+  variable: '--font-spectral',
   display: 'swap',
 });
+const pirata = Pirata_One({ subsets: ['latin'], weight: '400', variable: '--font-pirata', display: 'swap' });
 
 type LayoutParams = Promise<{ locale: string }>;
 
@@ -79,7 +82,7 @@ export async function RootLayout({ children, params }: { children: ReactNode; pa
   const t = await getTranslations('Common');
 
   return (
-    <html lang={locale} className={`${cormorant.variable} ${swordBrush.variable}`}>
+    <html lang={locale} className={`${spectral.variable} ${pirata.variable} ${swordBrush.variable}`}>
       <body>
         <a
           href="#main"
@@ -101,6 +104,8 @@ export async function RootLayout({ children, params }: { children: ReactNode; pa
             </PageTransitions>
           </Providers>
         </NextIntlClientProvider>
+        {/* 한글 KoPub바탕(통파일)은 첫 화면 뒤에 받음 */}
+        <DeferredFonts href="/fonts/kopub-batang.css" />
       </body>
     </html>
   );

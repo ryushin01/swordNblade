@@ -98,7 +98,7 @@ export async function RootLayout({ children, params }: { children: ReactNode; pa
             crossOrigin=""
           />
         )}
-        <style dangerouslySetInnerHTML={{ __html: FONT_FACE_CSS }} />
+        <style id="font-faces" dangerouslySetInnerHTML={{ __html: FONT_FACE_CSS }} />
       </head>
       <body>
         <FontLoader label={t('loadingFonts')} />

@@ -1,0 +1,9 @@
+/* KoPub바탕: 수정할 수 없는 글꼴이라 받은 파일 그대로(Regular, 1.8MB) 씁니다. DeferredFonts가 페이지를 다 받은 뒤 붙입니다. */
+@font-face {
+  font-family: 'KoPub Batang';
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+  src: url('./kopub-batang/KoPubBatang-Regular.woff2') format('woff2');
+  unicode-range: U+1100-11FF, U+3130-318F, U+A960-A97F, U+AC00-D7A3, U+D7B0-D7FF;
+}

@@ -7,6 +7,7 @@ import ko from '../src/shared/i18n/messages/ko.json';
 import type { Preview } from '@storybook/nextjs-vite';
 
 import '../src/_app/styles/globals.css';
+import '../public/fonts/kopub-batang.css';
 
 const queryClient = new QueryClient({ defaultOptions: { queries: { retry: false } } });
 const MESSAGES = { ko, en } as const;
@@ -41,7 +42,7 @@ const preview: Preview = {
       return (
         <NextIntlClientProvider locale={locale} messages={MESSAGES[locale]} timeZone="Asia/Seoul">
           <QueryClientProvider client={queryClient}>
-            <div lang={locale} style={{ fontFamily: "'Cormorant Garamond', AppleMyungjo, serif" }}>
+            <div lang={locale} style={{ fontFamily: "'Spectral', 'KoPub Batang', AppleMyungjo, serif" }}>
               <Story />
             </div>
           </QueryClientProvider>

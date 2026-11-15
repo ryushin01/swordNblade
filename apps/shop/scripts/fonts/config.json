@@ -1,0 +1,17 @@
+{
+  "outDir": "src/_app/styles/fonts",
+  "restDir": "public/fonts",
+  "scan": ["src", "../../packages/mocks/src", "../../packages/domain/src", "../../packages/sword-art/src"],
+  "dataExtensions": ["json"],
+  "extra": "년월일시분초오전후요화수목금토만억조원",
+  "fonts": [
+    {
+      "family": "SnbBatang",
+      "slug": "snb-batang",
+      "rename": true,
+      "weights": {
+        "400": "scripts/fonts/kopub-batang/KoPubBatang-Regular.ttf"
+      }
+    }
+  ]
+}

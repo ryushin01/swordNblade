@@ -16,3 +16,8 @@ pnpm-lock.yaml
 # 문서는 표·줄바꿈을 손으로 맞춰 두었으므로 제외
 *.md
 .lighthouseci
+
+# pnpm --filter @snb/shop fonts로 만드는 글꼴 CSS와 글자 묶음 자료(직접 고치지 않음)
+apps/shop/src/_app/styles/fonts/
+apps/shop/public/fonts/
+apps/shop/scripts/fonts/ko-slices.json

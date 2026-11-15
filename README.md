@@ -104,6 +104,7 @@ pnpm dev    # 쇼핑몰 http://localhost:3000 · 어드민 http://localhost:3000
 | `pnpm --filter @snb/shop e2e` | 쇼핑몰 프로덕션 빌드 E2E (먼저 `build` 필요, `E2E_BASE_URL`을 주면 배포된 사이트 검사) |
 | `pnpm --filter @snb/shop screenshots` | README 화면 다시 찍기 (먼저 `ADMIN_ORIGIN=http://localhost:3102 pnpm build`, 브라우저 안 Mock 데이터) |
 | `pnpm --filter @snb/shop storybook` | 쇼핑몰 Storybook (`http://localhost:6006`) |
+| `pnpm --filter @snb/shop fonts` | 한글 웹 폰트(화면 글자 파일과 나머지 조각) 다시 만들기 (화면 글자를 바꾼 뒤, `pip install fonttools brotli` 필요) |
 
 ## 프로젝트 구조
 
@@ -135,10 +136,10 @@ docs/          문서와 스크린샷
 |---|---|---|
 | Spectral | 영문·숫자 (제목·본문) | 400·500·600·700 |
 | Pirata One | 영어 화면의 큰 제목(h1·h2) | 400 |
-| KoPub바탕 | 한글 (제목·본문) | 400 (굵은 글씨는 브라우저가 두껍게 그림) |
+| KoPub바탕 (SIL OFL판, 줄인 파일 이름 SnbBatang) | 한글 (제목·본문) | 400 (굵은 글씨는 브라우저가 두껍게 그림) |
 | 나눔손글씨 붓 | 칼 이름의 한글 | 400 |
 
-저작자·라이선스·원본은 아래 출처 표에 있습니다. 모두 같은 사이트에서 제공합니다. KoPub바탕은 수정할 수 없는 글꼴이라 받은 파일(1.8MB)을 통째로 쓰고(`apps/shop/public/fonts/kopub-batang`), 첫 화면을 막지 않게 페이지를 다 받은 뒤 붙입니다.
+저작자·라이선스·원본은 아래 출처 표에 있습니다. 모두 같은 사이트에서 제공합니다. KoPub바탕은 Google Fonts가 SIL OFL 1.1로 배포하는 판을 씁니다. 화면에 쓰는 글자만 담은 파일(약 130KB)을 첫 화면과 함께 받고, 나머지 글자는 글자 묶음별 조각으로 나눠 페이지를 다 받은 뒤 필요한 조각만 받습니다(`pnpm --filter @snb/shop fonts`). OFL의 예약 이름 때문에 줄인 파일은 SnbBatang이라는 이름으로 씁니다.
 
 ## 출처
 
@@ -146,7 +147,7 @@ docs/          문서와 스크린샷
 |---|---|---|---|
 | Spectral 글꼴 | Production Type | SIL OFL 1.1 | [Google Fonts](https://fonts.google.com/specimen/Spectral) |
 | Pirata One 글꼴 | Rodrigo Fuenzalida, Nicolas Massi | SIL OFL 1.1 | [Google Fonts](https://fonts.google.com/specimen/Pirata+One) |
-| KoPub바탕 글꼴 | 문화체육관광부, 한국출판인회의 | 무료(웹 사용 가능, 수정·판매 금지) | [눈누](https://noonnu.cc/font_page/32) |
+| KoPub바탕 글꼴 (화면 글자 파일·조각으로 줄여 SnbBatang으로 이름을 바꿈) | 문화체육관광부, 한국출판인회의 | SIL OFL 1.1 (예약 이름 KoPub Batang) | [google/fonts](https://github.com/google/fonts/tree/main/ofl/kopubbatang) |
 | Nanum Brush Script(나눔손글씨 붓) 글꼴 (쓰는 글자만 남긴 `sword-brush.woff2`) | NHN(네이버), 디자인 산돌커뮤니케이션 | SIL OFL 1.1 | [Google Fonts](https://fonts.google.com/specimen/Nanum+Brush+Script) |
 
 도검 일러스트는 이미지 파일 없이 코드(SVG)로 그렸습니다.

@@ -102,6 +102,7 @@ pnpm dev    # 쇼핑몰 http://localhost:3000 · 어드민 http://localhost:3000
 | `pnpm format` | Prettier로 서식 정리 (커밋할 때 바뀐 파일은 자동 정리) |
 | `pnpm --filter @snb/shop size` / `lhci` | 쇼핑몰 번들 크기 / Lighthouse 기준 검사 (먼저 `build` 필요) |
 | `pnpm --filter @snb/shop e2e` | 쇼핑몰 프로덕션 빌드 E2E (먼저 `build` 필요, `E2E_BASE_URL`을 주면 배포된 사이트 검사) |
+| `pnpm --filter @snb/shop screenshots` | README 화면 다시 찍기 (먼저 `build`, 브라우저 안 Mock 데이터) |
 | `pnpm --filter @snb/shop storybook` | 쇼핑몰 Storybook (`http://localhost:6006`) |
 
 ## 프로젝트 구조

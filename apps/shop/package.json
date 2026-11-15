@@ -14,6 +14,7 @@
     "storybook": "storybook dev -p 6006",
     "build-storybook": "storybook build -o public/storybook --quiet",
     "e2e": "playwright test",
+    "screenshots": "SCREENSHOTS=1 playwright test --project=screenshots",
     "test:storybook": "vitest run --project storybook",
     "size": "size-limit",
     "lhci": "lhci autorun"

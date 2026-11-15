@@ -11,6 +11,14 @@ async function shoot(page: Page, name: string, wait = 800) {
   await page.waitForLoadState('networkidle', { timeout: 8_000 }).catch(() => {});
   // 한국어 화면은 KoPub바탕(통파일)을 다 받아 로딩 화면이 걷힐 때까지 기다립니다.
   await page.waitForFunction(() => document.documentElement.dataset.fonts === 'ready', null, { timeout: 30_000 });
+  // 한국어 화면에서 글꼴을 받지 못한 채(8초 제한) 열렸으면 기존 화면을 덮어쓰지 않고 멈춥니다.
+  const fallback = await page.evaluate(
+    () =>
+      document.documentElement.lang === 'ko' &&
+      ((document.getElementById('font-faces') as HTMLStyleElement | null)?.disabled !== false ||
+        ![...document.fonts].some((face) => face.family.includes('KoPub Batang') && face.status === 'loaded')),
+  );
+  if (fallback) throw new Error('KoPub바탕을 받지 못해 화면을 바꾸지 않았습니다.');
   await page.evaluate(() => document.fonts.ready);
   await page.waitForTimeout(wait);
   await page.screenshot({ path: `${OUT}/${name}.jpg`, type: 'jpeg', quality: 82 });
@@ -79,10 +87,11 @@ test.describe('데스크톱', () => {
     await page.waitForTimeout(1200);
     await page.screenshot({ path: `${OUT}/admin-dashboard.jpg`, type: 'jpeg', quality: 82 });
     await page.goto('/admin/users');
-    await page.waitForTimeout(1200);
+    await expect(page.getByRole('row').filter({ hasText: 'demo@example.com' })).toBeVisible();
     await page.screenshot({ path: `${OUT}/admin-users.jpg`, type: 'jpeg', quality: 82 });
     await page.goto('/admin/products/sw-001');
-    await page.waitForTimeout(1500);
+    await expect(page.getByRole('heading', { level: 1, name: /수정$/ })).toBeVisible();
+    await expect(page.getByRole('textbox').first()).not.toHaveValue('');
     await page.screenshot({ path: `${OUT}/admin-product-edit.jpg`, type: 'jpeg', quality: 82 });
   });
 });

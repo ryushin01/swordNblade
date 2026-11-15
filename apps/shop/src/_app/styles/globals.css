@@ -239,18 +239,9 @@
   gap: 28px;
   background: var(--wall);
   color: var(--ink);
-  transition:
-    opacity 0.6s ease,
-    visibility 0s linear 0.6s;
 }
 [data-fonts='ready'] .font-loader {
-  opacity: 0;
-  visibility: hidden;
-  pointer-events: none;
-}
-/* 걷힐 때 글자는 바로 숨기고 배경만 서서히 사라지게 함(반투명한 글자가 명도 대비를 해치지 않게) */
-[data-fonts='ready'] .font-loader > * {
-  visibility: hidden;
+  display: none;
 }
 [data-fonts='loading'] body > :not(.font-loader) {
   visibility: hidden;
@@ -287,9 +278,6 @@
   }
 }
 @media (prefers-reduced-motion: reduce) {
-  [data-fonts] .font-loader {
-    transition: none;
-  }
   .font-loader__blade::after {
     animation: none;
     translate: 150% 0;

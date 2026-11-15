@@ -13,12 +13,14 @@ import { SiteHeader } from '@/widgets/site-header';
 import { Providers } from '../query-client/providers';
 import { PageTransitions } from '../transitions/page-transitions';
 import { RouteBoundary } from '../transitions/route-boundary';
-import { FONT_FACE_CSS, FontLoader } from './font-loader';
+import { RestFonts } from './rest-fonts';
 
 import type { Metadata, Viewport } from 'next';
 import type { ReactNode } from 'react';
 
 import '../styles/globals.css';
+// 한글: KoPub바탕(OFL판, 줄인 파일 이름 SnbBatang) 중 화면에 쓰는 글자만 담은 파일. pnpm --filter @snb/shop fonts로 만듭니다.
+import '../styles/fonts/snb-batang.css';
 
 /**
  * 칼 이름의 한글만 붓글씨(나눔손글씨 붓)로 씁니다. 이름에 쓰인 247자만 담은 66KB 파일이라 본문 한글 웹 글꼴과 달리 가볍습니다.
@@ -82,26 +84,8 @@ export async function RootLayout({ children, params }: { children: ReactNode; pa
   const t = await getTranslations('Common');
 
   return (
-    <html
-      lang={locale}
-      className={`${spectral.variable} ${pirata.variable} ${swordBrush.variable}`}
-      suppressHydrationWarning
-    >
-      <head>
-        {/* 한글 KoPub바탕(통파일): 바로 받기 시작하고, 다 받을 때까지 FontLoader가 로딩 화면을 보여 줌 */}
-        {locale === 'ko' && (
-          <link
-            rel="preload"
-            href="/fonts/kopub-batang/KoPubBatang-Regular.woff2"
-            as="font"
-            type="font/woff2"
-            crossOrigin=""
-          />
-        )}
-        <style id="font-faces" dangerouslySetInnerHTML={{ __html: FONT_FACE_CSS }} />
-      </head>
+    <html lang={locale} className={`${spectral.variable} ${pirata.variable} ${swordBrush.variable}`}>
       <body>
-        <FontLoader label={t('loadingFonts')} />
         <a
           href="#main"
           className="sr-only z-50 bg-ink px-4 py-3 text-wall focus:not-sr-only focus:fixed focus:left-4 focus:top-4"
@@ -122,6 +106,8 @@ export async function RootLayout({ children, params }: { children: ReactNode; pa
             </PageTransitions>
           </Providers>
         </NextIntlClientProvider>
+        {/* 화면 글자 파일에 없는 한글은 나머지 조각으로(첫 화면 뒤에 붙임) */}
+        <RestFonts href="/fonts/snb-batang-rest.css" />
       </body>
     </html>
   );

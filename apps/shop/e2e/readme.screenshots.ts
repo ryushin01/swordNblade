@@ -9,17 +9,14 @@ const OUT = '../../docs/images';
 
 async function shoot(page: Page, name: string, wait = 800) {
   await page.waitForLoadState('networkidle', { timeout: 8_000 }).catch(() => {});
-  // 한국어 화면은 KoPub바탕(통파일)을 다 받아 로딩 화면이 걷힐 때까지 기다립니다.
-  await page.waitForFunction(() => document.documentElement.dataset.fonts === 'ready', null, { timeout: 30_000 });
-  // 한국어 화면에서 글꼴을 받지 못한 채(8초 제한) 열렸으면 기존 화면을 덮어쓰지 않고 멈춥니다.
+  // 한국어 화면은 화면 글자만 담은 KoPub바탕(SnbBatang)을 실제로 받은 뒤 찍습니다. 받지 못했으면 기존 화면을 덮어쓰지 않고 멈춥니다.
+  await page.evaluate(() => document.fonts.ready);
   const fallback = await page.evaluate(
     () =>
       document.documentElement.lang === 'ko' &&
-      ((document.getElementById('font-faces') as HTMLStyleElement | null)?.disabled !== false ||
-        ![...document.fonts].some((face) => face.family.includes('KoPub Batang') && face.status === 'loaded')),
+      ![...document.fonts].some((face) => face.family.includes('SnbBatang') && face.status === 'loaded'),
   );
-  if (fallback) throw new Error('KoPub바탕을 받지 못해 화면을 바꾸지 않았습니다.');
-  await page.evaluate(() => document.fonts.ready);
+  if (fallback) throw new Error('KoPub바탕(SnbBatang)을 받지 못해 화면을 바꾸지 않았습니다.');
   await page.waitForTimeout(wait);
   await page.screenshot({ path: `${OUT}/${name}.jpg`, type: 'jpeg', quality: 82 });
 }

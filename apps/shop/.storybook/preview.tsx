@@ -7,7 +7,8 @@ import ko from '../src/shared/i18n/messages/ko.json';
 import type { Preview } from '@storybook/nextjs-vite';
 
 import '../src/_app/styles/globals.css';
-import '../public/fonts/kopub-batang.css';
+// 한글: 화면 글자만 담은 KoPub바탕(OFL판, SnbBatang). 스토리에만 있는 드문 글자는 운영체제 명조로 보입니다.
+import '../src/_app/styles/fonts/snb-batang.css';
 
 const queryClient = new QueryClient({ defaultOptions: { queries: { retry: false } } });
 const MESSAGES = { ko, en } as const;
@@ -42,7 +43,7 @@ const preview: Preview = {
       return (
         <NextIntlClientProvider locale={locale} messages={MESSAGES[locale]} timeZone="Asia/Seoul">
           <QueryClientProvider client={queryClient}>
-            <div lang={locale} style={{ fontFamily: "'Spectral', 'KoPub Batang', AppleMyungjo, serif" }}>
+            <div lang={locale} style={{ fontFamily: "'Spectral', 'SnbBatang', AppleMyungjo, serif" }}>
               <Story />
             </div>
           </QueryClientProvider>

@@ -70,7 +70,7 @@
 
   /*
    * 영문·숫자는 Spectral, 한글은 KoPub바탕. KoPub바탕은 수정할 수 없는 글꼴이라 받은 파일(1.8MB)을 통째로 쓰고,
-   * 첫 화면을 막지 않게 DeferredFonts가 페이지를 다 받은 뒤 붙입니다. 그 전에는 운영체제 명조(맥 AppleMyungjo,
+   * 첫 화면을 막지 않게 FontLoader가 페이지를 다 받은 뒤 붙입니다. 그 전에는 운영체제 명조(맥 AppleMyungjo,
    * 안드로이드 Noto Serif CJK, 윈도 바탕)로 보이고, 영문은 운영체제의 올드스타일 세리프(맥 Baskerville, 윈도 Garamond)로 잇습니다.
    */
   --font-serif:
@@ -219,5 +219,79 @@
     animation-duration: 0.01ms !important;
     transition-duration: 0.01ms !important;
     scroll-behavior: auto !important;
+  }
+}
+
+/*
+ * 글꼴 로딩 화면: KoPub바탕을 다 받을 때까지 칼날 위로 빛이 흐릅니다.
+ * html[data-fonts="loading"]일 때만 보이고 "ready"가 되면 걷힙니다.
+ */
+.font-loader {
+  display: none;
+}
+[data-fonts] .font-loader {
+  position: fixed;
+  inset: 0;
+  z-index: 2147483000;
+  display: grid;
+  place-content: center;
+  justify-items: center;
+  gap: 28px;
+  background: var(--wall);
+  color: var(--ink);
+  transition:
+    opacity 0.6s ease,
+    visibility 0s linear 0.6s;
+}
+[data-fonts='ready'] .font-loader {
+  opacity: 0;
+  visibility: hidden;
+  pointer-events: none;
+}
+/* 걷힐 때 글자는 바로 숨기고 배경만 서서히 사라지게 함(반투명한 글자가 명도 대비를 해치지 않게) */
+[data-fonts='ready'] .font-loader > * {
+  visibility: hidden;
+}
+[data-fonts='loading'] body > :not(.font-loader) {
+  visibility: hidden;
+}
+.font-loader__blade {
+  position: relative;
+  display: block;
+  width: min(280px, 70vw);
+  height: 10px;
+  overflow: hidden;
+  background: linear-gradient(180deg, #8d8b84, var(--ink-muted) 50%, var(--ink));
+  clip-path: polygon(0 50%, 6% 0, 100% 0, 100% 100%, 6% 100%);
+}
+.font-loader__blade::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(90deg, transparent, var(--glow) 50%, transparent);
+  width: 30%;
+  animation: font-loader-glint 1.8s ease-in-out infinite;
+}
+.font-loader__text {
+  margin: 0;
+  font-family: var(--font-serif);
+  font-size: 0.9375rem;
+  letter-spacing: 0.04em;
+}
+@keyframes font-loader-glint {
+  from {
+    translate: -120% 0;
+  }
+  to {
+    translate: 400% 0;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  [data-fonts] .font-loader {
+    transition: none;
+  }
+  .font-loader__blade::after {
+    animation: none;
+    translate: 150% 0;
   }
 }

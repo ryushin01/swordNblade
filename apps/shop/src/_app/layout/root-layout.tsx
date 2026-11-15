@@ -13,7 +13,7 @@ import { SiteHeader } from '@/widgets/site-header';
 import { Providers } from '../query-client/providers';
 import { PageTransitions } from '../transitions/page-transitions';
 import { RouteBoundary } from '../transitions/route-boundary';
-import { DeferredFonts } from './deferred-fonts';
+import { FONT_FACE_CSS, FontLoader } from './font-loader';
 
 import type { Metadata, Viewport } from 'next';
 import type { ReactNode } from 'react';
@@ -82,8 +82,26 @@ export async function RootLayout({ children, params }: { children: ReactNode; pa
   const t = await getTranslations('Common');
 
   return (
-    <html lang={locale} className={`${spectral.variable} ${pirata.variable} ${swordBrush.variable}`}>
+    <html
+      lang={locale}
+      className={`${spectral.variable} ${pirata.variable} ${swordBrush.variable}`}
+      suppressHydrationWarning
+    >
+      <head>
+        {/* 한글 KoPub바탕(통파일): 바로 받기 시작하고, 다 받을 때까지 FontLoader가 로딩 화면을 보여 줌 */}
+        {locale === 'ko' && (
+          <link
+            rel="preload"
+            href="/fonts/kopub-batang/KoPubBatang-Regular.woff2"
+            as="font"
+            type="font/woff2"
+            crossOrigin=""
+          />
+        )}
+        <style dangerouslySetInnerHTML={{ __html: FONT_FACE_CSS }} />
+      </head>
       <body>
+        <FontLoader label={t('loadingFonts')} />
         <a
           href="#main"
           className="sr-only z-50 bg-ink px-4 py-3 text-wall focus:not-sr-only focus:fixed focus:left-4 focus:top-4"
@@ -104,8 +122,6 @@ export async function RootLayout({ children, params }: { children: ReactNode; pa
             </PageTransitions>
           </Providers>
         </NextIntlClientProvider>
-        {/* 한글 KoPub바탕(통파일)은 첫 화면 뒤에 받음 */}
-        <DeferredFonts href="/fonts/kopub-batang.css" />
       </body>
     </html>
   );

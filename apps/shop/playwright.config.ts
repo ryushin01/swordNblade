@@ -15,6 +15,10 @@ export default defineConfig({
   projects: [
     { name: 'desktop', use: { ...devices['Desktop Chrome'] } },
     { name: 'mobile', use: { ...devices['Pixel 7'] } },
+    // README 화면 촬영(pnpm screenshots). 화면 파일을 덮어쓰므로 SCREENSHOTS=1일 때만 넣습니다.
+    ...(process.env.SCREENSHOTS === '1'
+      ? [{ name: 'screenshots', testMatch: /readme\.screenshots\.ts/, use: { ...devices['Desktop Chrome'] } }]
+      : []),
   ],
   // 쇼핑몰과 어드민(/admin)을 함께 띄웁니다. 쇼핑몰은 ADMIN_ORIGIN=http://localhost:3102로 빌드해야 합니다.
   webServer: BASE_URL

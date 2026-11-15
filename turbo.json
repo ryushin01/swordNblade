@@ -4,7 +4,7 @@
     "build": {
       "dependsOn": ["^build"],
       "outputs": [".next/**", "!.next/cache/**", "public/storybook/**"],
-      "env": ["ADMIN_ORIGIN"]
+      "env": ["ADMIN_ORIGIN", "VERCEL_GIT_COMMIT_SHA"]
     },
     "dev": {
       "cache": false,

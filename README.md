@@ -1,7 +1,7 @@
 # Sword & Blade - 도검의 벽
 
 [![CI](https://github.com/ryushin01/swordnblade/actions/workflows/ci.yml/badge.svg)](https://github.com/ryushin01/swordnblade/actions/workflows/ci.yml)
-![version](https://img.shields.io/badge/version-0.19.0-7a4a35)
+![version](https://img.shields.io/badge/version-1.0.0-7a4a35)
 ![Storybook](https://img.shields.io/badge/Storybook-10-FF4785?logo=storybook&logoColor=white)
 
 동양 도검부터 신화 속 검까지, 석고 벽에 새긴 부조처럼 진열한 도검 쇼핑몰과 관리자 화면입니다. 배송 국가에 따라 관세·부가세를 미리 계산합니다.
@@ -96,7 +96,7 @@ pnpm dev    # 쇼핑몰 http://localhost:3000 · 어드민 http://localhost:3000
 | 명령 | 설명 |
 |---|---|
 | `pnpm build` | 두 앱 프로덕션 빌드 |
-| `pnpm test` | 단위·컴포넌트 테스트 (도메인, Mock API, 일러스트, 두 앱) |
+| `pnpm test` / `test:coverage` | 단위·컴포넌트 테스트 (도메인, Mock API, 일러스트, 두 앱) / 커버리지와 패키지별 하한까지 |
 | `pnpm test:storybook` | 모든 스토리를 실제 브라우저에서 렌더링하고 접근성 검사 |
 | `pnpm typecheck` / `pnpm lint` | 타입 검사 / ESLint와 FSD 규칙 검사(Steiger) |
 | `pnpm format` | Prettier로 서식 정리 (커밋할 때 바뀐 파일은 자동 정리) |

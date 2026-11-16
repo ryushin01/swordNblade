@@ -7,9 +7,9 @@
 - 석고색 바탕에 1px 선으로 나눈 정사각 칸
 - 마우스를 올리거나 초점을 받으면 칸에 번지는 따뜻한 빛
 - 상세: 왼쪽 큰 부조, 오른쪽 패널, 양옆에 선과 점을 둔 테라코타색 작은 제목, 타임라인
-- Cormorant Garamond 스몰 캡스
+- 영문 스몰 캡스(지금은 Spectral, 영어 화면의 큰 제목은 Pirata One)
 
-한글은 웹 글꼴 대신 운영체제 명조체(맥 AppleMyungjo, 안드로이드 Noto Serif CJK, 윈도 바탕)를 씁니다. 한글 웹 글꼴은 모바일 첫 화면을 4~5초 늦췄습니다([개발 가이드](development.md#성능-lighthouse-모바일)). 한글은 낱말 중간에서 줄을 바꾸지 않습니다(`word-break: keep-all`).
+한글은 KoPub바탕(Google Fonts의 SIL OFL판, 줄인 파일 이름 SnbBatang)을 씁니다. 화면에 쓰는 글자만 담은 파일(약 127 KB)을 첫 화면과 함께 받고, 나머지 글자는 글자 묶음별 조각으로 필요할 때만 받습니다. 받기 전에는 운영체제 명조(맥 AppleMyungjo, 안드로이드 Noto Serif CJK, 윈도 바탕)로 보입니다. 예전에 한글 웹 글꼴 조각을 그대로 받을 때는 모바일 첫 화면이 4~5초 늦었습니다([개발 가이드](development.md#성능-lighthouse-모바일)). 한글은 낱말 중간에서 줄을 바꾸지 않습니다(`word-break: keep-all`).
 
 칼 이름의 한글만은 나눔손글씨 붓(Nanum Brush Script)으로 씁니다. 이름에 쓰인 247자만 남긴 66KB 파일(`apps/shop/src/_app/fonts/sword-brush.woff2`)이라 첫 화면을 늦추지 않습니다. 붓글씨가 작아 보여 `size-adjust: 125%`로 키우고, 파일에 없는 글자는 명조로 이어집니다. 이름이 바뀌면 `sword-brush.test.ts`가 실패하며, 테스트 맨 위의 방법으로 글자 목록과 파일을 다시 만듭니다.
 

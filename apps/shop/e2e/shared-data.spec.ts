@@ -1,5 +1,7 @@
 import { expect, type Page, test } from '@playwright/test';
 
+import { resetStorageEachTest } from './support';
+
 async function loginAdmin(page: Page) {
   await page.goto('/admin/login');
   await page.getByRole('button', { name: '데모 계정으로 로그인' }).click();
@@ -10,13 +12,8 @@ async function loginAdmin(page: Page) {
  * 어드민은 쇼핑몰 주소의 /admin 아래에서 열려 같은 Mock 데이터를 씁니다.
  * 어드민에서 바꾼 내용이 쇼핑몰에, 쇼핑몰 주문이 어드민에 보이는지 확인합니다.
  */
+resetStorageEachTest();
 test.beforeEach(async ({ page }) => {
-  await page.addInitScript(() => {
-    if (!sessionStorage.getItem('__e2e_reset__')) {
-      localStorage.clear();
-      sessionStorage.setItem('__e2e_reset__', '1');
-    }
-  });
   await loginAdmin(page);
 });
 

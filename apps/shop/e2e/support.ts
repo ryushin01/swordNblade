@@ -35,6 +35,14 @@ export async function expectNoA11yViolations(page: Page) {
   expect(results.violations.map((v) => `${v.id}: ${v.nodes.map((n) => n.target.join(' ')).join(', ')}`)).toEqual([]);
 }
 
+/** 화면이 가로로 넘치지 않는지(모바일에서 옆으로 밀리지 않는지) 봅니다. */
+export async function expectNoHorizontalOverflow(page: Page) {
+  const overflow = await page.evaluate(
+    () => document.documentElement.scrollWidth - document.documentElement.clientWidth,
+  );
+  expect(overflow).toBeLessThanOrEqual(0);
+}
+
 /** 어드민이 상품 값을 바꾼 상황을 만듭니다(브라우저 안 Mock API로 어드민 로그인 뒤 PUT). */
 export async function updateSwordAsAdmin(page: Page, slug: string, patch: Record<string, unknown>) {
   await page.evaluate(

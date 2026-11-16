@@ -124,7 +124,7 @@ describe('비회원 주문 조회', () => {
     });
   });
 
-  it('키가 없던 예전 주문은 조회할 때 키를 만들어 그 키로 열 수 있다', async () => {
+  it('키가 없던 예전 주문은 조회해도 키를 붙이지 않아, 예전처럼 주문번호로도 열린다', async () => {
     const order = await placeOrder();
     db.write((state) => ({
       ...state,
@@ -134,11 +134,12 @@ describe('비회원 주문 조회', () => {
         return legacy;
       }),
     }));
-    const { accessKey } = (await (await lookup({ id: order.id, email: customer.email })).json()) as {
-      accessKey: string;
-    };
+    const response = await lookup({ id: order.id, email: customer.email });
+    expect(response.status).toBe(200);
+    const { accessKey } = (await response.json()) as { accessKey: string };
     expect(accessKey).toMatch(/^[0-9a-f-]{36}$/);
-    expect((await readOrder(order.id)).status).toBe(404);
+    expect(db.read().orders.find((item) => item.id === order.id)?.accessKey).toBeUndefined();
+    expect((await readOrder(order.id)).status).toBe(200);
     expect((await readOrder(order.id, { 'X-Order-Key': accessKey })).status).toBe(200);
   });
 });

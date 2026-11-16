@@ -15,9 +15,12 @@ function readKeys(): OrderKeys {
   }
 }
 
+/** 저장소를 쓸 수 없을 때(사생활 보호 모드 등) 새로고침 전까지 쓰는 주문 키 */
+const memoryKeys = new Map<string, string>();
+
 /**
  * 주문 키를 이 기기에 남깁니다. 주문번호는 날짜+순번이라 짐작하기 쉬워, Mock API는 주문한 기기의 키·주문한 회원·어드민에게만
- * 주문 확인을 엽니다. 저장소를 못 쓰면 이번 화면에서만 열리고, 다른 기기에서는 비회원 주문 조회(주문번호 + 이메일)로 엽니다.
+ * 주문 확인을 엽니다. 저장소를 못 쓰면 새로고침 전까지만 열리고, 다른 기기에서는 비회원 주문 조회(주문번호 + 이메일)로 엽니다.
  */
 export function rememberOrderKey(id: string, key: string) {
   try {
@@ -25,8 +28,9 @@ export function rememberOrderKey(id: string, key: string) {
     entries.push([id, key]);
     localStorage.setItem(SITE.orderKeysStorageKey, JSON.stringify(Object.fromEntries(entries.slice(-MAX_KEYS))));
   } catch {
-    // 저장하지 못해도 주문은 끝났습니다.
+    // 저장하지 못해도 주문은 끝났습니다. 비회원 주문 조회 뒤 주문 확인을 열 수 있게 메모리에 둡니다.
+    memoryKeys.set(id, key);
   }
 }
 
-export const orderKeyFor = (id: string): string | undefined => readKeys()[id];
+export const orderKeyFor = (id: string): string | undefined => readKeys()[id] ?? memoryKeys.get(id);

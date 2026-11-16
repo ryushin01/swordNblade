@@ -45,6 +45,9 @@ export function OrderLookupForm() {
     if (Object.keys(nextErrors).length > 0) return show(nextErrors, t('checkError'));
 
     lockRef.current = true;
+    // 고쳐서 다시 보낼 때는 앞서 보인 오류를 지웁니다(고친 칸이 응답을 기다리는 동안에도 틀렸다고 표시되지 않게).
+    setErrors({});
+    setMessage(null);
     lookup.mutate(
       { id, email },
       {

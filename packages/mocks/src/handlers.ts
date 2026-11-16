@@ -270,15 +270,9 @@ export function createHandlers(db: Db, options: HandlerOptions = {}) {
         .read()
         .orders.find((item) => item.id === id && item.customer.email.trim().toLowerCase() === email);
       if (!order) return error(404, { message: '주문번호와 이메일이 맞는 주문이 없습니다.' });
-      // 키가 생기기 전 주문이면 이때 만들어 둡니다.
-      const accessKey = order.accessKey ?? crypto.randomUUID();
-      if (!order.accessKey) {
-        db.write((state) => ({
-          ...state,
-          orders: state.orders.map((item) => (item.id === order.id ? { ...item, accessKey } : item)),
-        }));
-      }
-      return HttpResponse.json({ id: order.id, accessKey });
+      // 키가 생기기 전 주문은 예전처럼 주문번호로 열리므로 키를 새로 붙이지 않습니다(붙이면 그 주문을 키 없이 열던 기기가 막힘).
+      // 화면이 같은 흐름으로 다루도록 이번 응답에만 쓰는 키를 돌려주고, 그 주문을 열 때는 키를 확인하지 않습니다.
+      return HttpResponse.json({ id: order.id, accessKey: order.accessKey ?? crypto.randomUUID() });
     }),
 
     http.post('*/api/orders', async ({ request }) => {

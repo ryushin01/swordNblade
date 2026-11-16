@@ -1,4 +1,4 @@
-import { afterEach, describe, expect, it } from 'vitest';
+import { afterEach, describe, expect, it, vi } from 'vitest';
 
 import { SITE } from '@/shared/config';
 
@@ -25,5 +25,18 @@ describe('order keys', () => {
     expect(orderKeyFor('SNB-1')).toBeUndefined();
     localStorage.setItem(SITE.orderKeysStorageKey, JSON.stringify({ 'SNB-1': 42 }));
     expect(orderKeyFor('SNB-1')).toBeUndefined();
+  });
+
+  it('저장소를 쓸 수 없으면 새로고침 전까지 메모리에 둔다(비회원 주문 조회 뒤 주문 확인)', () => {
+    const setItem = vi.spyOn(Storage.prototype, 'setItem').mockImplementation(() => {
+      throw new DOMException('저장소를 쓸 수 없습니다.', 'SecurityError');
+    });
+    try {
+      rememberOrderKey('SNB-20261116-0003', 'memory-key');
+      expect(localStorage.getItem(SITE.orderKeysStorageKey)).toBeNull();
+      expect(orderKeyFor('SNB-20261116-0003')).toBe('memory-key');
+    } finally {
+      setItem.mockRestore();
+    }
   });
 });

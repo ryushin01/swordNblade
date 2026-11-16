@@ -32,7 +32,10 @@ test.describe('공유 그림', () => {
   test.use({ viewport: { width: 1200, height: 630 }, deviceScaleFactor: 1 });
 
   test('도검의 벽 첫 화면(public/og.jpg)', async ({ page }) => {
-    await page.goto('/');
+    // 배포되는 파일이라, 오류 화면이 뜨면 찍지 않고 멈춰 기존 그림을 지킵니다.
+    const response = await page.goto('/');
+    expect(response?.ok(), `첫 화면 응답 ${response?.status()}`).toBe(true);
+    await expect(page.getByRole('heading', { level: 1, name: '도검의 벽' })).toBeVisible();
     await shoot(page, 'og', 1500, 'public');
   });
 });

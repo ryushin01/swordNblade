@@ -1,13 +1,13 @@
 import { expect, type Page, test } from '@playwright/test';
 
 /**
- * README 화면 촬영 (pnpm --dir apps/shop screenshots, 먼저 pnpm build).
- * 결과: 저장소 루트의 docs/images/*.jpg. 상품·주문·회원은 모두 브라우저 안 Mock 데이터(가상)입니다.
+ * README 화면과 사이트 공유 그림 촬영 (pnpm --dir apps/shop screenshots, 먼저 pnpm build).
+ * 결과: 저장소 루트의 docs/images/*.jpg와 public/og.jpg. 상품·주문·회원은 모두 브라우저 안 Mock 데이터(가상)입니다.
  * 평소 E2E에는 들어가지 않습니다(SCREENSHOTS=1일 때만 프로젝트가 생김).
  */
 const OUT = '../../docs/images';
 
-async function shoot(page: Page, name: string, wait = 800) {
+async function shoot(page: Page, name: string, wait = 800, dir = OUT) {
   await page.waitForLoadState('networkidle', { timeout: 8_000 }).catch(() => {});
   // 한국어 화면은 화면 글자만 담은 KoPub바탕(SnbBatang)을 실제로 받은 뒤 찍습니다. 받지 못했으면 기존 화면을 덮어쓰지 않고 멈춥니다.
   await page.evaluate(() => document.fonts.ready);
@@ -18,7 +18,7 @@ async function shoot(page: Page, name: string, wait = 800) {
   );
   if (fallback) throw new Error('KoPub바탕(SnbBatang)을 받지 못해 화면을 바꾸지 않았습니다.');
   await page.waitForTimeout(wait);
-  await page.screenshot({ path: `${OUT}/${name}.jpg`, type: 'jpeg', quality: 82 });
+  await page.screenshot({ path: `${dir}/${name}.jpg`, type: 'jpeg', quality: 82 });
 }
 
 async function addToCart(page: Page, slug: string) {
@@ -26,6 +26,19 @@ async function addToCart(page: Page, slug: string) {
   await page.getByRole('button', { name: '장바구니에 담기' }).click();
   await expect(page.getByText(/장바구니에 담았습니다/)).toBeVisible();
 }
+
+// 사이트 공유 그림(1200×630): 첫 화면을 그대로 찍어, 로고·글꼴이 바뀌면 README 화면과 함께 새로 찍힙니다.
+test.describe('공유 그림', () => {
+  test.use({ viewport: { width: 1200, height: 630 }, deviceScaleFactor: 1 });
+
+  test('도검의 벽 첫 화면(public/og.jpg)', async ({ page }) => {
+    // 배포되는 파일이라, 오류 화면이 뜨면 찍지 않고 멈춰 기존 그림을 지킵니다.
+    const response = await page.goto('/');
+    expect(response?.ok(), `첫 화면 응답 ${response?.status()}`).toBe(true);
+    await expect(page.getByRole('heading', { level: 1, name: '도검의 벽' })).toBeVisible();
+    await shoot(page, 'og', 1500, 'public');
+  });
+});
 
 test.describe('데스크톱', () => {
   test.use({ viewport: { width: 1440, height: 900 }, deviceScaleFactor: 1 });

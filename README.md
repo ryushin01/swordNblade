@@ -1,7 +1,7 @@
 # Sword & Blade - 도검의 벽
 
 [![CI](https://github.com/ryushin01/swordnblade/actions/workflows/ci.yml/badge.svg)](https://github.com/ryushin01/swordnblade/actions/workflows/ci.yml)
-![version](https://img.shields.io/badge/version-0.18.0-7a4a35)
+![version](https://img.shields.io/badge/version-0.19.0-7a4a35)
 ![Storybook](https://img.shields.io/badge/Storybook-10-FF4785?logo=storybook&logoColor=white)
 
 동양 도검부터 신화 속 검까지, 석고 벽에 새긴 부조처럼 진열한 도검 쇼핑몰과 관리자 화면입니다. 배송 국가에 따라 관세·부가세를 미리 계산합니다.
@@ -50,11 +50,11 @@
 | 관세 계산 | 출고지별로 묶어 계산합니다. 해외 → 한국(면세 150달러, 미국발 200달러, 관세 8%, 부가세 10%)과 한국 → 해외(국가별 CIF·FOB, 부가세)를 모두 지원합니다. |
 | 한국어·영어 | 한국어는 `/`, 영어는 `/en`. 화면 글, 도검 213점의 설명과 이야기, 국가별 허가 안내를 영어로 옮겼고, 머리글에서 언어를 바꿉니다. 어드민은 한국어만 제공합니다. |
 | 허가 안내 | 칼날 15cm 이상 진검은 소지허가 대상으로 표시하고, 주문할 때 허가 안내를 확인받습니다. |
-| 주문 | 오류 요약과 칸별 안내, 중복 제출 방지. 금액은 Mock 서버가 다시 계산합니다. |
+| 주문 | 오류 요약과 칸별 안내, 중복 제출 방지, 품절·재고 부족 안내. 금액은 Mock 서버가 다시 계산합니다. 주문 확인은 주문한 기기·회원만 열고, 다른 기기에서는 비회원 주문 조회(주문번호와 이메일)로 찾습니다. 주문 확인은 영수증만 인쇄됩니다. |
 | 회원 | 회원가입·로그인, 내 계정(회원 정보·내 주문, 출고 전 주문 취소). 로그인하면 주문서에 이름과 이메일이 채워집니다. |
 | 후기 | 구매한 회원만 별점과 글을 남기고, 프로필 사진이 원형으로 보입니다. |
 | 도검 연표 | 역사 도검을 시대와 지역 표로 펼쳐 봅니다. |
-| 찜·비교 | 도검을 찜해 모아 보고(로그인하면 계정에 저장), 최대 3점을 같은 축척과 제원 표로 비교합니다. 상세 아래에 같은 지역의 도검을 추천합니다. |
+| 찜·비교 | 도검을 찜해 모아 보고(로그인하면 계정에 저장), 최대 3점을 같은 축척과 제원 표로 비교합니다. 상세 아래에 같은 지역의 도검을 추천하고, 최근 본 도검(기록 지우기 가능)을 보여 줍니다. 상세에서 공유 시트나 주소 복사로 도검을 공유합니다. |
 
 **어드민** (`apps/admin`, Ant Design, 쇼핑몰 주소의 `/admin`)
 
@@ -102,7 +102,7 @@ pnpm dev    # 쇼핑몰 http://localhost:3000 · 어드민 http://localhost:3000
 | `pnpm format` | Prettier로 서식 정리 (커밋할 때 바뀐 파일은 자동 정리) |
 | `pnpm --filter @snb/shop size` / `lhci` | 쇼핑몰 번들 크기 / Lighthouse 기준 검사 (먼저 `build` 필요) |
 | `pnpm --filter @snb/shop e2e` | 쇼핑몰 프로덕션 빌드 E2E (먼저 `build` 필요, `E2E_BASE_URL`을 주면 배포된 사이트 검사) |
-| `pnpm --filter @snb/shop screenshots` | README 화면 다시 찍기 (먼저 `ADMIN_ORIGIN=http://localhost:3102 pnpm build`, 브라우저 안 Mock 데이터) |
+| `pnpm --filter @snb/shop screenshots` | README 화면과 사이트 공유 그림(`public/og.jpg`) 다시 찍기 (먼저 `ADMIN_ORIGIN=http://localhost:3102 pnpm build`, 브라우저 안 Mock 데이터) |
 | `pnpm --filter @snb/shop storybook` | 쇼핑몰 Storybook (`http://localhost:6006`) |
 | `pnpm --filter @snb/shop fonts` | 한글 웹 폰트(화면 글자 파일과 나머지 조각) 다시 만들기 (화면 글자를 바꾼 뒤, `pip install fonttools brotli` 필요) |
 

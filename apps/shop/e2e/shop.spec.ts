@@ -383,6 +383,8 @@ test('최근 본 도검: 앞서 본 도검을 상세 아래에 보여 준다', a
   await page.goto('/swords/hwando');
   await expect(page.getByRole('heading', { name: '최근 본 도검' })).toHaveCount(0);
   await expect(page.getByRole('heading', { level: 1, name: '환도' })).toBeVisible();
+  // 제목은 서버 HTML이라 hydrate 전에도 보이므로, 본 기록이 저장된 뒤에 다음 도검으로 갑니다.
+  await page.waitForFunction(() => localStorage.getItem('snb-recent-v1')?.includes('sw-002') ?? false);
   await page.goto('/swords/ssangsudo');
   const recent = page.getByRole('list', { name: '최근 본 도검' });
   await expect(recent.getByRole('link', { name: /환도/ })).toBeVisible();

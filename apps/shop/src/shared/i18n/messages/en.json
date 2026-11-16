@@ -12,7 +12,8 @@
     "account": "My account",
     "wishlist": "Wishlist",
     "compare": "Compare swords",
-    "timeline": "Sword timeline"
+    "timeline": "Sword timeline",
+    "orderLookup": "Find your order"
   },
   "Common": {
     "skipToContent": "Skip to content",
@@ -38,7 +39,8 @@
     "customs": "Duties and VAT are estimates based on example rates. In Korea, owning a blade of 15 cm or longer requires a permit from the local police, and importing one requires a permit from the National Police Agency.",
     "adminLink": "Open the admin",
     "adminNote": " · Prices, stock and duty rates you change there show up in this shop right away. The admin is available in Korean only.",
-    "tagline": "Illustrations drawn in code · No real blades were harmed"
+    "tagline": "Illustrations drawn in code · No real blades were harmed",
+    "orderLookup": "Find your order"
   },
   "Home": {
     "eyebrow": "Carved in plaster, forged in steel",
@@ -233,7 +235,9 @@
     "duty": "Duty",
     "vat": "VAT",
     "paid": "Total paid",
-    "addressTitle": "Shipping address"
+    "addressTitle": "Shipping address",
+    "lookupLink": "Find your order",
+    "print": "Print"
   },
   "NotFound": {
     "title": "Nothing is carved in this spot"
@@ -278,7 +282,9 @@
       "password": "Use at least 8 characters with both letters and numbers.",
       "passwordRequired": "Enter your password.",
       "passwordConfirm": "The passwords do not match."
-    }
+    },
+    "orderLookupHint": "Not a member? You can find an order with its number and email.",
+    "orderLookup": "Find your order"
   },
   "Account": {
     "title": "My account",
@@ -373,7 +379,9 @@
     "loading": "Loading reviews."
   },
   "Recent": {
-    "title": "Recently viewed"
+    "title": "Recently viewed",
+    "clear": "Clear history",
+    "cleared": "Your recently viewed swords are cleared."
   },
   "Timeline": {
     "title": "Sword timeline",
@@ -397,5 +405,28 @@
     "title": "Something went wrong",
     "body": "This page ran into a problem. Try again, or go back to the wall.",
     "retry": "Try again"
+  },
+  "Lookup": {
+    "title": "Find your order",
+    "intro": "Find an order with its order number and the email you ordered with. Members can see their orders in their account.",
+    "id": "Order number",
+    "idHint": "For example, SNB-20261116-0001",
+    "email": "Email",
+    "emailHint": "The email on your order form",
+    "submit": "Find order",
+    "submitting": "Finding…",
+    "checkError": "Please check your details.",
+    "errors": {
+      "id": "Enter the order number.",
+      "email": "Check the email format."
+    },
+    "notFound": "No order matches that order number and email. Check the order number on your confirmation page and the email on your order form.",
+    "genericError": "We could not look up the order. Please try again shortly.",
+    "accountLink": "See orders in your account"
+  },
+  "Share": {
+    "button": "Share",
+    "copied": "Link copied.",
+    "failed": "We could not copy the link. Please copy it from the address bar."
   }
 }

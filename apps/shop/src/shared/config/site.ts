@@ -14,4 +14,6 @@ export const SITE = {
   recentStorageKey: 'snb-recent-v1',
   /** 로그인 세션 토큰을 두는 localStorage 키 */
   sessionStorageKey: 'snb-session-v1',
+  /** 이 기기에서 연 주문의 주문 키(주문번호 → 키). 비회원이 주문 확인을 다시 열 때 씁니다. */
+  orderKeysStorageKey: 'snb-order-keys-v1',
 } as const;

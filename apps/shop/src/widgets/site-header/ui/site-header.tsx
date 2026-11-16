@@ -11,7 +11,7 @@ import { WishlistSync } from './wishlist-sync';
 
 export function SiteHeader() {
   return (
-    <header className="relative z-10 border-b border-line">
+    <header className="relative z-10 border-b border-line print:hidden">
       <div className="mx-auto flex max-w-[90rem] flex-wrap items-center justify-between gap-x-3 gap-y-1 px-4 py-2 sm:gap-x-6 sm:px-8 sm:py-3">
         <Link href="/" className="inline-flex min-h-11 items-center">
           <Wordmark />

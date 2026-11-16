@@ -1,6 +1,6 @@
 import { getTranslations, setRequestLocale } from 'next-intl/server';
 
-import { type AppLocale, languageAlternates } from '@/shared/i18n';
+import { type AppLocale, languageAlternates, Link } from '@/shared/i18n';
 import { firstParam, safeNextPath } from '@/shared/lib';
 
 import { LoginForm } from './login-form';
@@ -26,6 +26,12 @@ export async function LoginPage({ params, searchParams }: { params: Params; sear
       <h1 className="text-carved text-center text-3xl">{t('loginTitle')}</h1>
       <p className="text-center text-ink-muted">{t('loginIntro')}</p>
       <LoginForm next={safeNextPath(firstParam(next))} />
+      <p className="text-center text-sm text-ink-muted">
+        {t('orderLookupHint')}{' '}
+        <Link href="/orders/lookup" className="inline-flex min-h-6 items-center text-ink underline underline-offset-4">
+          {t('orderLookup')}
+        </Link>
+      </p>
     </div>
   );
 }

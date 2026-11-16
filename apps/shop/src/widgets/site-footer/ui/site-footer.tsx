@@ -1,15 +1,24 @@
 import { useTranslations } from 'next-intl';
 
+import { Link } from '@/shared/i18n';
 import { Wordmark } from '@/shared/ui';
 
 export function SiteFooter() {
   const t = useTranslations('Footer');
   return (
-    <footer className="border-t border-line">
+    <footer className="border-t border-line print:hidden">
       <div className="mx-auto grid max-w-[90rem] gap-4 px-4 py-10 text-sm text-ink-muted sm:px-8">
         <Wordmark className="opacity-90" />
         <p>{t('disclaimer')}</p>
         <p>{t('customs')}</p>
+        <p>
+          <Link
+            href="/orders/lookup"
+            className="inline-flex min-h-11 items-center text-ink underline underline-offset-4"
+          >
+            {t('orderLookup')}
+          </Link>
+        </p>
         <p>
           {/* 어드민은 다른 앱(zone)이라 언어 경로 없이 일반 링크로 이동합니다. */}
           <a

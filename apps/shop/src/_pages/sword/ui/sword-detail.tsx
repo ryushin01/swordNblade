@@ -28,6 +28,7 @@ import { DiscountPeriod } from './discount-period';
 import { RecentSwords } from './recent-swords';
 import { RelatedSwords } from './related-swords';
 import { Reviews } from './reviews';
+import { ShareButton } from './share-button';
 import { SwordGallery } from './sword-gallery';
 import { WishlistButton } from './wishlist-button';
 
@@ -142,6 +143,7 @@ function SwordDetailView({ sword: source }: { sword: Sword }) {
             <AddToCart sword={sword} />
             <p className="flex flex-wrap items-center gap-3">
               <WishlistButton swordId={sword.id} />
+              <ShareButton title={sword.name} text={sword.summary} />
               <Link
                 href={{ pathname: '/compare', query: { a: sword.slug } }}
                 className="inline-flex min-h-11 items-center text-sm underline underline-offset-4"

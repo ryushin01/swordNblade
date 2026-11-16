@@ -18,7 +18,7 @@ import {
 import { createAdminHandlers, isAdmin } from './admin-handlers';
 import { createAuthHandlers, findSessionUser } from './auth-handlers';
 import { createMemoryImageStore, type ImageStore } from './image-store';
-import { cancelOrderInState, reviveOrderInState, reviveShortage } from './order-stock';
+import { cancelOrderInState, reviveOrderInState, reviveShortage, withoutAccessKey } from './order-stock';
 import { createReviewHandlers } from './review-handlers';
 
 import type { Db } from './db';
@@ -112,6 +112,15 @@ export function createHandlers(db: Db, options: HandlerOptions = {}) {
   const requireAdmin = options.requireAdmin ?? false;
   const adminDenied = (request: Request) =>
     requireAdmin && !isAdmin(db, request) ? error(401, { message: '어드민 로그인이 필요합니다.' }) : null;
+  /**
+   * 주문 확인을 열 수 있는지. 주문번호는 날짜+순번이라 짐작하기 쉬우므로, 주문한 기기의 주문 키(X-Order-Key)·주문한 회원·어드민만 엽니다.
+   * 주문 키가 생기기 전에 만든 주문은 예전처럼 엽니다.
+   */
+  const canReadOrder = (request: Request, order: Order) =>
+    !order.accessKey ||
+    request.headers.get('X-Order-Key') === order.accessKey ||
+    (order.userId !== undefined && findSessionUser(db, request)?.id === order.userId) ||
+    isAdmin(db, request);
 
   return [
     ...createAuthHandlers(db, wait, requireAdmin),
@@ -234,13 +243,36 @@ export function createHandlers(db: Db, options: HandlerOptions = {}) {
       if (denied) return denied;
       await wait();
       const orders = [...db.read().orders].sort((a, b) => b.createdAt.localeCompare(a.createdAt));
-      return HttpResponse.json(orders);
+      return HttpResponse.json(orders.map(withoutAccessKey));
     }),
 
-    http.get<{ id: string }>('*/api/orders/:id', async ({ params }) => {
+    http.get<{ id: string }>('*/api/orders/:id', async ({ params, request }) => {
       await wait();
       const order = db.read().orders.find((item) => item.id === params.id);
-      return order ? HttpResponse.json(order) : error(404, { message: '주문을 찾을 수 없습니다.' });
+      // 열 수 없는 주문은 있는지도 알리지 않습니다.
+      if (!order || !canReadOrder(request, order)) return error(404, { message: '주문을 찾을 수 없습니다.' });
+      return HttpResponse.json(withoutAccessKey(order));
+    }),
+
+    // 비회원 주문 조회: 주문번호와 주문할 때 쓴 이메일이 맞으면 주문 키를 돌려줍니다. 무엇이 틀렸는지는 알리지 않습니다.
+    http.post('*/api/orders/lookup', async ({ request }) => {
+      await wait();
+      const body = (await request.json().catch(() => null)) as { id?: unknown; email?: unknown } | null;
+      const id = typeof body?.id === 'string' ? body.id.trim().toUpperCase() : '';
+      const email = typeof body?.email === 'string' ? body.email.trim().toLowerCase() : '';
+      if (!id || !email) {
+        return error(422, {
+          message: '주문번호와 이메일을 입력해 주세요.',
+          fields: { ...(id ? {} : { id: 'required' }), ...(email ? {} : { email: 'required' }) },
+        });
+      }
+      const order = db
+        .read()
+        .orders.find((item) => item.id === id && item.customer.email.trim().toLowerCase() === email);
+      if (!order) return error(404, { message: '주문번호와 이메일이 맞는 주문이 없습니다.' });
+      // 키가 생기기 전 주문은 예전처럼 주문번호로 열리므로 키를 새로 붙이지 않습니다(붙이면 그 주문을 키 없이 열던 기기가 막힘).
+      // 화면이 같은 흐름으로 다루도록 이번 응답에만 쓰는 키를 돌려주고, 그 주문을 열 때는 키를 확인하지 않습니다.
+      return HttpResponse.json({ id: order.id, accessKey: order.accessKey ?? crypto.randomUUID() });
     }),
 
     http.post('*/api/orders', async ({ request }) => {
@@ -328,6 +360,8 @@ export function createHandlers(db: Db, options: HandlerOptions = {}) {
       const order: Order = {
         id: nextOrderId(state.orders, now),
         createdAt: now.toISOString(),
+        // 이 기기에서 주문 확인을 열 때 씁니다(응답에만 싣고, 화면이 기기에 남김).
+        accessKey: crypto.randomUUID(),
         status: needsPermit ? 'permit-review' : 'paid',
         destination: body.destination!,
         // 로그인한 채 주문하면 내 주문 내역에 남도록 회원 id를 붙입니다.
@@ -371,7 +405,8 @@ export function createHandlers(db: Db, options: HandlerOptions = {}) {
         if (reviving) return reviveOrderInState(state, order, status);
         return { ...state, orders: state.orders.map((item) => (item.id === params.id ? { ...item, status } : item)) };
       });
-      return HttpResponse.json(next.orders.find((item) => item.id === params.id));
+      const updated = next.orders.find((item) => item.id === params.id);
+      return HttpResponse.json(updated && withoutAccessKey(updated));
     }),
 
     http.get('*/api/stats', async ({ request }) => {

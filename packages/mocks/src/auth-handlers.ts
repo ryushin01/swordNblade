@@ -3,7 +3,8 @@ import { http, HttpResponse } from 'msw';
 import { canCustomerCancel, EMAIL_RULE, PASSWORD_RULE, type User } from '@snb/domain';
 
 import { isAdmin } from './admin-handlers';
-import { cancelOrderInState } from './order-stock';
+import { cancelOrderInState, withoutAccessKey } from './order-stock';
+import { isFreshSession, USER_SESSION_TTL_MS } from './sessions';
 
 import type { Db, Session, StoredUser } from './db';
 
@@ -50,7 +51,9 @@ export function findSessionUser(db: Db, request: Request): StoredUser | undefine
   if (!token) return undefined;
   const state = db.read();
   const session = state.sessions?.find((item) => item.token === token);
-  return session ? state.users?.find((user) => user.id === session.userId) : undefined;
+  // 만료된 세션은 없는 것으로 봅니다(화면은 401을 받아 로그아웃 상태가 됨).
+  if (!session || !isFreshSession(session.createdAt, USER_SESSION_TTL_MS)) return undefined;
+  return state.users?.find((user) => user.id === session.userId);
 }
 
 export function createAuthHandlers(
@@ -62,7 +65,14 @@ export function createAuthHandlers(
 
   const startSession = (user: StoredUser): AuthResponse => {
     const session: Session = { token: crypto.randomUUID(), userId: user.id, createdAt: new Date().toISOString() };
-    db.write((state) => ({ ...state, sessions: [...(state.sessions ?? []), session] }));
+    // 새 세션을 더하면서 만료된 세션은 지워 저장값이 끝없이 늘지 않게 합니다.
+    db.write((state) => ({
+      ...state,
+      sessions: [
+        ...(state.sessions ?? []).filter((item) => isFreshSession(item.createdAt, USER_SESSION_TTL_MS)),
+        session,
+      ],
+    }));
     return { token: session.token, user: publicUser(user) };
   };
 
@@ -115,7 +125,8 @@ export function createAuthHandlers(
       if (!canCustomerCancel(order.status))
         return HttpResponse.json({ message: '출고된 주문은 취소할 수 없습니다.' }, { status: 409 });
       const next = db.write((state) => cancelOrderInState(state, order));
-      return HttpResponse.json(next.orders.find((item) => item.id === params.id));
+      const cancelled = next.orders.find((item) => item.id === params.id);
+      return HttpResponse.json(cancelled && withoutAccessKey(cancelled));
     }),
 
     // 어드민 회원 목록. 비밀번호 해시는 내보내지 않습니다.
@@ -188,7 +199,7 @@ export function createAuthHandlers(
         .read()
         .orders.filter((order) => order.userId === user.id)
         .sort((a, b) => b.createdAt.localeCompare(a.createdAt));
-      return HttpResponse.json(orders);
+      return HttpResponse.json(orders.map(withoutAccessKey));
     }),
   ];
 }

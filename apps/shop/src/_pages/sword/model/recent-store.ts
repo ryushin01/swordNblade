@@ -13,6 +13,8 @@ const MAX_RECENT = 9;
 interface RecentState {
   ids: string[];
   record: (swordId: string) => void;
+  /** 본 기록을 모두 지웁니다(공용 기기 등). */
+  clear: () => void;
 }
 
 /** 방금 본 도검을 맨 앞으로 옮깁니다. */
@@ -24,6 +26,7 @@ export const useRecentStore = create<RecentState>()(
     (set) => ({
       ids: [],
       record: (swordId) => set((state) => ({ ids: pushRecent(state.ids, swordId) })),
+      clear: () => set({ ids: [] }),
     }),
     {
       name: SITE.recentStorageKey,

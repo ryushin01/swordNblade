@@ -4,6 +4,7 @@ import {
   expectNoA11yViolations,
   expectNoHorizontalOverflow,
   resetStorageEachTest,
+  updateSwordAsAdmin,
   waitForPageTransition,
 } from './support';
 
@@ -129,19 +130,7 @@ test('주문하는 사이 가격이 바뀌면 바뀐 금액을 알리고, 확인
   await expect(summary).toContainText('4,500,000원');
 
   // 주문서를 보는 사이 어드민이 가격을 바꿉니다(이 화면은 아직 예전 가격을 보여 줌).
-  await page.evaluate(async () => {
-    const login = await fetch('/api/admin/login', {
-      method: 'POST',
-      body: JSON.stringify({ email: 'admin@example.com', password: 'demo1234' }),
-    });
-    const { token } = (await login.json()) as { token: string };
-    const sword = (await (await fetch('/api/swords/uchigatana')).json()) as { id: string };
-    await fetch(`/api/swords/${sword.id}`, {
-      method: 'PUT',
-      headers: { Authorization: `Bearer ${token}` },
-      body: JSON.stringify({ ...sword, price: 5_000_000 }),
-    });
-  });
+  await updateSwordAsAdmin(page, 'uchigatana', { price: 5_000_000 });
 
   await page.getByLabel(/^받는 분/).fill('김가상');
   await page.getByLabel(/^이메일/).fill('buyer@example.com');

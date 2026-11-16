@@ -43,8 +43,18 @@ export async function expectNoHorizontalOverflow(page: Page) {
   expect(overflow).toBeLessThanOrEqual(0);
 }
 
-/** 어드민이 상품 값을 바꾼 상황을 만듭니다(브라우저 안 Mock API로 어드민 로그인 뒤 PUT). */
+/**
+ * 어드민이 상품 값을 바꾼 상황을 만듭니다(브라우저 안 Mock API로 어드민 로그인 뒤 PUT).
+ * Mock API(서비스 워커)는 화면의 첫 API 요청 때 켜지므로, 켜지기 전에 보내면 Next 서버가 404 HTML로 답합니다.
+ * 화면처럼 Mock API가 JSON으로 답할 때까지 기다린 뒤 보냅니다(부하가 클 때 가끔 실패하던 것).
+ */
 export async function updateSwordAsAdmin(page: Page, slug: string, patch: Record<string, unknown>) {
+  await expect
+    .poll(
+      () => page.evaluate(async (slug) => (await fetch(`/api/swords/${slug}`)).headers.get('content-type') ?? '', slug),
+      { timeout: 15_000 },
+    )
+    .toContain('application/json');
   await page.evaluate(
     async ({ slug, patch }) => {
       const login = await fetch('/api/admin/login', {

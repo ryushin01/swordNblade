@@ -39,4 +39,21 @@ describe('order keys', () => {
       setItem.mockRestore();
     }
   });
+
+  it('저장소에 옛 키가 있는데 쓰기만 실패하면 메모리의 새 키를 쓰고, 다시 저장되면 저장소의 키를 쓴다', () => {
+    rememberOrderKey('SNB-20261116-0004', 'old');
+    const setItem = vi.spyOn(Storage.prototype, 'setItem').mockImplementation(() => {
+      throw new DOMException('저장 공간이 가득 찼습니다.', 'QuotaExceededError');
+    });
+    try {
+      rememberOrderKey('SNB-20261116-0004', 'new');
+    } finally {
+      setItem.mockRestore();
+    }
+    expect(orderKeyFor('SNB-20261116-0004')).toBe('new');
+
+    // 저장에 성공하면 메모리의 키를 지우므로 저장소의 키를 따릅니다.
+    rememberOrderKey('SNB-20261116-0004', 'newest');
+    expect(orderKeyFor('SNB-20261116-0004')).toBe('newest');
+  });
 });

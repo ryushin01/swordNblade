@@ -27,10 +27,12 @@ export function rememberOrderKey(id: string, key: string) {
     const entries = Object.entries(readKeys()).filter(([orderId]) => orderId !== id);
     entries.push([id, key]);
     localStorage.setItem(SITE.orderKeysStorageKey, JSON.stringify(Object.fromEntries(entries.slice(-MAX_KEYS))));
+    memoryKeys.delete(id);
   } catch {
     // 저장하지 못해도 주문은 끝났습니다. 비회원 주문 조회 뒤 주문 확인을 열 수 있게 메모리에 둡니다.
     memoryKeys.set(id, key);
   }
 }
 
-export const orderKeyFor = (id: string): string | undefined => readKeys()[id] ?? memoryKeys.get(id);
+/** 메모리의 키가 저장소의 키보다 새것이므로 먼저 봅니다(저장소는 읽히지만 쓰기만 실패한 경우). */
+export const orderKeyFor = (id: string): string | undefined => memoryKeys.get(id) ?? readKeys()[id];

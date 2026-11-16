@@ -26,7 +26,7 @@ export function CheckoutView() {
 
   if (placedId) {
     return (
-      <p aria-live="polite" className="py-24 text-center">
+      <p role="status" className="py-24 text-center">
         {t('placed', { id: placedId })}
       </p>
     );

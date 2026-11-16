@@ -76,7 +76,7 @@ export function SwordWall({ category, q, sort, kind, sale, page, initialView, la
 
   if (!shown) {
     return (
-      <div aria-busy="true" aria-live="polite" className={`${GRID} border-l border-t border-line`}>
+      <div role="status" aria-busy="true" className={`${GRID} border-l border-t border-line`}>
         <p className="sr-only">{t('loading')}</p>
         {Array.from({ length: 8 }, (_, index) => (
           <div key={index} className={`${CELL} aspect-square animate-pulse bg-wall-sunk/40`} />

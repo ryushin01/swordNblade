@@ -4,6 +4,7 @@ import { useId } from 'react';
 import { useTranslations } from 'next-intl';
 
 import { MAX_QUANTITY, useCartStore } from '@/entities/cart';
+import { REMOVE_CONTROL_ATTRIBUTE } from '@/shared/lib/use-removal-focus';
 import { selectClassName } from '@/shared/ui';
 
 export function QuantitySelect({
@@ -42,13 +43,26 @@ export function QuantitySelect({
   );
 }
 
-export function RemoveLineButton({ swordId, name }: { swordId: string; name: string }) {
+export function RemoveLineButton({
+  swordId,
+  name,
+  onBeforeRemove,
+}: {
+  swordId: string;
+  name: string;
+  /** 지우기 전에 초점을 옮길 곳을 정합니다(목록의 다음 줄 버튼 등). */
+  onBeforeRemove?: (button: HTMLButtonElement) => void;
+}) {
   const t = useTranslations('Cart');
   const remove = useCartStore((state) => state.remove);
   return (
     <button
       type="button"
-      onClick={() => remove(swordId)}
+      {...{ [REMOVE_CONTROL_ATTRIBUTE]: '' }}
+      onClick={(event) => {
+        onBeforeRemove?.(event.currentTarget);
+        remove(swordId);
+      }}
       className="min-h-11 px-2 text-sm text-ink-muted underline underline-offset-4 hover:text-ink"
     >
       <span>{t('remove')}</span>

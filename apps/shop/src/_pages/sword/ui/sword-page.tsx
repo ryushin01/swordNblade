@@ -18,8 +18,10 @@ export async function generateSwordMetadata({ params }: { params: Params }): Pro
   const seed = SEED_SWORDS.find((item) => item.slug === slug);
   const alternates = languageAlternates(`/swords/${slug}`, locale as AppLocale);
   if (!seed) {
+    // 시드에 없는 주소는 어드민에서 만든 도검(브라우저에만 있음)이거나 없는 도검이라 서버 HTML에는 내용이 없습니다.
+    // 검색 엔진이 빈 화면을 올리지 않게 색인을 막습니다.
     const t = await getTranslations({ locale, namespace: 'Meta' });
-    return { title: t('sword'), alternates };
+    return { title: t('sword'), alternates, robots: { index: false } };
   }
   const sword = localizeForLocale(seed, locale as Locale);
   return {

@@ -10,6 +10,7 @@ import { useCartQuote } from '@/features/cart-quote';
 import { DestinationSelect } from '@/features/choose-destination';
 import { Link } from '@/shared/i18n';
 import { cn } from '@/shared/lib';
+import { useRemovalFocus } from '@/shared/lib/use-removal-focus';
 import { buttonVariants, LiveTotal, OrnamentHeading, PriceTag } from '@/shared/ui';
 
 import { QuantitySelect, RemoveLineButton } from './cart-line-controls';
@@ -20,6 +21,8 @@ export function CartView() {
   const customs = useTranslations('Customs');
   const locale = useLocale() as Locale;
   const quote = useCartQuote();
+  // 줄을 지우면 다음 줄의 삭제 버튼으로, 모두 지우면 빈 장바구니 안내로 초점을 옮깁니다.
+  const { fallbackRef, beforeRemove } = useRemovalFocus<HTMLParagraphElement>();
 
   if (quote.status === 'loading') {
     return (
@@ -42,7 +45,9 @@ export function CartView() {
   if (items.length === 0) {
     return (
       <div className="grid justify-items-center gap-4 py-24 text-center">
-        <p className="text-lg">{t('empty')}</p>
+        <p ref={fallbackRef} tabIndex={-1} className="text-lg">
+          {t('empty')}
+        </p>
         <Link href="/" className={cn(buttonVariants({ variant: 'outline' }), 'h-11 rounded-sm bg-transparent px-6')}>
           {common('browse')}
         </Link>
@@ -111,7 +116,7 @@ export function CartView() {
                 </td>
                 <td className="py-3 text-right tabular-nums">{formatKRW(pricing.price * line.quantity, locale)}</td>
                 <td className="py-3 text-right">
-                  <RemoveLineButton swordId={sword.id} name={sword.name} />
+                  <RemoveLineButton swordId={sword.id} name={sword.name} onBeforeRemove={beforeRemove} />
                 </td>
               </tr>
             ))}

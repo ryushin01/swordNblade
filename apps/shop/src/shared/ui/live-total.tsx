@@ -6,7 +6,8 @@ import { formatKRW, type Locale } from '@snb/domain';
 export function LiveTotal({ total, label }: { total: number; label: string }) {
   const locale = useLocale() as Locale;
   return (
-    <p className="sr-only" aria-live="polite" aria-atomic="true">
+    // role="status"는 polite·atomic을 함께 뜻합니다. 영역은 처음부터 두고 글자만 바꿔야 읽힙니다.
+    <p className="sr-only" role="status">
       {label} {formatKRW(total, locale)}
     </p>
   );

@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { useLocale, useTranslations } from 'next-intl';
 
 import { localizeForLocale, relatedSwords, SwordTile, useSwords } from '@/entities/sword';
@@ -20,6 +20,13 @@ export function RecentSwords({ swordId, relatedTo }: { swordId: string; relatedT
   const hydrated = useStoreHydrated(useRecentStore);
   const ids = useRecentStore((state) => state.ids);
   const record = useRecentStore((state) => state.record);
+  const clear = useRecentStore((state) => state.clear);
+  // 기록을 지우면 지우기 버튼이 사라지므로, 지웠다는 안내로 초점을 옮깁니다.
+  const [cleared, setCleared] = useState(false);
+  const clearedRef = useRef<HTMLParagraphElement>(null);
+  useEffect(() => {
+    if (cleared) clearedRef.current?.focus();
+  }, [cleared]);
   const { data } = useSwords();
   // RelatedSwords와 같은 질의라 다시 받지 않습니다(TanStack Query 캐시).
   const { data: sameCategory } = useSwords(relatedTo.category);
@@ -35,6 +42,18 @@ export function RecentSwords({ swordId, relatedTo }: { swordId: string; relatedT
         .flatMap((id) => data?.find((sword) => sword.id === id) ?? [])
         .slice(0, 4)
     : [];
+  if (cleared) {
+    return (
+      <section aria-labelledby="recent-title" className="mx-auto max-w-[90rem] pb-12">
+        <h2 id="recent-title" className="text-carved pb-6 text-center text-2xl">
+          {t('title')}
+        </h2>
+        <p ref={clearedRef} tabIndex={-1} className="text-center text-ink-muted">
+          {t('cleared')}
+        </p>
+      </section>
+    );
+  }
   if (swords.length === 0) return null;
 
   return (
@@ -42,6 +61,18 @@ export function RecentSwords({ swordId, relatedTo }: { swordId: string; relatedT
       <h2 id="recent-title" className="text-carved pb-6 text-center text-2xl">
         {t('title')}
       </h2>
+      <p className="-mt-4 pb-4 text-center">
+        <button
+          type="button"
+          onClick={() => {
+            clear();
+            setCleared(true);
+          }}
+          className="inline-flex min-h-11 items-center px-2 text-sm text-ink-muted underline underline-offset-4 hover:text-ink"
+        >
+          {t('clear')}
+        </button>
+      </p>
       <ul aria-labelledby="recent-title" className="grid grid-cols-2 border-l border-t border-line xl:grid-cols-4">
         {swords.map((sword) => (
           <li key={sword.id} className="border-b border-r border-line">

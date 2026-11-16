@@ -7,7 +7,7 @@ import { countryName, formatKRW, type Locale, orderStatusLabel } from '@snb/doma
 import { useOrder } from '@/entities/order';
 import { swordNameFor } from '@/entities/sword';
 import { Link } from '@/shared/i18n';
-import { OrnamentHeading, PriceTag } from '@/shared/ui';
+import { Button, OrnamentHeading, PriceTag } from '@/shared/ui';
 
 export function OrderReceipt({ id }: { id: string }) {
   const t = useTranslations('Order');
@@ -27,9 +27,15 @@ export function OrderReceipt({ id }: { id: string }) {
     return (
       <div className="grid justify-items-center gap-4 py-24 text-center">
         <h1 className="text-2xl text-carved">{t('notFound')}</h1>
-        <Link href="/" className="underline underline-offset-4">
-          {common('backToWall')}
-        </Link>
+        {/* 다른 기기에서 열었거나 주문 키가 없으면 주문번호와 이메일로 찾을 수 있습니다. */}
+        <p className="flex flex-wrap items-center justify-center gap-4">
+          <Link href="/orders/lookup" className="inline-flex min-h-11 items-center underline underline-offset-4">
+            {t('lookupLink')}
+          </Link>
+          <Link href="/" className="inline-flex min-h-11 items-center underline underline-offset-4">
+            {common('backToWall')}
+          </Link>
+        </p>
       </div>
     );
   }
@@ -87,9 +93,15 @@ export function OrderReceipt({ id }: { id: string }) {
         </p>
       </section>
 
-      <Link href="/" className="justify-self-center underline underline-offset-4">
-        {common('backToWall')}
-      </Link>
+      {/* 인쇄하면 영수증만 남깁니다(머리글·바닥글·이 버튼 줄은 print:hidden). */}
+      <p className="flex flex-wrap items-center justify-center gap-4 print:hidden">
+        <Button type="button" variant="outline" className="min-h-11 rounded-sm" onClick={() => window.print()}>
+          {t('print')}
+        </Button>
+        <Link href="/" className="inline-flex min-h-11 items-center underline underline-offset-4">
+          {common('backToWall')}
+        </Link>
+      </p>
     </div>
   );
 }

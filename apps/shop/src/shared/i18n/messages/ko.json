@@ -12,7 +12,8 @@
     "account": "내 계정",
     "wishlist": "찜 목록",
     "compare": "도검 비교",
-    "timeline": "도검 연표"
+    "timeline": "도검 연표",
+    "orderLookup": "비회원 주문 조회"
   },
   "Common": {
     "skipToContent": "본문 바로가기",
@@ -38,7 +39,8 @@
     "customs": "관세·부가세는 예시 세율로 계산한 예상액입니다. 한국에서 칼날 15cm 이상인 도검을 가지려면 관할 경찰서의 소지허가가 필요하고, 수입하려면 경찰청 수입허가가 필요합니다.",
     "adminLink": "관리자 화면 보기",
     "adminNote": " · 상품 가격·재고나 관세율을 바꾸면 이 쇼핑몰에 바로 반영됩니다. 관리자 화면은 한국어로만 제공합니다.",
-    "tagline": "Illustrations drawn in code · No real blades were harmed"
+    "tagline": "Illustrations drawn in code · No real blades were harmed",
+    "orderLookup": "비회원 주문 조회"
   },
   "Home": {
     "eyebrow": "Carved in plaster, forged in steel",
@@ -233,7 +235,9 @@
     "duty": "관세",
     "vat": "부가세",
     "paid": "결제 금액",
-    "addressTitle": "배송지"
+    "addressTitle": "배송지",
+    "lookupLink": "비회원 주문 조회",
+    "print": "인쇄"
   },
   "NotFound": {
     "title": "이 자리에는 아무것도 새겨져 있지 않습니다"
@@ -278,7 +282,9 @@
       "password": "비밀번호를 8자 이상, 영문과 숫자를 함께 넣어 입력해 주세요.",
       "passwordRequired": "비밀번호를 입력해 주세요.",
       "passwordConfirm": "비밀번호가 서로 다릅니다."
-    }
+    },
+    "orderLookupHint": "회원이 아니어도 주문번호와 이메일로 주문을 찾을 수 있습니다.",
+    "orderLookup": "비회원 주문 조회"
   },
   "Account": {
     "title": "내 계정",
@@ -373,7 +379,9 @@
     "loading": "후기를 불러오는 중입니다."
   },
   "Recent": {
-    "title": "최근 본 도검"
+    "title": "최근 본 도검",
+    "clear": "기록 지우기",
+    "cleared": "최근 본 도검 기록을 지웠습니다."
   },
   "Timeline": {
     "title": "도검 연표",
@@ -397,5 +405,28 @@
     "title": "화면을 그리지 못했습니다",
     "body": "잠시 문제가 생겼습니다. 다시 시도하거나 도검의 벽으로 돌아가 주세요.",
     "retry": "다시 시도"
+  },
+  "Lookup": {
+    "title": "비회원 주문 조회",
+    "intro": "주문번호와 주문할 때 쓴 이메일로 주문을 찾습니다. 회원이면 내 계정에서 주문을 볼 수 있습니다.",
+    "id": "주문번호",
+    "idHint": "예: SNB-20261116-0001",
+    "email": "이메일",
+    "emailHint": "주문서에 적은 이메일",
+    "submit": "주문 찾기",
+    "submitting": "찾는 중…",
+    "checkError": "입력 내용을 확인해 주세요.",
+    "errors": {
+      "id": "주문번호를 입력해 주세요.",
+      "email": "이메일 형식을 확인해 주세요."
+    },
+    "notFound": "주문번호와 이메일이 맞는 주문이 없습니다. 주문 확인 화면의 주문번호와 주문서에 적은 이메일을 확인해 주세요.",
+    "genericError": "주문을 찾지 못했습니다. 잠시 뒤 다시 시도해 주세요.",
+    "accountLink": "내 계정에서 주문 보기"
+  },
+  "Share": {
+    "button": "공유하기",
+    "copied": "주소를 복사했습니다.",
+    "failed": "주소를 복사하지 못했습니다. 주소창의 주소를 복사해 주세요."
   }
 }

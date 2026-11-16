@@ -238,6 +238,11 @@ export interface Order {
   status: OrderStatus;
   /** 로그인한 채 주문했으면 회원 id */
   userId?: string;
+  /**
+   * 주문 키. 비회원이 주문 확인을 열 때 씁니다(주문번호는 날짜+순번이라 짐작하기 쉬워 그것만으로는 열지 않음).
+   * 주문할 때의 응답과 비회원 주문 조회 응답에만 실리고, 다른 응답에서는 빠집니다. 키가 생기기 전 주문에는 없습니다.
+   */
+  accessKey?: string;
   destination: CountryCode;
   customer: Customer;
   lines: OrderLine[];

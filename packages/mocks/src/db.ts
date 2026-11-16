@@ -10,10 +10,10 @@ export interface DbState {
   seedVersion?: number;
   /** 회원(비밀번호는 SHA-256 해시). 예전 데이터에는 없을 수 있음 */
   users?: StoredUser[];
-  /** 로그인 세션 */
+  /** 로그인 세션(USER_SESSION_TTL_MS가 지나면 무효) */
   sessions?: Session[];
-  /** 어드민 데모 로그인 토큰 */
-  adminSessions?: string[];
+  /** 어드민 데모 로그인 세션(ADMIN_SESSION_TTL_MS가 지나면 무효). 만료를 두기 전 데이터에는 토큰 문자열만 있어 무효로 봅니다. */
+  adminSessions?: Array<AdminSession | string>;
   /** 구매한 회원의 후기 */
   reviews?: StoredReview[];
 }
@@ -36,6 +36,11 @@ export interface StoredReview {
 export interface Session {
   token: string;
   userId: string;
+  createdAt: string;
+}
+
+export interface AdminSession {
+  token: string;
   createdAt: string;
 }
 

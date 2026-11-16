@@ -1,6 +1,13 @@
 import type { DbState } from './db';
 import type { Order } from '@snb/domain';
 
+/** 응답에 실을 주문. 주문 키는 주문할 때와 비회원 주문 조회 응답에만 싣습니다. */
+export function withoutAccessKey(order: Order): Order {
+  const copy = { ...order };
+  delete copy.accessKey;
+  return copy;
+}
+
 /** 주문 수량만큼 재고를 되돌립니다(sign 1) 또는 다시 뺍니다(sign -1). 지워진 도검은 건너뜁니다. */
 function moveStock(state: DbState, order: Order, sign: 1 | -1): DbState {
   return {

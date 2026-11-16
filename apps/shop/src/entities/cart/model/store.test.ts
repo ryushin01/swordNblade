@@ -41,6 +41,19 @@ describe('toValidLines', () => {
       { swordId: 'b', quantity: 1 },
     ]);
   });
+
+  it('같은 도검이 여러 줄이면 한 줄로 합친다', () => {
+    expect(
+      toValidLines([
+        { swordId: 'a', quantity: 2 },
+        { swordId: 'b', quantity: 1 },
+        { swordId: 'a', quantity: 2 },
+      ]),
+    ).toEqual([
+      { swordId: 'a', quantity: 4 },
+      { swordId: 'b', quantity: 1 },
+    ]);
+  });
 });
 
 describe('toValidDestination', () => {

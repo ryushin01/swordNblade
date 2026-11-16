@@ -29,16 +29,17 @@ interface CartState {
 
 const clamp = (value: number) => Math.min(MAX_QUANTITY, Math.max(1, Math.round(value)));
 
-export const toValidLines = (value: unknown): CartLine[] =>
-  Array.isArray(value)
-    ? value
-        .filter(
-          (line): line is CartLine =>
-            typeof line?.swordId === 'string' && Number.isFinite(line?.quantity) && line.quantity > 0,
-        )
-        // 저장값이 1~MAX_QUANTITY를 벗어나도 담기·바꾸기와 같은 범위로 맞춥니다.
-        .map((line) => ({ swordId: line.swordId, quantity: clamp(line.quantity) }))
-    : [];
+export function toValidLines(value: unknown): CartLine[] {
+  if (!Array.isArray(value)) return [];
+  // 같은 도검이 여러 줄로 저장돼 있으면(깨진 저장값) 한 줄로 합칩니다. 줄마다 따로 재고를 확인하면 주문 때에야 거절됩니다.
+  const quantities = new Map<string, number>();
+  for (const line of value as Array<Partial<CartLine> | null>) {
+    if (typeof line?.swordId !== 'string' || !Number.isFinite(line.quantity) || !(line.quantity! > 0)) continue;
+    quantities.set(line.swordId, (quantities.get(line.swordId) ?? 0) + line.quantity!);
+  }
+  // 저장값이 1~MAX_QUANTITY를 벗어나도 담기·바꾸기와 같은 범위로 맞춥니다.
+  return [...quantities].map(([swordId, quantity]) => ({ swordId, quantity: clamp(quantity) }));
+}
 
 export const useCartStore = create<CartState>()(
   persist(

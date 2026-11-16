@@ -26,7 +26,7 @@ export function SettingsPage() {
         showIcon
         style={{ marginBottom: 16 }}
         title="포트폴리오용 예시 값입니다."
-        description="여기서 바꾼 값은 이 브라우저의 Mock 데이터에 저장되고, 같은 브라우저로 여는 쇼핑몰(같은 주소의 /)의 관세 계산에 바로 반영됩니다."
+        description="여기서 바꾼 값은 이 브라우저의 Mock 데이터에 저장되고, 같은 브라우저의 쇼핑몰(같은 주소의 /) 관세 계산에 바로 반영됩니다. 이미 열려 있는 쇼핑몰 탭도 바뀐 값을 다시 받습니다."
       />
       {isError ? <Alert type="error" showIcon title="설정을 불러오지 못했습니다." /> : null}
       {isPending || !data ? (

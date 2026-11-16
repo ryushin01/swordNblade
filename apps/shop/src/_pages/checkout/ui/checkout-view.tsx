@@ -49,6 +49,8 @@ export function CheckoutView() {
 
   const { destination, items, estimate, needsPermit, rule, config, blocked } = quote;
   if (arrivedBlocked === null) setArrivedBlocked(blocked);
+  // 장바구니를 고쳐 주문할 수 있게 되면 그 뒤에는 막지 않습니다. 작성 중에 다시 막히면 폼과 입력값을 두고 오류 요약이 알립니다.
+  else if (arrivedBlocked && !blocked) setArrivedBlocked(false);
 
   if (items.length === 0) {
     return (

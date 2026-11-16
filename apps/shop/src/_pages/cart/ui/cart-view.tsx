@@ -37,7 +37,7 @@ export function CartView() {
     );
   }
 
-  const { items, estimate, needsPermit, rule, config } = quote;
+  const { items, estimate, needsPermit, rule, config, blocked } = quote;
 
   if (items.length === 0) {
     return (
@@ -78,7 +78,7 @@ export function CartView() {
             </tr>
           </thead>
           <tbody>
-            {items.map(({ line, sword, pricing }) => (
+            {items.map(({ line, sword, pricing, stockIssue }) => (
               <tr key={sword.id} className="border-b border-line align-middle">
                 <th scope="row" className="py-3 pr-2 font-normal">
                   <span className="flex items-center gap-3">
@@ -96,6 +96,12 @@ export function CartView() {
                       <span className="text-sm text-ink-muted sm:hidden">
                         {t('shippedFrom', { country: countryName(sword.origin, locale) })}
                       </span>
+                      {/* 담은 뒤 품절되거나 재고가 줄면 글자로 알리고 고칠 방법을 적습니다(색만으로 알리지 않음). */}
+                      {stockIssue ? (
+                        <span className="text-sm text-danger">
+                          {stockIssue.kind === 'sold-out' ? t('soldOut') : t('short', { stock: stockIssue.stock })}
+                        </span>
+                      ) : null}
                     </span>
                   </span>
                 </th>
@@ -123,9 +129,13 @@ export function CartView() {
         <DestinationSelect config={config} />
         <LiveTotal label={customs('total')} total={estimate.totals.total} />
         <CustomsBreakdown estimate={estimate} config={config} />
-        <Link href="/checkout" className={cn(buttonVariants({ size: 'lg' }), 'h-12 rounded-sm text-base small-caps')}>
-          {t('checkout')}
-        </Link>
+        {blocked ? (
+          <p className="rounded-sm border border-danger p-3 text-sm text-danger">{t('blocked')}</p>
+        ) : (
+          <Link href="/checkout" className={cn(buttonVariants({ size: 'lg' }), 'h-12 rounded-sm text-base small-caps')}>
+            {t('checkout')}
+          </Link>
+        )}
       </section>
     </div>
   );

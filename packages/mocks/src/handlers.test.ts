@@ -1,5 +1,6 @@
 import { afterAll, afterEach, beforeAll, describe, expect, it } from 'vitest';
 
+import { nextOrderId } from './handlers';
 import { createMockServer } from './node';
 
 import type { Order } from '@snb/domain';
@@ -66,7 +67,7 @@ describe('Mock API', () => {
     expect(body.fields.permitConfirmed).toBeDefined();
   });
 
-  it('재고보다 많이 주문하면 409', async () => {
+  it('재고보다 많이 주문하면 409와 함께 어느 도검이 몇 점 남았는지 알린다', async () => {
     const response = await fetch(`${BASE}/api/orders`, {
       method: 'POST',
       body: JSON.stringify({
@@ -78,6 +79,79 @@ describe('Mock API', () => {
       }),
     });
     expect(response.status).toBe(409);
+    const stock = db.read().swords.find((sword) => sword.id === 'sw-016')!.stock;
+    expect(await response.json()).toMatchObject({ code: 'out-of-stock', swordId: 'sw-016', stock });
+  });
+
+  it('판매가 끝난(목록에 없는) 도검은 재고 0으로 알린다', async () => {
+    const response = await fetch(`${BASE}/api/orders`, {
+      method: 'POST',
+      body: JSON.stringify({
+        destination: 'KR',
+        customer,
+        lines: [{ swordId: 'removed-sword', quantity: 1 }],
+        paymentMethod: 'card',
+        permitConfirmed: true,
+      }),
+    });
+    expect(response.status).toBe(409);
+    expect(await response.json()).toMatchObject({ code: 'out-of-stock', swordId: 'removed-sword', stock: 0 });
+  });
+
+  it.each([
+    ['음수', -2],
+    ['0', 0],
+    ['소수', 1.5],
+    ['최대 수량 초과', 6],
+    ['숫자가 아닌 값', '2'],
+  ])('수량이 %s이면 주문하지 않고 422, 재고도 그대로', async (_label, quantity) => {
+    const before = db.read().swords.find((sword) => sword.id === 'sw-004')!.stock;
+    const response = await fetch(`${BASE}/api/orders`, {
+      method: 'POST',
+      body: JSON.stringify({
+        destination: 'KR',
+        customer,
+        lines: [{ swordId: 'sw-004', quantity }],
+        paymentMethod: 'card',
+        permitConfirmed: true,
+      }),
+    });
+    expect(response.status).toBe(422);
+    expect(db.read().swords.find((sword) => sword.id === 'sw-004')!.stock).toBe(before);
+  });
+
+  it('같은 도검이 여러 줄이면 합쳐서 재고를 확인하고 한 줄로 주문한다', async () => {
+    db.write((state) => ({
+      ...state,
+      swords: state.swords.map((sword) => (sword.id === 'sw-004' ? { ...sword, stock: 3 } : sword)),
+    }));
+    const order = (lines: Array<{ swordId: string; quantity: number }>) =>
+      fetch(`${BASE}/api/orders`, {
+        method: 'POST',
+        body: JSON.stringify({ destination: 'KR', customer, lines, paymentMethod: 'card', permitConfirmed: true }),
+      });
+    // 줄마다 따로 보면 2점씩이라 재고(3점) 안이지만, 합치면 4점이라 모자랍니다.
+    const short = await order([
+      { swordId: 'sw-004', quantity: 2 },
+      { swordId: 'sw-004', quantity: 2 },
+    ]);
+    expect(short.status).toBe(409);
+    expect(db.read().swords.find((sword) => sword.id === 'sw-004')!.stock).toBe(3);
+
+    const placed = await order([
+      { swordId: 'sw-004', quantity: 1 },
+      { swordId: 'sw-004', quantity: 2 },
+    ]);
+    expect(placed.status).toBe(201);
+    const body = (await placed.json()) as Order;
+    expect(body.lines).toHaveLength(1);
+    expect(body.lines[0]).toMatchObject({ swordId: 'sw-004', quantity: 3 });
+    expect(db.read().swords.find((sword) => sword.id === 'sw-004')!.stock).toBe(0);
+  });
+
+  it('주문번호의 날짜는 한국 시간이다', () => {
+    // 2026-11-15 16:30 UTC는 한국 시간 2026-11-16 01:30입니다.
+    expect(nextOrderId([], new Date('2026-11-15T16:30:00Z'))).toBe('SNB-20261116-0001');
   });
 
   it('할인 중인 도검은 할인가로 주문하고 정가를 함께 남긴다', async () => {
@@ -135,6 +209,19 @@ describe('Mock API', () => {
     expect(db.read().swords.find((sword) => sword.id === 'sw-004')?.stock).toBe(4);
     // 바뀐 금액을 확인하고 다시 보내면 주문합니다.
     expect((await place(5_446_980)).status).toBe(201);
+  });
+
+  it('상품을 고칠 때 다른 상품과 같은 주소(slug)로 바꾸면 409, 이름이나 주소를 비우면 400', async () => {
+    const [first, second] = db.read().swords;
+    const put = (body: object) =>
+      fetch(`${BASE}/api/swords/${first!.id}`, { method: 'PUT', body: JSON.stringify({ ...first, ...body }) });
+    const conflict = await put({ slug: second!.slug });
+    expect(conflict.status).toBe(409);
+    expect(((await conflict.json()) as { fields: Record<string, string> }).fields.slug).toBeDefined();
+    expect((await put({ name: '' })).status).toBe(400);
+    // 자기 주소 그대로 저장하는 것은 됩니다.
+    expect((await put({ stock: 9 })).status).toBe(200);
+    expect(db.read().swords.find((sword) => sword.id === second!.id)?.slug).toBe(second!.slug);
   });
 
   it('할인 값이 맞지 않으면 상품을 저장하지 않고 422', async () => {

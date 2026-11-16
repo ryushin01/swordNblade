@@ -39,6 +39,16 @@ export function findCountryRule(config: CustomsConfig, code: CountryCode): Count
   return rule;
 }
 
+/**
+ * 관세 표에 있는 배송 국가를 돌려줍니다. 표에 없는 값(깨진 저장값, 없어진 국가)이면 대한민국, 표에 대한민국도
+ * 없으면 첫 국가로 계산해, 관세를 계산하는 화면이 예외로 멈추지 않게 합니다.
+ */
+export function resolveDestination(config: CustomsConfig, code: string | null | undefined): CountryCode {
+  const codes = config.countries.map((country) => country.code);
+  if (code && (codes as string[]).includes(code)) return code as CountryCode;
+  return codes.includes('KR') ? 'KR' : (codes[0] ?? 'KR');
+}
+
 export function toCurrency(krw: number, currency: keyof CustomsConfig['exchangeRates'], config: CustomsConfig): number {
   const rate = config.exchangeRates[currency];
   if (!rate || rate <= 0) throw new Error(`환율이 올바르지 않습니다: ${currency}`);

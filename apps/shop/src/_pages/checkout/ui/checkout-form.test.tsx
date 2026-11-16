@@ -1,4 +1,4 @@
-import { screen, waitFor } from '@testing-library/react';
+import { screen, waitFor, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 
 import { DEFAULT_CUSTOMS_CONFIG, estimateCustoms, formatKRW, priceOf } from '@snb/domain';
@@ -49,6 +49,7 @@ const setup = ({ onPlaced = vi.fn(), expectedTotal = quotedTotal() } = {}) => {
       needsPermit
       permitNote="허가 안내 문구"
       expectedTotal={expectedTotal}
+      swordNames={{ 'sw-001': '쌍수도' }}
       onPlaced={onPlaced}
     />,
   );
@@ -89,6 +90,22 @@ describe('CheckoutForm', () => {
 
     await waitFor(() => expect(onPlaced).toHaveBeenCalledTimes(1));
     expect(db.read().orders.filter((order) => order.customer.name === '홍길동')).toHaveLength(1);
+  });
+
+  it('주문하는 사이 재고가 줄었으면 어느 도검이 몇 점 남았는지 알리고 장바구니 링크를 준다', async () => {
+    db.write((state) => ({
+      ...state,
+      swords: state.swords.map((sword) => (sword.id === 'sw-001' ? { ...sword, stock: 0 } : sword)),
+    }));
+    const { user, onPlaced } = setup();
+    await fillValid(user);
+    await user.click(screen.getByRole('button', { name: '결제하기' }));
+
+    const alert = await screen.findByRole('alert');
+    expect(alert).toHaveTextContent('쌍수도은(는) 품절되었습니다. 장바구니에서 삭제한 뒤 다시 주문해 주세요.');
+    expect(within(alert).getByRole('link', { name: '장바구니로 가기' })).toHaveAttribute('href', '/cart');
+    await waitFor(() => expect(alert).toHaveFocus());
+    expect(onPlaced).not.toHaveBeenCalled();
   });
 
   it('주문하는 사이 결제 금액이 바뀌었으면 주문하지 않고 바뀐 금액을 알린다', async () => {

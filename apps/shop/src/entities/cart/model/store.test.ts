@@ -1,6 +1,6 @@
 import { beforeEach, describe, expect, it } from 'vitest';
 
-import { MAX_QUANTITY, selectItemCount, toValidLines, useCartStore } from './store';
+import { MAX_QUANTITY, selectItemCount, toValidDestination, toValidLines, useCartStore } from './store';
 
 describe('cart store', () => {
   beforeEach(() => useCartStore.setState({ lines: [], destination: 'KR' }));
@@ -40,5 +40,27 @@ describe('toValidLines', () => {
       { swordId: 'a', quantity: MAX_QUANTITY },
       { swordId: 'b', quantity: 1 },
     ]);
+  });
+
+  it('같은 도검이 여러 줄이면 한 줄로 합친다', () => {
+    expect(
+      toValidLines([
+        { swordId: 'a', quantity: 2 },
+        { swordId: 'b', quantity: 1 },
+        { swordId: 'a', quantity: 2 },
+      ]),
+    ).toEqual([
+      { swordId: 'a', quantity: 4 },
+      { swordId: 'b', quantity: 1 },
+    ]);
+  });
+});
+
+describe('toValidDestination', () => {
+  it('관세 표에 있는 배송 국가만 받고, 깨진 값이면 지금 값을 둔다', () => {
+    expect(toValidDestination('JP', 'KR')).toBe('JP');
+    expect(toValidDestination('ZZ', 'KR')).toBe('KR');
+    expect(toValidDestination(42, 'US')).toBe('US');
+    expect(toValidDestination(undefined, 'KR')).toBe('KR');
   });
 });

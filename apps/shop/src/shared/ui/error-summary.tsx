@@ -1,6 +1,6 @@
 'use client';
 
-import { type RefObject, useEffect, useRef, useState } from 'react';
+import { type ReactNode, type RefObject, useEffect, useRef, useState } from 'react';
 
 export interface ErrorSummaryItem {
   /** 틀린 칸의 id */
@@ -26,11 +26,14 @@ export function ErrorSummary({
   summaryRef,
   message,
   items,
+  children,
 }: {
   id: string;
   summaryRef: RefObject<HTMLDivElement | null>;
   message: string;
   items: ErrorSummaryItem[];
+  /** 칸으로 가는 링크 말고 고칠 곳으로 가는 링크(예: 장바구니) */
+  children?: ReactNode;
 }) {
   return (
     <div
@@ -54,6 +57,7 @@ export function ErrorSummary({
           ))}
         </ul>
       ) : null}
+      {children ? <p className="mt-2 text-sm">{children}</p> : null}
     </div>
   );
 }

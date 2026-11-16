@@ -25,6 +25,7 @@ const meta = {
     // 쌍수도 1점을 국내로 보낼 때 주문 요약에 보이는 결제 금액
     expectedTotal: estimateCustoms([{ origin: 'KR', unitPrice: 17_600_000, quantity: 1 }], 'KR', DEFAULT_CUSTOMS_CONFIG)
       .totals.total,
+    swordNames: { 'sw-001': '쌍수도' },
     onPlaced: fn(),
   },
 } satisfies Meta<typeof CheckoutForm>;

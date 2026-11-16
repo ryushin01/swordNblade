@@ -5,6 +5,7 @@ import { useLocale, useTranslations } from 'next-intl';
 import { localizeForLocale, SwordTile, useSwords } from '@/entities/sword';
 import { useWishlistHydrated, useWishlistStore } from '@/entities/wishlist';
 import { Link } from '@/shared/i18n';
+import { REMOVE_CONTROL_ATTRIBUTE, useRemovalFocus } from '@/shared/lib/use-removal-focus';
 import { Button } from '@/shared/ui';
 
 import type { Locale } from '@snb/domain';
@@ -17,6 +18,8 @@ export function WishlistView() {
   const ids = useWishlistStore((state) => state.ids);
   const toggle = useWishlistStore((state) => state.toggle);
   const { data, isError, refetch } = useSwords();
+  // 찜을 빼면 다음 칸의 빼기 버튼으로, 모두 빼면 빈 목록 안내로 초점을 옮깁니다.
+  const { fallbackRef, beforeRemove } = useRemovalFocus<HTMLParagraphElement>();
 
   if (isError && !data) {
     return (
@@ -46,7 +49,9 @@ export function WishlistView() {
   if (swords.length === 0) {
     return (
       <div className="grid justify-items-center gap-4 py-16 text-center">
-        <p>{t('empty')}</p>
+        <p ref={fallbackRef} tabIndex={-1}>
+          {t('empty')}
+        </p>
         <Link href="/" className="inline-flex min-h-11 items-center underline underline-offset-4">
           {t('browse')}
         </Link>
@@ -68,7 +73,11 @@ export function WishlistView() {
             <SwordTile sword={sword} />
             <button
               type="button"
-              onClick={() => toggle(sword.id)}
+              {...{ [REMOVE_CONTROL_ATTRIBUTE]: '' }}
+              onClick={(event) => {
+                beforeRemove(event.currentTarget);
+                toggle(sword.id);
+              }}
               className="min-h-11 border-t border-line px-2 text-sm hover:bg-wall-raised"
             >
               {t('remove', { name: sword.name })}

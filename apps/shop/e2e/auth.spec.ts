@@ -215,7 +215,9 @@ test('구매 후기와 프로필 사진: 산 회원만 쓰고, 사진이 원형�
   await page.goto('/swords/uchigatana');
   const section = page.getByRole('region', { name: /구매 후기/ });
   await section.getByRole('button', { name: '후기 등록' }).click();
-  await expect(section.getByRole('alert')).toContainText('별점을 골라 주세요.');
+  // 오류는 틀린 칸(별점 묶음)에 이어 읽히고, 첫 별점으로 초점이 갑니다.
+  await expect(section.getByRole('group', { name: '별점' })).toHaveAccessibleDescription('별점을 골라 주세요.');
+  await expect(section.getByRole('radio', { name: '5점' })).toBeFocused();
   await section.getByRole('radio', { name: '5점' }).check();
   await section.getByLabel('후기 내용').fill('균형이 좋고 손잡이 감기가 단단합니다.');
   await section.getByRole('button', { name: '후기 등록' }).click();

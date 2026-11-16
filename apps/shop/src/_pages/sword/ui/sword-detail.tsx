@@ -21,7 +21,7 @@ import { DestinationSelect } from '@/features/choose-destination';
 import { ApiRequestError } from '@/shared/api';
 import { Link } from '@/shared/i18n';
 import { useNow } from '@/shared/lib/use-now';
-import { LiveTotal, OrnamentHeading } from '@/shared/ui';
+import { Button, LiveTotal, OrnamentHeading } from '@/shared/ui';
 
 import { AddToCart } from './add-to-cart';
 import { DiscountPeriod } from './discount-period';
@@ -34,16 +34,25 @@ import { WishlistButton } from './wishlist-button';
 export function SwordDetail({ slug, initialSword }: { slug: string; initialSword?: Sword }) {
   const t = useTranslations('Sword');
   const common = useTranslations('Common');
-  const { data: sword, isPending, error } = useSword(slug, initialSword);
+  const errors = useTranslations('Error');
+  const { data: sword, isPending, error, refetch } = useSword(slug, initialSword);
 
   if (error) {
     const notFound = error instanceof ApiRequestError && error.status === 404;
     return (
       <div className="grid justify-items-center gap-4 px-4 py-32 text-center">
         <h1 className="text-2xl text-carved">{notFound ? t('notFound') : t('loadError')}</h1>
-        <Link href="/" className="underline underline-offset-4">
-          {common('backToWall')}
-        </Link>
+        <p className="flex flex-wrap items-center justify-center gap-4">
+          {/* 없는 도검이 아니라 불러오지 못한 것이면(Mock API 시작 실패 등) 다시 시도할 수 있게 합니다. */}
+          {notFound ? null : (
+            <Button type="button" variant="outline" className="min-h-11 rounded-sm" onClick={() => void refetch()}>
+              {errors('retry')}
+            </Button>
+          )}
+          <Link href="/" className="inline-flex min-h-11 items-center underline underline-offset-4">
+            {common('backToWall')}
+          </Link>
+        </p>
       </div>
     );
   }

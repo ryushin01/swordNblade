@@ -126,7 +126,8 @@ export function SwordGallery({ sword, reliefLabel }: { sword: Sword; reliefLabel
           <ChevronRight aria-hidden="true" className="size-5" strokeWidth={1.5} />
         </button>
       </div>
-      <p aria-live="polite" className="text-center text-sm text-ink-muted tabular-nums">
+      {/* 넘길 때마다 위치를 알립니다. role="status"가 polite·atomic을 함께 뜻해 aria-live를 따로 쓰지 않습니다. */}
+      <p role="status" className="text-center text-sm text-ink-muted tabular-nums">
         {t('position', { current: active + 1, total: items.length, label: current.label })}
       </p>
     </section>

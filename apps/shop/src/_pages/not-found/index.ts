@@ -1,1 +1,1 @@
-export { CatchAllPage, NotFoundPage } from './ui/not-found-page';
+export { CatchAllPage, generateNotFoundMetadata, NotFoundPage } from './ui/not-found-page';

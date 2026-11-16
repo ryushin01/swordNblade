@@ -1,1 +1,1 @@
-export { CatchAllPage as default } from '@/_pages/not-found';
+export { CatchAllPage as default, generateNotFoundMetadata as generateMetadata } from '@/_pages/not-found';

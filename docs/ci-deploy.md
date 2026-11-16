@@ -34,6 +34,7 @@ pnpm 12는 허용하지 않은 의존성의 빌드 스크립트가 있으면 CI 
 - Framework는 Next.js, Node.js는 22.x입니다. 설치·빌드 명령은 기본값을 씁니다. Vercel이 루트의 `packageManager`(pnpm 12)와 워크스페이스를 알아서 처리합니다.
 - 환경 변수는 `NEXT_TELEMETRY_DISABLED=1` 하나뿐입니다. Mock API가 브라우저에서 동작하므로 비밀 값이 없습니다.
 - 어드민은 `robots: noindex`로 검색 노출을 막습니다.
+- 보안 헤더: 두 앱의 `next.config.ts`가 `X-Content-Type-Options: nosniff`, `Referrer-Policy: strict-origin-when-cross-origin`, `X-Frame-Options: SAMEORIGIN`, `Content-Security-Policy`(`frame-ancestors 'self'; base-uri 'self'; form-action 'self'; object-src 'none'`), `Permissions-Policy`(카메라·마이크·위치·결제·USB 끔)를 붙입니다. Storybook이 같은 출처의 iframe을 쓰므로 프레임은 같은 출처만 허용합니다. 쇼핑몰은 `/admin`으로 넘기는 응답에는 붙이지 않고 어드민 앱이 붙여, 헤더가 두 번 붙지 않습니다. CSP의 `script-src`는 Next 인라인 스크립트 때문에 두지 않습니다. E2E가 운영에서도 헤더를 확인합니다.
 
 ## 배포 후 검사 (`.github/workflows/live-check.yml`)
 

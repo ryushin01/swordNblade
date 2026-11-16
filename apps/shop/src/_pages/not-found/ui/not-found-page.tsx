@@ -1,7 +1,19 @@
 import { notFound } from 'next/navigation';
 import { useTranslations } from 'next-intl';
+import { getTranslations } from 'next-intl/server';
 
 import { Link } from '@/shared/i18n';
+
+import type { Metadata } from 'next';
+
+/**
+ * 404 화면 제목. 첫 화면 제목과 같으면 어느 화면인지 구분되지 않습니다(KWCAG 6.4.2).
+ * 없는 주소를 받는 catch-all 페이지([...rest])에 답니다. 언어별 레이아웃 아래의 not-found.tsx에 단 메타데이터는 쓰이지 않습니다.
+ */
+export async function generateNotFoundMetadata(): Promise<Metadata> {
+  const t = await getTranslations('NotFound');
+  return { title: t('title') };
+}
 
 export function NotFoundPage() {
   const t = useTranslations('NotFound');

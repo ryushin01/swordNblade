@@ -1,6 +1,7 @@
 'use client';
 
 import { type FormEvent, useId, useRef, useState } from 'react';
+import { flushSync } from 'react-dom';
 import { useLocale, useTranslations } from 'next-intl';
 import { toast } from 'sonner';
 
@@ -36,12 +37,17 @@ function ReviewItem({ review }: { review: Review }) {
   );
 }
 
-function ReviewForm({ slug }: { slug: string }) {
+type ReviewError = { field: 'rating' | 'text'; message: string } | { field: 'submit'; message: string };
+
+/** 구매한 회원의 후기 폼. 테스트에서 바로 그리려고 내보냅니다(슬라이스 공개 API에는 없음). */
+export function ReviewForm({ slug }: { slug: string }) {
   const t = useTranslations('Reviews');
   const create = useCreateReview(slug);
-  const [error, setError] = useState<string | null>(null);
+  const [error, setError] = useState<ReviewError | null>(null);
   const lockRef = useRef(false);
   const errorId = useId();
+  const firstRatingRef = useRef<HTMLInputElement>(null);
+  const textRef = useRef<HTMLTextAreaElement>(null);
 
   const handleSubmit = (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
@@ -49,8 +55,18 @@ function ReviewForm({ slug }: { slug: string }) {
     const form = new FormData(event.currentTarget);
     const rating = Number(form.get('rating'));
     const text = String(form.get('text') ?? '').trim();
-    if (!rating) return setError(t('errorRating'));
-    if (!text) return setError(t('errorText'));
+    // 틀린 칸에 오류를 잇고 그 칸으로 초점을 옮깁니다(KWCAG 7.3.1). 칸이 오류 문구를 함께 읽어 줍니다.
+    // 초점이 닿을 때 오류 연결(aria-invalid·aria-describedby)이 이미 그려져 있도록 상태를 먼저 반영합니다.
+    if (!rating) {
+      flushSync(() => setError({ field: 'rating', message: t('errorRating') }));
+      firstRatingRef.current?.focus();
+      return;
+    }
+    if (!text) {
+      flushSync(() => setError({ field: 'text', message: t('errorText') }));
+      textRef.current?.focus();
+      return;
+    }
     setError(null);
     lockRef.current = true;
     create.mutate(
@@ -60,45 +76,66 @@ function ReviewForm({ slug }: { slug: string }) {
         onSuccess: () => toast.success(t('saved')),
         onError: () => {
           lockRef.current = false;
-          setError(t('failed'));
+          setError({ field: 'submit', message: t('failed') });
         },
       },
     );
   };
 
   return (
-    <form noValidate onSubmit={handleSubmit} className="grid gap-4" aria-describedby={error ? errorId : undefined}>
+    <form noValidate onSubmit={handleSubmit} className="grid gap-4">
       <h3 className="text-carved text-lg">{t('formTitle')}</h3>
-      <fieldset className="grid gap-1.5">
+      <fieldset className="grid gap-1.5" aria-describedby={error?.field === 'rating' ? errorId : undefined}>
         <legend className="text-sm">{t('rating')}</legend>
         <div className="flex flex-wrap gap-x-4">
-          {[5, 4, 3, 2, 1].map((n) => (
+          {[5, 4, 3, 2, 1].map((n, index) => (
             <label key={n} className="inline-flex min-h-11 items-center gap-1.5">
-              <input type="radio" name="rating" value={n} />
+              <input
+                ref={index === 0 ? firstRatingRef : undefined}
+                type="radio"
+                name="rating"
+                value={n}
+                onChange={() => error?.field === 'rating' && setError(null)}
+              />
               {t('ratingOption', { n })}
             </label>
           ))}
         </div>
+        {error?.field === 'rating' ? (
+          <p id={errorId} className="text-sm text-danger">
+            {error.message}
+          </p>
+        ) : null}
       </fieldset>
       <div className="grid gap-1.5">
         <label htmlFor="review-text" className="text-sm">
           {t('text')}
         </label>
         <textarea
+          ref={textRef}
           id="review-text"
           name="text"
           rows={4}
           maxLength={500}
-          aria-describedby="review-text-hint"
-          className="rounded-sm border border-input bg-wall-raised p-3 text-base"
+          // 내용을 고치면 별점처럼 오류를 지웁니다(고친 칸이 계속 틀렸다고 읽히지 않게).
+          onChange={() => error?.field === 'text' && setError(null)}
+          aria-invalid={error?.field === 'text' ? true : undefined}
+          aria-describedby={error?.field === 'text' ? `review-text-hint ${errorId}` : 'review-text-hint'}
+          className="rounded-sm border border-input bg-wall-raised p-3 text-base aria-invalid:border-2 aria-invalid:border-danger"
         />
         <p id="review-text-hint" className="text-sm text-ink-muted">
           {t('hint')}
         </p>
+        {error?.field === 'text' ? (
+          <p id={errorId} className="text-sm text-danger">
+            {error.message}
+          </p>
+        ) : null}
       </div>
-      {error ? (
-        <p id={errorId} role="alert" className="text-sm text-danger">
-          {error}
+      {/* 보내지 못한 오류는 고칠 칸이 없으므로 바로 알립니다. */}
+      {error?.field === 'submit' ? (
+        <p role="alert" className="text-sm text-danger">
+          {error.message}
         </p>
       ) : null}
       <div>

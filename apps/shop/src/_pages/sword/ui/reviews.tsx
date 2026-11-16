@@ -1,6 +1,7 @@
 'use client';
 
 import { type FormEvent, useId, useRef, useState } from 'react';
+import { flushSync } from 'react-dom';
 import { useLocale, useTranslations } from 'next-intl';
 import { toast } from 'sonner';
 
@@ -55,13 +56,14 @@ export function ReviewForm({ slug }: { slug: string }) {
     const rating = Number(form.get('rating'));
     const text = String(form.get('text') ?? '').trim();
     // 틀린 칸에 오류를 잇고 그 칸으로 초점을 옮깁니다(KWCAG 7.3.1). 칸이 오류 문구를 함께 읽어 줍니다.
+    // 초점이 닿을 때 오류 연결(aria-invalid·aria-describedby)이 이미 그려져 있도록 상태를 먼저 반영합니다.
     if (!rating) {
-      setError({ field: 'rating', message: t('errorRating') });
+      flushSync(() => setError({ field: 'rating', message: t('errorRating') }));
       firstRatingRef.current?.focus();
       return;
     }
     if (!text) {
-      setError({ field: 'text', message: t('errorText') });
+      flushSync(() => setError({ field: 'text', message: t('errorText') }));
       textRef.current?.focus();
       return;
     }
@@ -115,6 +117,8 @@ export function ReviewForm({ slug }: { slug: string }) {
           name="text"
           rows={4}
           maxLength={500}
+          // 내용을 고치면 별점처럼 오류를 지웁니다(고친 칸이 계속 틀렸다고 읽히지 않게).
+          onChange={() => error?.field === 'text' && setError(null)}
           aria-invalid={error?.field === 'text' ? true : undefined}
           aria-describedby={error?.field === 'text' ? `review-text-hint ${errorId}` : 'review-text-hint'}
           className="rounded-sm border border-input bg-wall-raised p-3 text-base aria-invalid:border-2 aria-invalid:border-danger"

@@ -82,6 +82,8 @@ test('상세의 공유하기: 공유 시트가 없으면 도검 주소를 복사
 test('최근 본 도검 기록을 지우면 지웠다는 안내로 초점이 가고, 다시 열어도 기록이 없다', async ({ page }) => {
   await page.goto('/swords/ssangsudo');
   await expect(page.getByRole('heading', { level: 1, name: '쌍수도' })).toBeVisible();
+  // 제목은 서버 HTML이라 hydrate 전에도 보이므로, 본 기록이 저장된 뒤에 다음 도검으로 갑니다.
+  await page.waitForFunction(() => localStorage.getItem('snb-recent-v1')?.includes('sw-001') ?? false);
   await page.goto('/swords/hwando');
   const recent = page.getByRole('region', { name: '최근 본 도검' });
   await expect(recent.getByRole('link', { name: /쌍수도/ })).toBeVisible();

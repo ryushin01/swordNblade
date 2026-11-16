@@ -1,7 +1,7 @@
 # Sword & Blade - 도검의 벽
 
 [![CI](https://github.com/ryushin01/swordnblade/actions/workflows/ci.yml/badge.svg)](https://github.com/ryushin01/swordnblade/actions/workflows/ci.yml)
-![version](https://img.shields.io/badge/version-0.16.0-7a4a35)
+![version](https://img.shields.io/badge/version-0.17.0-7a4a35)
 ![Storybook](https://img.shields.io/badge/Storybook-10-FF4785?logo=storybook&logoColor=white)
 
 동양 도검부터 신화 속 검까지, 석고 벽에 새긴 부조처럼 진열한 도검 쇼핑몰과 관리자 화면입니다. 배송 국가에 따라 관세·부가세를 미리 계산합니다.
@@ -134,8 +134,8 @@ docs/          문서와 스크린샷
 
 | 글꼴 | 쓰는 곳 | 굵기 |
 |---|---|---|
-| Spectral | 영문·숫자 (제목·본문) | 400·500·600·700 |
-| Pirata One | 영어 화면의 큰 제목(h1·h2) | 400 |
+| Spectral | 영문·숫자 (제목·본문) | 400·500·600 |
+| Pirata One | 영어 화면의 큰 제목(h1·h2), 그 제목을 그릴 때 받음 | 400 |
 | KoPub바탕 (SIL OFL판, 줄인 파일 이름 SnbBatang) | 한글 (제목·본문) | 400 (굵은 글씨는 브라우저가 두껍게 그림) |
 | 나눔손글씨 붓 | 칼 이름의 한글 | 400 |
 

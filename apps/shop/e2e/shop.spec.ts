@@ -484,6 +484,44 @@ test.describe('화면 전환', () => {
     await waitForPageTransition(page);
   });
 
+  test('카드 부조를 복제할 때 SVG 하위 요소마다 계산 스타일을 옮겨 적지 않는다(전환 멈춤 방지 패치)', async ({
+    page,
+  }) => {
+    await page.emulateMedia({ reducedMotion: 'no-preference' });
+    await page.goto('/');
+    await waitForHydration(page);
+    const art = page.locator('[data-hero-exit-key]').first();
+    await expect(art).toBeVisible();
+    const slug = await art.getAttribute('data-hero-exit-key');
+    // 전환 중 SSGOI가 만든 복제본(data-ssgoi-crossfade)의 인라인 스타일 속성 수를 셉니다.
+    const cloned = page.waitForFunction(
+      () => {
+        const svg = document.querySelector('svg[data-ssgoi-crossfade]');
+        if (!svg) return null;
+        const children = [...svg.querySelectorAll('*')] as SVGElement[];
+        return {
+          root: svg instanceof SVGElement ? svg.style.length : 0,
+          children: children.length,
+          maxChild: Math.max(0, ...children.map((child) => child.style.length)),
+        };
+      },
+      undefined,
+      { polling: 'raf' },
+    );
+    await page.locator(`a[href$="/swords/${slug}"]`).first().click();
+    const { root, children, maxChild } = (await (await cloned).jsonValue()) as {
+      root: number;
+      children: number;
+      maxChild: number;
+    };
+    expect(children).toBeGreaterThan(50);
+    // 최상위 svg에는 계산 스타일 전체(실측 555개)를 옮기고, 하위 요소에는 애니메이션·전환 끄기 값(실측 17개)만 남습니다.
+    // 패치 전에는 하위 요소 수백 개마다 500개 넘게 옮겨 적어, 카드를 누르면 화면이 멈췄습니다(CPU 4배 감속에서 1.4초).
+    expect(root).toBeGreaterThan(100);
+    expect(maxChild).toBeLessThan(50);
+    await waitForPageTransition(page);
+  });
+
   test('동작 줄이기를 켜면 움직이지 않고 바로 바뀐다(겹침은 몇 프레임 안)', async ({ page }) => {
     await page.emulateMedia({ reducedMotion: 'reduce' });
     await openFirstSword(page);

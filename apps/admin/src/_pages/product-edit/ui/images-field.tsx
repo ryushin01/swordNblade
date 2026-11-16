@@ -24,8 +24,8 @@ export function ImagesField() {
       {(fields, { add, remove, move }) => (
         <Flex vertical gap={12}>
           <Typography.Paragraph type="secondary" style={{ margin: 0 }}>
-            상세 화면에서 부조 그림(전체·손잡이·칼끝 확대) 뒤에 이 순서로 보입니다. 최대 {MAX_IMAGES}장, 긴 변 1600px로
-            줄여 저장합니다.
+            상세 화면에서 부조 그림 다섯 시점(전체·손잡이·칼끝·코등이·칼날 중간 또는 덧쇠) 뒤에 이 순서로 보입니다. 최대{' '}
+            {MAX_IMAGES}장, 긴 변 1600px로 줄여 저장합니다.
           </Typography.Paragraph>
           {fields.length === 0 ? <Alert type="info" showIcon title="올린 사진이 없습니다." /> : null}
           {fields.map((field, index) => (

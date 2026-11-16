@@ -39,6 +39,7 @@ import { SEED_TRANSLATIONS_EN } from '@snb/mocks';
 import { SwordRelief } from '@snb/sword-art';
 
 import { type SwordInput, useSaveSword, useSwords } from '@/entities/sword';
+import { ApiRequestError } from '@/shared/api';
 import { SITE } from '@/shared/config';
 import { useNow } from '@/shared/lib';
 
@@ -259,7 +260,14 @@ export function ProductForm({ initial }: { initial?: Sword }) {
         const en = normalizeTranslation(values.translations?.en);
         // 비우면 빈 객체로 저장해 '일부러 지움'을 남깁니다(쇼핑몰이 시드 번역으로 되돌아가지 않음).
         data.translations = en ? { en } : {};
-        save.mutate(data);
+        save.mutate(data, {
+          // 다른 상품과 주소(slug)가 겹치면 알림만 띄우지 않고 그 칸에 오류를 붙이고 초점을 옮깁니다(오류 정정).
+          onError: (error) => {
+            if (!(error instanceof ApiRequestError) || !error.fields.slug) return;
+            form.setFields([{ name: 'slug', errors: ['다른 상품이 쓰는 주소입니다. 다른 값을 입력해 주세요.'] }]);
+            form.scrollToField('slug', { focus: true });
+          },
+        });
       }}
     >
       <Row gutter={24}>

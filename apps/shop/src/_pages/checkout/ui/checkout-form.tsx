@@ -8,6 +8,7 @@ import { type CountryCode, formatKRW, type Locale, type Order } from '@snb/domai
 import { useCreateOrder } from '@/entities/order';
 import { useMe } from '@/entities/session';
 import { ApiRequestError } from '@/shared/api';
+import { Link } from '@/shared/i18n';
 import { cn } from '@/shared/lib';
 import { Button, ErrorSummary, TextField, useErrorFocus } from '@/shared/ui';
 
@@ -22,6 +23,8 @@ interface CheckoutFormProps {
   permitNote: string;
   /** 주문 요약에 보이는 결제 금액. 서버가 다시 계산한 금액과 다르면 주문하지 않고 바뀐 금액을 알립니다. */
   expectedTotal: number;
+  /** 도검 id → 화면 언어의 이름. 재고 부족으로 주문하지 못했을 때 어느 도검인지 알리는 데 씁니다. */
+  swordNames: Record<string, string>;
   onPlaced: (order: Order) => void;
 }
 
@@ -41,6 +44,7 @@ export function CheckoutForm({
   needsPermit,
   permitNote,
   expectedTotal,
+  swordNames,
   onPlaced,
 }: CheckoutFormProps) {
   const t = useTranslations('Checkout');
@@ -50,6 +54,8 @@ export function CheckoutForm({
   const [values, setValues] = useState<CheckoutValues>(INITIAL);
   const [errors, setErrors] = useState<CheckoutErrors>({});
   const [message, setMessage] = useState<string | null>(null);
+  // 재고 부족처럼 장바구니에서 고쳐야 하는 오류면 오류 요약에 장바구니 링크를 붙입니다.
+  const [fixInCart, setFixInCart] = useState(false);
   const { ref: summaryRef, moveFocus } = useErrorFocus();
   const submittingRef = useRef(false);
   const createOrder = useCreateOrder();
@@ -70,9 +76,10 @@ export function CheckoutForm({
   const update = <K extends keyof CheckoutValues>(key: K, value: CheckoutValues[K]) =>
     setValues((current) => ({ ...current, [key]: value }));
 
-  const showErrors = (next: CheckoutErrors, nextMessage: string) => {
+  const showErrors = (next: CheckoutErrors, nextMessage: string, cartLink = false) => {
     setErrors(next);
     setMessage(nextMessage);
+    setFixInCart(cartLink);
     moveFocus();
   };
 
@@ -114,6 +121,13 @@ export function CheckoutForm({
           if (error instanceof ApiRequestError && error.code === 'price-changed' && error.total !== undefined) {
             // 주문하지 않았습니다. 주문 요약이 새 금액으로 바뀌고, 고객이 확인한 뒤 다시 결제하면 주문합니다.
             showErrors({}, t('priceChanged', { total: formatKRW(error.total, locale) }));
+          } else if (error instanceof ApiRequestError && error.code === 'out-of-stock') {
+            // 주문하는 사이 품절되거나 재고가 줄었습니다. 다시 결제해도 되지 않으므로 장바구니에서 고치게 안내합니다.
+            const name = error.swordId ? swordNames[error.swordId] : undefined;
+            const stock = error.stock ?? 0;
+            let text = t('blocked');
+            if (name) text = stock > 0 ? t('outOfStock', { name, stock }) : t('soldOut', { name });
+            showErrors({}, text, true);
           } else if (error instanceof ApiRequestError && Object.keys(error.fields).length > 0) {
             // 서버가 알려 준 칸만 표시하고, 안내 문구는 화면 언어로 씁니다.
             const fields = FIELD_ORDER.filter((field) => field in error.fields);
@@ -141,7 +155,13 @@ export function CheckoutForm({
             fieldId: fieldId(field),
             text: `${t(`fields.${field}`)}: ${errorText(field)}`,
           }))}
-        />
+        >
+          {fixInCart ? (
+            <Link href="/cart" className="inline-block min-h-6 py-0.5 underline underline-offset-4">
+              {t('toCart')}
+            </Link>
+          ) : null}
+        </ErrorSummary>
       ) : null}
 
       <fieldset className="grid gap-4">

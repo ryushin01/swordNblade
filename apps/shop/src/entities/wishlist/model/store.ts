@@ -5,6 +5,7 @@ import { persist } from 'zustand/middleware';
 
 import { SITE } from '@/shared/config';
 import { safeJsonStorage } from '@/shared/lib/safe-storage';
+import { syncAcrossTabs } from '@/shared/lib/sync-across-tabs';
 
 interface WishlistState {
   ids: string[];
@@ -37,3 +38,6 @@ export const useWishlistStore = create<WishlistState>()(
     },
   ),
 );
+
+// 다른 탭에서 찜을 바꾸면 이 탭도 다시 불러옵니다.
+syncAcrossTabs(useWishlistStore, SITE.wishlistStorageKey);

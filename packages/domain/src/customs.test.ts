@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest';
 
 import { DEFAULT_CUSTOMS_CONFIG } from './constants';
-import { estimateCustoms, floorTo10, requiresPossessionPermit } from './customs';
+import { estimateCustoms, floorTo10, requiresPossessionPermit, resolveDestination } from './customs';
 
 import type { CustomsConfig } from './types';
 
@@ -80,6 +80,19 @@ describe('estimateCustoms: 한국 → 해외', () => {
   it('규칙이 없는 국가는 오류', () => {
     const empty: CustomsConfig = { ...config, countries: [] };
     expect(() => estimateCustoms([], 'KR', empty)).toThrow();
+  });
+});
+
+describe('resolveDestination', () => {
+  it('관세 표에 있는 국가는 그대로 쓴다', () => {
+    expect(resolveDestination(config, 'JP')).toBe('JP');
+  });
+
+  it('표에 없는 값(깨진 저장값)이면 대한민국, 대한민국도 없으면 첫 국가로 계산한다', () => {
+    expect(resolveDestination(config, 'ZZ')).toBe('KR');
+    expect(resolveDestination(config, undefined)).toBe('KR');
+    const withoutKorea: CustomsConfig = { ...config, countries: config.countries.filter((c) => c.code !== 'KR') };
+    expect(resolveDestination(withoutKorea, 'ZZ')).toBe(withoutKorea.countries[0]?.code);
   });
 });
 

@@ -5,6 +5,7 @@ import {
   type Customer,
   type CustomsConfig,
   estimateCustoms,
+  MAX_ORDER_QUANTITY,
   type Order,
   type OrderStatus,
   priceOf,
@@ -35,10 +36,17 @@ export interface CreateOrderBody {
 export interface ApiError {
   message: string;
   fields?: Record<string, string>;
-  /** 화면이 따로 안내해야 하는 오류. price-changed: 주문하는 사이 결제 금액이 바뀜 */
-  code?: 'price-changed';
+  /**
+   * 화면이 따로 안내해야 하는 오류.
+   * - price-changed: 주문하는 사이 결제 금액이 바뀜
+   * - out-of-stock: 품절됐거나(판매 종료 포함) 재고가 담은 수량보다 적음
+   */
+  code?: 'price-changed' | 'out-of-stock';
   /** price-changed일 때 서버가 다시 계산한 결제 금액 */
   total?: number;
+  /** out-of-stock일 때 재고가 모자란 도검과 남은 재고(판매가 끝났으면 0) */
+  swordId?: string;
+  stock?: number;
 }
 
 export interface DashboardStats {
@@ -62,8 +70,14 @@ const discountError = (body: Pick<Sword, 'discount'>) => {
 
 const pad = (value: number, length: number) => String(value).padStart(length, '0');
 
-function nextOrderId(orders: Order[], now: Date): string {
-  const day = `${now.getFullYear()}${pad(now.getMonth() + 1, 2)}${pad(now.getDate(), 2)}`;
+/** 한국 시간 날짜(YYYYMMDD). 할인 기간과 화면 시각처럼 주문번호 날짜도 브라우저 시간대가 아닌 한국 시간을 씁니다. */
+const kstDay = (now: Date) =>
+  new Intl.DateTimeFormat('en-CA', { timeZone: 'Asia/Seoul', year: 'numeric', month: '2-digit', day: '2-digit' })
+    .format(now)
+    .replace(/-/g, '');
+
+export function nextOrderId(orders: Order[], now: Date): string {
+  const day = kstDay(now);
   const max = orders.reduce((acc, order) => Math.max(acc, Number(order.id.split('-')[2] ?? 0)), 0);
   return `SNB-${day}-${pad(max + 1, 4)}`;
 }
@@ -170,10 +184,18 @@ export function createHandlers(db: Db, options: HandlerOptions = {}) {
       if (denied) return denied;
       await wait();
       const body = (await request.json()) as Sword;
+      if (!body.slug || !body.name) return error(400, { message: '이름과 주소(slug)는 필수입니다.' });
       const invalidDiscount = discountError(body);
       if (invalidDiscount) return invalidDiscount;
-      const exists = db.read().swords.some((sword) => sword.id === params.id);
-      if (!exists) return error(404, { message: '상품을 찾을 수 없습니다.' });
+      const { swords } = db.read();
+      if (!swords.some((sword) => sword.id === params.id)) return error(404, { message: '상품을 찾을 수 없습니다.' });
+      // 다른 상품과 같은 주소로 바꾸면 그 상품이 상세 화면에서 가려지므로 막습니다(등록과 같은 규칙).
+      if (swords.some((sword) => sword.slug === body.slug && sword.id !== params.id)) {
+        return error(409, {
+          message: '같은 주소(slug)의 상품이 있습니다.',
+          fields: { slug: '다른 값을 입력해 주세요.' },
+        });
+      }
       const updated: Sword = { ...body, id: params.id };
       db.write((state) => ({
         ...state,
@@ -231,18 +253,47 @@ export function createHandlers(db: Db, options: HandlerOptions = {}) {
         fields.destination = '배송 국가를 선택해 주세요.';
       }
       if (!body.paymentMethod) fields.paymentMethod = '결제 수단을 선택해 주세요.';
-      if (!body.lines?.length) return error(400, { message: '장바구니가 비어 있습니다.' });
+      if (!Array.isArray(body.lines) || body.lines.length === 0) {
+        return error(400, { message: '장바구니가 비어 있습니다.' });
+      }
 
-      const lines = body.lines.map((line) => ({
-        line,
-        sword: state.swords.find((sword) => sword.id === line.swordId),
+      // 수량은 도검마다 1~최대 수량의 정수입니다. 같은 도검이 여러 줄이면 합쳐서 재고를 확인하고 뺍니다.
+      const quantities = new Map<string, number>();
+      for (const line of body.lines as unknown[]) {
+        const { swordId, quantity } = (line ?? {}) as { swordId?: unknown; quantity?: unknown };
+        if (typeof swordId !== 'string' || !Number.isInteger(quantity) || (quantity as number) < 1) {
+          return error(422, { message: '주문 수량을 확인해 주세요.', fields: { lines: 'quantity' } });
+        }
+        quantities.set(swordId, (quantities.get(swordId) ?? 0) + (quantity as number));
+      }
+      if ([...quantities.values()].some((quantity) => quantity > MAX_ORDER_QUANTITY)) {
+        return error(422, {
+          message: `한 도검은 ${MAX_ORDER_QUANTITY}점까지 주문할 수 있습니다.`,
+          fields: { lines: 'quantity' },
+        });
+      }
+      const lines = [...quantities].map(([swordId, quantity]) => ({
+        line: { swordId, quantity },
+        sword: state.swords.find((sword) => sword.id === swordId),
       }));
       const missing = lines.find(({ sword }) => !sword);
-      if (missing) return error(409, { message: '판매가 끝난 상품이 장바구니에 있습니다.' });
+      if (missing) {
+        return error(409, {
+          message: '판매가 끝난 상품이 장바구니에 있습니다.',
+          code: 'out-of-stock',
+          swordId: missing.line.swordId,
+          stock: 0,
+        });
+      }
 
       const shortage = lines.find(({ line, sword }) => sword && sword.stock < line.quantity);
       if (shortage?.sword) {
-        return error(409, { message: `${shortage.sword.name}의 재고가 ${shortage.sword.stock}점 남았습니다.` });
+        return error(409, {
+          message: `${shortage.sword.name}의 재고가 ${shortage.sword.stock}점 남았습니다.`,
+          code: 'out-of-stock',
+          swordId: shortage.sword.id,
+          stock: Math.max(0, shortage.sword.stock),
+        });
       }
 
       const needsPermit = lines.some(({ sword }) => sword && requiresPossessionPermit(sword.specs));

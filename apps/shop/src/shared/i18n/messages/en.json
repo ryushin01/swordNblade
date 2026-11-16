@@ -168,13 +168,18 @@
     "checkout": "Go to checkout",
     "quantityOf": "Quantity of {name}",
     "remove": "Remove",
-    "removeOf": " {name}"
+    "removeOf": " {name}",
+    "soldOut": "Sold out. Please remove it from your cart.",
+    "short": "Only {stock} left. Reduce the quantity to {stock} or fewer.",
+    "blocked": "Fix the sold-out or short-stock swords before checking out."
   },
   "Checkout": {
     "title": "Checkout",
     "preparing": "Preparing your order.",
     "loadError": "Could not load your order. Please reload the page.",
     "empty": "There is nothing to order.",
+    "blocked": "Some swords in your cart are sold out or short on stock. Fix them in your cart, then check out.",
+    "toCart": "Go to cart",
     "placed": "Order {id} received. Taking you to the confirmation.",
     "formTitle": "Order form",
     "destination": "Ship to:",
@@ -183,6 +188,8 @@
     "checkError": "Please check your details.",
     "genericError": "We could not process the payment. Please try again shortly.",
     "priceChanged": "The total changed to {total} while you were ordering. Check the new amount in the order summary, then pay again.",
+    "outOfStock": "Only {stock} of {name} left. Change the quantity in your cart, then order again.",
+    "soldOut": "{name} is sold out. Remove it from your cart, then order again.",
     "recipient": "Recipient",
     "fields": {
       "name": "Recipient",
@@ -384,5 +391,11 @@
     "ad1500": "16th–17th c.",
     "ad1700": "18th–19th c.",
     "ad1900": "20th c. onward"
+  },
+  "Error": {
+    "eyebrow": "Error",
+    "title": "Something went wrong",
+    "body": "This page ran into a problem. Try again, or go back to the wall.",
+    "retry": "Try again"
   }
 }

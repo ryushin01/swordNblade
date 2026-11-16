@@ -216,3 +216,9 @@ export const DEFAULT_CUSTOMS_CONFIG: CustomsConfig = {
   ],
   updatedAt: '2026-11-01T00:00:00.000Z',
 };
+
+/** 기본 관세 표에 있는 배송 국가. 브라우저에 저장된 배송 국가를 불러올 때 이 값만 받습니다. */
+export const DESTINATION_CODES: CountryCode[] = DEFAULT_CUSTOMS_CONFIG.countries.map((country) => country.code);
+
+/** 한 도검을 한 번에 담고 주문할 수 있는 최대 수량. 쇼핑몰 장바구니와 Mock 서버가 같은 값을 씁니다. */
+export const MAX_ORDER_QUANTITY = 5;

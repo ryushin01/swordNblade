@@ -30,6 +30,10 @@ export function useCreateOrder() {
         void queryClient.invalidateQueries({ queryKey: ['swords'] });
         void queryClient.invalidateQueries({ queryKey: ['customs-config'] });
       }
+      // 재고가 줄었으면 상품을 새로 받아 장바구니가 품절·재고 부족을 알리게 합니다.
+      if (error instanceof ApiRequestError && error.code === 'out-of-stock') {
+        void queryClient.invalidateQueries({ queryKey: ['swords'] });
+      }
     },
   });
 }

@@ -9,6 +9,9 @@ export class ApiRequestError extends Error {
   readonly code?: ApiError['code'];
   /** price-changed일 때 서버가 다시 계산한 결제 금액 */
   readonly total?: number;
+  /** out-of-stock일 때 재고가 모자란 도검과 남은 재고 */
+  readonly swordId?: string;
+  readonly stock?: number;
 
   constructor(status: number, body: Partial<ApiError>) {
     super(body.message ?? '요청을 처리하지 못했습니다.');
@@ -17,6 +20,8 @@ export class ApiRequestError extends Error {
     this.fields = body.fields ?? {};
     this.code = body.code;
     this.total = body.total;
+    this.swordId = body.swordId;
+    this.stock = body.stock;
   }
 }
 

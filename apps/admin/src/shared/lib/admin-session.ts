@@ -20,9 +20,16 @@ export function setAdminToken(token: string | null) {
   listeners.forEach((listener) => listener());
 }
 
+/** 다른 탭에서 로그인·로그아웃하면(같은 키가 바뀌거나 저장소를 비우면) 이 탭도 따릅니다. */
+const onStorage = (event: StorageEvent) => {
+  if (event.key === KEY || event.key === null) listeners.forEach((listener) => listener());
+};
+
 export function subscribeAdminToken(listener: () => void) {
+  if (listeners.size === 0) window.addEventListener('storage', onStorage);
   listeners.add(listener);
   return () => {
     listeners.delete(listener);
+    if (listeners.size === 0) window.removeEventListener('storage', onStorage);
   };
 }

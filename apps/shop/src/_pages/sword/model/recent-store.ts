@@ -6,6 +6,7 @@ import { persist } from 'zustand/middleware';
 import { toValidIds } from '@/entities/wishlist';
 import { SITE } from '@/shared/config';
 import { safeJsonStorage } from '@/shared/lib/safe-storage';
+import { syncAcrossTabs } from '@/shared/lib/sync-across-tabs';
 
 const MAX_RECENT = 9;
 
@@ -32,3 +33,6 @@ export const useRecentStore = create<RecentState>()(
     },
   ),
 );
+
+// 다른 탭에서 본 도검도 이 탭의 기록에 반영합니다.
+syncAcrossTabs(useRecentStore, SITE.recentStorageKey);

@@ -21,6 +21,8 @@ export function CheckoutView() {
   const clear = useCartStore((state) => state.clear);
   const quote = useCartQuote();
   const [placedId, setPlacedId] = useState<string | null>(null);
+  // 들어올 때 이미 주문할 수 없는(품절·재고 부족) 장바구니였는지. 작성하는 사이 재고가 줄면 폼은 그대로 두고 오류 요약이 알립니다.
+  const [arrivedBlocked, setArrivedBlocked] = useState<boolean | null>(null);
 
   if (placedId) {
     return (
@@ -45,7 +47,8 @@ export function CheckoutView() {
     );
   }
 
-  const { destination, items, estimate, needsPermit, rule, config } = quote;
+  const { destination, items, estimate, needsPermit, rule, config, blocked } = quote;
+  if (arrivedBlocked === null) setArrivedBlocked(blocked);
 
   if (items.length === 0) {
     return (
@@ -53,6 +56,17 @@ export function CheckoutView() {
         <p className="text-lg">{t('empty')}</p>
         <Link href="/" className="underline underline-offset-4">
           {common('browse')}
+        </Link>
+      </div>
+    );
+  }
+
+  if (arrivedBlocked && blocked) {
+    return (
+      <div className="grid justify-items-center gap-4 py-24 text-center">
+        <p className="text-lg">{t('blocked')}</p>
+        <Link href="/cart" className="inline-flex min-h-11 items-center underline underline-offset-4">
+          {t('toCart')}
         </Link>
       </div>
     );
@@ -82,6 +96,7 @@ export function CheckoutView() {
           needsPermit={needsPermit}
           permitNote={permitNote(rule, locale)}
           expectedTotal={estimate.totals.total}
+          swordNames={Object.fromEntries(items.map(({ sword }) => [sword.id, sword.name]))}
           onPlaced={handlePlaced}
         />
       </section>

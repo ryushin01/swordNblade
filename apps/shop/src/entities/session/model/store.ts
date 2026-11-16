@@ -6,6 +6,7 @@ import { persist } from 'zustand/middleware';
 import { setApiAuthToken } from '@/shared/api';
 import { SITE } from '@/shared/config';
 import { safeJsonStorage } from '@/shared/lib/safe-storage';
+import { syncAcrossTabs } from '@/shared/lib/sync-across-tabs';
 
 interface SessionState {
   token: string | null;
@@ -31,3 +32,6 @@ export const useSessionStore = create<SessionState>()(
     },
   ),
 );
+
+// 다른 탭에서 로그인·로그아웃하면 이 탭도 따릅니다(되살린 토큰은 onRehydrateStorage가 API 요청에 붙임).
+syncAcrossTabs(useSessionStore, SITE.sessionStorageKey);

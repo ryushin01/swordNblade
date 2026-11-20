@@ -3,7 +3,7 @@ import { describe, expect, it } from 'vitest';
 
 import { SEED_SWORDS } from '@snb/mocks';
 
-import { type ReliefFocus } from './geometry';
+import { localBounds, type ReliefFocus } from './geometry';
 import { BladeMark } from './Logo';
 import { SwordRelief } from './SwordRelief';
 
@@ -116,6 +116,26 @@ describe('SwordRelief 칼날 장식', () => {
     expect(opacityOf(draw({ color: '#1f2420' }), '#1f2420')).toBe(0.9);
     // 다른 재질은 재질 진하기를 그대로 씁니다.
     expect(opacityOf(draw({ material: 'bronze', color: '#a0702a' }), '#a0702a')).toBe(0.8);
+  });
+
+  it('메달리온 문양(손바닥·십자·별)은 두 층에 문양 경로를 하나씩 더 그린다', () => {
+    const medallion = { at: 0.5, size: 0.6, color: '#e8b830' };
+    const plain = draw({ medallion });
+    for (const emblem of ['hand', 'cross', 'star'] as const) {
+      const marked = draw({ medallion: { ...medallion, emblem } });
+      expect(count(marked, 'path') - count(plain, 'path'), emblem).toBe(2);
+      expect(marked).not.toMatch(BROKEN);
+    }
+  });
+
+  it('나란한 두 번째 칼날(twin)은 두 층에 칼날을 하나씩 더 그리고, 그림 범위를 칼등 쪽으로 넓힌다', () => {
+    const plain = draw({});
+    const twin = draw({ twin: { width: 30, gap: 12, length: 0.8 } });
+    expect(count(twin, 'path') - count(plain, 'path')).toBe(2);
+    expect(twin).not.toMatch(BROKEN);
+    const art = (blade: Partial<SwordArt['blade']>) => ({ ...base, blade: { ...base.blade, ...blade } });
+    // 코등이(너비 160)보다 칼등 쪽으로 더 나가는 두 번째 칼날이면 그림 범위가 그만큼 넓어집니다.
+    expect(localBounds(art({ twin: { width: 60, gap: 20 } })).minX).toBeLessThan(localBounds(art({})).minX - 30);
   });
 
   it('칼날 메달리온은 두 층에 원 네 개씩을 그리고, 위치와 크기를 칼날 안쪽으로 맞춘다', () => {

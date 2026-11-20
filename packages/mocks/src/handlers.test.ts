@@ -146,7 +146,31 @@ describe('Mock API', () => {
     const body = (await placed.json()) as Order;
     expect(body.lines).toHaveLength(1);
     expect(body.lines[0]).toMatchObject({ swordId: 'sw-004', quantity: 3 });
+    // 영어 화면 영수증이 시드 목록 없이 이름을 고를 수 있게 영어 이름을 함께 남깁니다.
+    expect(body.lines[0]!.nameEn).toBe(db.read().swords.find((sword) => sword.id === 'sw-004')!.nameEn);
     expect(db.read().swords.find((sword) => sword.id === 'sw-004')!.stock).toBe(0);
+  });
+
+  it('영어 이름을 남기기 전에 만든 주문은 조회할 때 지금 도검 목록에서 영어 이름을 채운다', async () => {
+    const legacy: Order = {
+      id: 'SNB-20261101-0099',
+      createdAt: '2026-11-01T00:00:00.000Z',
+      status: 'paid',
+      destination: 'KR',
+      customer,
+      lines: [
+        { swordId: 'sw-004', name: '우치가타나', origin: 'JP', unitPrice: 1, quantity: 1 },
+        { swordId: 'sw-deleted', name: '지운 도검', origin: 'KR', unitPrice: 1, quantity: 1 },
+      ],
+      paymentMethod: 'card',
+      permitConfirmed: true,
+      amounts: { goods: 2, shipping: 0, duty: 0, vat: 0, total: 2 },
+    };
+    db.write((state) => ({ ...state, orders: [...state.orders, legacy] }));
+    const body = (await (await fetch(`${BASE}/api/orders/${legacy.id}`)).json()) as Order;
+    expect(body.lines[0]!.nameEn).toBe(db.read().swords.find((sword) => sword.id === 'sw-004')!.nameEn);
+    // 목록에 없는 도검은 저장된 이름만 남습니다.
+    expect(body.lines[1]!.nameEn).toBeUndefined();
   });
 
   it('주문번호의 날짜는 한국 시간이다', () => {

@@ -5,7 +5,7 @@
 | 패키지 | 역할 |
 |---|---|
 | `@snb/domain` | 타입(`Sword`, `Order`, `CustomsConfig`), 관세 계산 `estimateCustoms`, 소지허가 판단, 금액·길이 표시 형식 |
-| `@snb/mocks` | 283점 시드 데이터(`seed.ts`의 16점과 `catalog/`의 267점), 메모리 DB(`createDb`), MSW 핸들러, 브라우저(`/browser`)·Node(`/node`) 진입점 |
+| `@snb/mocks` | 283점 시드 데이터(`seed.ts`의 16점과 `catalog/`의 267점)와 시드 묶음(`/seed-bundle`), 메모리 DB(`createDbWithSeed`, 서버·테스트용 `createDb`), MSW 핸들러, 브라우저(`/browser`)·Node(`/node`) 진입점 |
 | `@snb/sword-art` | 도검 부조 `SwordRelief`, 칼날 로고 `BladeMark` |
 | `@snb/shop` | 쇼핑몰 (포트 3000) |
 | `@snb/admin` | 어드민 (포트 3001, `basePath: '/admin'`) |
@@ -30,7 +30,9 @@
 
 ## Mock API
 
-- 브라우저: 첫 API 요청 전에 `startMockApi`가 MSW 워커를 켭니다(`shared/api/client.ts`). 두 앱이 같은 워커(`/mockServiceWorker.js`)와 같은 localStorage 키(`snb-db-v1`)를 써서 데이터를 함께 씁니다. 새로고침해도 남고, 저장소를 못 쓰는 환경에서는 메모리로만 동작합니다.
+- 브라우저: 첫 API 요청 전에 `startMockApi`가 시드 JSON(쇼핑몰 `/mock-seed.json`, 어드민 `/admin/mock-seed.json`)을 받아 DB를 만들고 MSW 워커를 켭니다(`shared/api/client.ts`). 두 앱이 같은 워커(`/mockServiceWorker.js`)와 같은 localStorage 키(`snb-db-v1`)를 써서 데이터를 함께 씁니다. 새로고침해도 남고, 저장소를 못 쓰는 환경에서는 메모리로만 동작합니다.
+- 시드 JSON은 정적 라우트(`src/app/mock-seed.json/route.ts`)가 빌드할 때 `SEED_BUNDLE`(시드 버전·도검·주문·도검이 들어온 버전 표)로 만듭니다. 그래서 도검 목록이 화면 자바스크립트에 들어가지 않고, 도검을 더해도 화면 JS가 커지지 않습니다(1.4.0). 서버 렌더링·Node Mock 서버·테스트는 모듈에서 바로 읽습니다.
+- 화면 코드(클라이언트 컴포넌트와 그것이 불러오는 모듈)는 `@snb/mocks` 묶음을 값으로 불러오지 않습니다(도검 목록 전체가 따라 들어옴). 타입만 불러오거나(`import type`), `@snb/mocks/admin-account`처럼 하위 경로를 씁니다. 다시 들어오면 번들 크기 검사(490 kB)가 실패합니다.
 - Mock DB는 읽고 쓸 때마다 저장소를 다시 읽어, 다른 앱이 바꾼 값을 바로 봅니다. 저장된 값이 없으면 지금 메모리 상태를 유지합니다(시드로 되돌리지 않음).
 - 시드 버전 11(1.1.0)에서 도검 34점(단검·대검 보충, 게임 속 검의 실제 원형, 판타지·게임 분류)을 더했습니다. 예전 데이터에는 뒤에 붙이고, 이미 있는 도검의 판매 정보(이름·가격·재고·할인)는 그대로 둡니다. 새로 더한 id는 `catalog/index.ts`의 `CATALOG_V11_IDS`이고, `db.ts`가 이를 버전 11에 들어온 도검으로 적습니다.
 - 시드 버전 12(1.2.0)에서 게임·작품 속 검 10점(`CATALOG_V12_IDS`, 원작 이름 그대로 본뜬 비공식 팬 재현품)을 더하고, 원작의 합체검으로 바꾼 창작품 삼합 대검을 뺐습니다(`REMOVED_SEED_IDS`, 예전 데이터에서도 지움).
@@ -116,7 +118,7 @@ E2E는 `next start`(프로덕션 빌드)를 띄워 데스크톱·모바일(Pixel
 - 쇼핑몰만 한국어와 영어를 지원합니다. 한국어는 지금 주소(`/`), 영어는 `/en` 아래입니다(`localePrefix: 'as-needed'`). 브라우저 언어로 자동 이동하지 않습니다.
 - `src/proxy.ts`(Next 16의 미들웨어)가 언어 경로를 처리합니다. `/admin`, `/storybook`, `/api`, 정적 파일은 건드리지 않습니다.
 - 라우트는 `src/app/[locale]/` 아래에 있고, 화면 글은 `shared/i18n/messages/{ko,en}.json`에 있습니다. 앱 안 이동에는 `next/link` 대신 `@/shared/i18n`의 `Link`·`useRouter`를 씁니다(`/en`을 알아서 붙임).
-- 도검의 영어 글은 `packages/mocks/src/seed-en.ts`에 있고 `Sword.translations.en`으로 붙습니다. 화면은 `localizeForLocale`로 바꿔 보여 주며, 예전에 저장된 Mock 데이터에 번역이 없으면 같은 id의 시드 번역을, 그것도 없으면(어드민에서 새로 만든 도검) 한국어 원문을 씁니다. 어드민 상품 수정 화면의 "영어(English)" 카드에서 영어 글을 고칩니다. 모두 비우면 `translations`를 빈 객체로 저장해, 시드 번역으로 되돌아가지 않고 한국어 원문을 보여 줍니다.
+- 도검의 영어 글은 `packages/mocks/src/seed-en.ts`에 있고 `Sword.translations.en`으로 붙습니다. 화면은 `localizeForLocale`로 바꿔 보여 주며, 예전에 저장된 Mock 데이터에 번역이 없으면 Mock DB가 읽을 때 같은 id의 시드 번역을 채우고, 그것도 없으면(어드민에서 새로 만든 도검) 한국어 원문을 씁니다. 주문 영수증의 영어 이름은 주문할 때 남긴 `nameEn`을 쓰고, 남기기 전 주문은 Mock API가 돌려줄 때 지금 도검 목록에서 채웁니다. 어드민 상품 수정 화면의 "영어(English)" 카드에서 영어 글을 고칩니다. 모두 비우면 `translations`를 빈 객체로 저장해, 시드 번역으로 되돌아가지 않고 한국어 원문을 보여 줍니다.
 - 금액은 한국어 `1,234원`, 영어 `₩1,234`로, 국가 이름·주문 상태·허가 안내도 언어에 맞춥니다(`@snb/domain`의 `i18n.ts`).
 - 머리글의 언어 링크는 지금 주소와 검색 조건을 그대로 두고 언어만 바꿉니다. 링크 글자는 그 언어로 쓰고 `lang`·`hrefLang`을 붙입니다. 페이지마다 `hreflang` 대체 주소를 알립니다.
 - 시드 도검 상세, 장바구니, 주문서는 언어마다 정적으로 만듭니다(`setRequestLocale`).
@@ -145,7 +147,7 @@ E2E는 `next start`(프로덕션 빌드)를 띄워 데스크톱·모바일(Pixel
 
 운영 주소(https://swordnblade-ryushin01.vercel.app, 0.15.1)에서 2026-11-16에 3회씩 잰 중앙값이고, 접근성·권장 사항·SEO는 모든 화면 100점입니다. 어드민은 검색 노출을 막아(noindex) SEO 점수가 낮은 것이 정상입니다.
 
-- 글꼴: 한글 KoPub바탕은 화면 글자 파일과 나머지 조각으로 나눠 받습니다(README '웹 폰트'). 예전에 한글 웹 글꼴(Noto Serif KR) 조각 10여 개(약 700 KB)를 그대로 받을 때는 성능 62~70, FCP 4~5초였습니다. 0.17.0에서 쓰지 않는 Spectral 700과 한국어 화면의 Pirata One 미리 받기를 빼, 한국어 화면이 받는 글꼴이 7개 261 KB → 5개 237.5 KB가 되었습니다(로컬 측정).
+- 글꼴: 한글 KoPub바탕은 화면 글자 파일과 나머지 조각으로 나눠 받습니다(README '웹 폰트'). 예전에 한글 웹 글꼴(Noto Serif KR) 조각 10여 개(약 700 KB)를 그대로 받을 때는 성능 62~70, FCP 4~5초였습니다. 0.17.0에서 쓰지 않는 Spectral 700과 한국어 화면의 Pirata One 미리 받기를 빼, 한국어 화면이 받는 글꼴이 7개 261 KB → 5개 237.5 KB가 되었습니다(로컬 측정). 1.4.0에서 도검 설명·이야기에만 쓰인 글자를 상세 글자 파일(55.4 kB)로 나눠 화면 글자 파일이 155.5 → 117.7 kB가 되었고, 상세 글자 파일은 도검 상세만 받습니다(E2E로 확인).
 - 상호작용: 도검의 벽 카드 → 상세 hero 전환에서 가장 긴 프레임이 CPU 4배 감속 기준 1,437ms였다가, 0.17.0의 SSGOI 복제 패치로 146ms(동작 줄이기 1,404 → 180ms)가 되었습니다. 긴 애니메이션 프레임(LoAF)과 CPU 프로파일로 잽니다.
 - 메모리: 벽↔상세 hero 왕복 22회, 연표↔상세 fade 10회, 동작 줄이기 10회 뒤 GC해도 DOM 노드·이벤트 리스너 수가 그대로였습니다(2026-11-16). 잴 때는 `waitForFunction`이 요소를 돌려받지 않게 합니다(돌려받은 핸들이 떠난 화면을 붙잡아 누수처럼 보임).
 - Mock DB: 저장한 뒤에는 요청마다 localStorage(약 270 KB)를 다시 읽지만 한 번에 1ms 안팎이라, 요청마다 일부러 둔 지연(250ms)보다 훨씬 작습니다.
@@ -186,7 +188,7 @@ VoiceOver로 직접 들어 보는 점검은 사람이 해야 합니다. 다음�
 ## 품질 예산
 
 - **접근성 린트:** `eslint-config-next`는 jsx-a11y 규칙을 몇 개만 켭니다. 루트 `eslint.config.mjs`에서 이미 등록된 플러그인의 recommended 규칙을 모두 켭니다. 가로 스크롤용 `role="region"` + `tabIndex={0}`은 허용합니다.
-- **번들 크기:** `pnpm --filter @snb/shop size`가 쇼핑몰 전체 JS 575 kB, CSS 12 kB(gzip)를 넘으면 실패합니다. 기준은 `apps/shop/.size-limit.json`에 있습니다. 0.12.0에서 화면 전환(SSGOI, 약 31 kB)을 넣으며 520 kB에서, 1.1.0에서 도검 34점(브라우저 Mock API가 쓰는 시드 데이터, 약 18 kB)을 더하며 550 kB에서 올렸습니다. 슬라이스 공개 API(`index.ts`)로 내보낸 모듈은 그 슬라이스를 가져오는 화면 묶음마다 들어가므로, 한 화면에서만 쓰는 컴포넌트는 그 페이지 슬라이스에 두고, 화면에 들어가는 공통 모듈에는 다른 곳에서만 쓰는 코드(예: 할인 입력 검증 `discount-validation.ts`)를 섞지 않습니다.
+- **번들 크기:** `pnpm --filter @snb/shop size`가 쇼핑몰 전체 JS 490 kB, CSS 12 kB(gzip)를 넘으면 실패합니다. 기준은 `apps/shop/.size-limit.json`에 있습니다. 0.12.0에서 화면 전환(SSGOI, 약 31 kB)을 넣으며 520 kB에서, 1.1.0에서 도검 34점(브라우저 Mock API가 쓰는 시드 데이터, 약 18 kB)을 더하며 550 kB에서 575 kB로 올렸습니다. 1.4.0에서 시드를 화면 묶음 밖(시드 JSON)으로 옮겨 571 → 463 kB가 되었고, 도검 목록이 다시 화면 묶음에 들어오면 알 수 있게 490 kB로 낮췄습니다. CSS에는 한글 글꼴의 unicode-range(글자 목록)가 들어 있어 도검 설명의 새 글자가 늘면 조금씩 커집니다. 슬라이스 공개 API(`index.ts`)로 내보낸 모듈은 그 슬라이스를 가져오는 화면 묶음마다 들어가므로, 한 화면에서만 쓰는 컴포넌트는 그 페이지 슬라이스에 두고, 화면에 들어가는 공통 모듈에는 다른 곳에서만 쓰는 코드(예: 할인 입력 검증 `discount-validation.ts`)를 섞지 않습니다.
 - **화면 전환(SSGOI):** 제공자는 `_app/transitions/page-transitions.tsx`, 규칙은 `config.ts`, 경계(`RouteBoundary`)는 루트 레이아웃의 `main` 안에 둡니다.
   - 경계는 Suspense 없이 직접 만듭니다. `@ssgoi/react/nextjs`의 `SsgoiRouteBoundary`는 Suspense를 품어, 자바스크립트 없이 열면 비동기로 그리는 화면이 숨은 채로 남고, 경계 안에서 `notFound()`가 스트리밍 뒤에 나면 404 대신 200이 됩니다(이 앱은 `cacheComponents`를 쓰지 않아 `usePathname`이 멈추지 않음).
   - 404 화면도 경계 안에 둡니다. 경계 밖에 두면 앱 안에서 없는 주소로 이동할 때 떠나는 화면이 지워지지 않고 남습니다.

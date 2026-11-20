@@ -2,8 +2,8 @@ import { describe, expect, it } from 'vitest';
 
 import { isHistorical } from '@snb/domain';
 
-import { seedAddedIn } from '../db';
 import { SEED_SWORDS } from '../seed';
+import { seedAddedIn } from '../seed-bundle';
 import { CATALOG_V11_IDS, CATALOG_V12_IDS, CATALOG_V13_IDS } from './index';
 
 describe('시드 도검 목록', () => {

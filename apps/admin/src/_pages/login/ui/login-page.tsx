@@ -4,7 +4,7 @@ import { useRef, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { Alert, Button, Card, Flex, Form, Input, Typography } from 'antd';
 
-import { ADMIN_DEMO_ACCOUNT } from '@snb/mocks';
+import { ADMIN_DEMO_ACCOUNT } from '@snb/mocks/admin-account';
 
 import { apiFetch, ApiRequestError } from '@/shared/api';
 import { setAdminToken } from '@/shared/lib';

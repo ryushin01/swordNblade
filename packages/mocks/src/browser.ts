@@ -1,6 +1,6 @@
 import { setupWorker } from 'msw/browser';
 
-import { createDb } from './db';
+import { createDbWithSeed, type SeedBundle } from './db';
 import { createHandlers } from './handlers';
 import { createIndexedDbImageStore } from './image-store';
 
@@ -12,6 +12,11 @@ let started: Promise<unknown> | null = null;
  */
 export function startMockApi(options: {
   storageKey: string;
+  /**
+   * 시드 JSON 주소(앱의 /mock-seed.json 라우트, 어드민은 /admin/mock-seed.json).
+   * 카탈로그 코드를 화면 묶음에 싣지 않으려고 시드는 시작할 때 받아 옵니다.
+   */
+  seedUrl: string;
   latency?: number;
   serviceWorkerUrl?: string;
   /** 워커가 맡을 범위. 기본은 워커 파일이 있는 폴더 */
@@ -20,30 +25,38 @@ export function startMockApi(options: {
   serviceWorkerScope?: string;
 }) {
   if (!started) {
-    const db = createDb({ storageKey: options.storageKey });
-    const worker = setupWorker(
-      ...createHandlers(db, {
-        latency: options.latency ?? 250,
-        images: createIndexedDbImageStore(),
-        requireAdmin: true,
-      }),
-    );
-    started = withStartTimeout(
-      worker.start({
+    const start = loadSeed(options.seedUrl).then((seed) => {
+      const db = createDbWithSeed(seed, { storageKey: options.storageKey });
+      const worker = setupWorker(
+        ...createHandlers(db, {
+          latency: options.latency ?? 250,
+          images: createIndexedDbImageStore(),
+          requireAdmin: true,
+        }),
+      );
+      return worker.start({
         onUnhandledFrame: 'bypass',
         quiet: true,
         serviceWorker: {
           url: options.serviceWorkerUrl ?? '/mockServiceWorker.js',
           options: options.serviceWorkerScope ? { scope: options.serviceWorkerScope } : undefined,
         },
-      }),
-      options.startTimeout ?? START_TIMEOUT,
-    );
+      });
+    });
+    // 시드를 받지 못했거나 시작이 실패하면 withStartTimeout이 started를 비워, 다음 요청에서 시드부터 다시 받습니다.
+    started = withStartTimeout(start, options.startTimeout ?? START_TIMEOUT);
   }
   return started;
 }
 
-/** 서비스 워커 시작을 기다리는 최대 시간 */
+/** 시드 JSON을 받습니다. 응답이 실패하면 오류로 알려 화면이 다시 시도할 수 있게 합니다. */
+async function loadSeed(url: string): Promise<SeedBundle> {
+  const response = await fetch(url);
+  if (!response.ok) throw new Error(`Mock API 시드를 받지 못했습니다(${response.status}).`);
+  return (await response.json()) as SeedBundle;
+}
+
+/** 시드를 받고 서비스 워커를 시작하기까지 기다리는 최대 시간 */
 const START_TIMEOUT = 10_000;
 const RELOAD_FLAG = '__snb_mock_reload__';
 

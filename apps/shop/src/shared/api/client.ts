@@ -41,7 +41,7 @@ async function ensureMockApi() {
   if (typeof window === 'undefined' || process.env.NEXT_PUBLIC_API_MOCKING === 'off') return;
   if (!mockReady) {
     mockReady = import('@snb/mocks/browser').then(({ startMockApi }) =>
-      startMockApi({ storageKey: SITE.mockStorageKey }),
+      startMockApi({ storageKey: SITE.mockStorageKey, seedUrl: '/mock-seed.json' }),
     );
   }
   try {

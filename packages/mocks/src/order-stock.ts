@@ -1,5 +1,18 @@
 import type { DbState } from './db';
-import type { Order } from '@snb/domain';
+import type { Order, Sword } from '@snb/domain';
+
+/** 영어 이름을 남기기 전에 만든 주문은 지금 도검 목록에서 영어 이름을 채웁니다. 목록에 없는 도검은 그대로 둡니다. */
+export function withEnglishNames(order: Order, swords: readonly Sword[]): Order {
+  if (order.lines.every((line) => line.nameEn)) return order;
+  return {
+    ...order,
+    lines: order.lines.map((line) => {
+      if (line.nameEn) return line;
+      const nameEn = swords.find((sword) => sword.id === line.swordId)?.nameEn;
+      return nameEn ? { ...line, nameEn } : line;
+    }),
+  };
+}
 
 /** 응답에 실을 주문. 주문 키는 주문할 때와 비회원 주문 조회 응답에만 싣습니다. */
 export function withoutAccessKey(order: Order): Order {

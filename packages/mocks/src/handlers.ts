@@ -18,7 +18,13 @@ import {
 import { createAdminHandlers, isAdmin } from './admin-handlers';
 import { createAuthHandlers, findSessionUser } from './auth-handlers';
 import { createMemoryImageStore, type ImageStore } from './image-store';
-import { cancelOrderInState, reviveOrderInState, reviveShortage, withoutAccessKey } from './order-stock';
+import {
+  cancelOrderInState,
+  reviveOrderInState,
+  reviveShortage,
+  withEnglishNames,
+  withoutAccessKey,
+} from './order-stock';
 import { createReviewHandlers } from './review-handlers';
 
 import type { Db } from './db';
@@ -248,10 +254,11 @@ export function createHandlers(db: Db, options: HandlerOptions = {}) {
 
     http.get<{ id: string }>('*/api/orders/:id', async ({ params, request }) => {
       await wait();
-      const order = db.read().orders.find((item) => item.id === params.id);
+      const state = db.read();
+      const order = state.orders.find((item) => item.id === params.id);
       // 열 수 없는 주문은 있는지도 알리지 않습니다.
       if (!order || !canReadOrder(request, order)) return error(404, { message: '주문을 찾을 수 없습니다.' });
-      return HttpResponse.json(withoutAccessKey(order));
+      return HttpResponse.json(withoutAccessKey(withEnglishNames(order, state.swords)));
     }),
 
     // 비회원 주문 조회: 주문번호와 주문할 때 쓴 이메일이 맞으면 주문 키를 돌려줍니다. 무엇이 틀렸는지는 알리지 않습니다.
@@ -340,6 +347,7 @@ export function createHandlers(db: Db, options: HandlerOptions = {}) {
         return {
           swordId: sword!.id,
           name: sword!.name,
+          nameEn: sword!.nameEn,
           origin: sword!.origin,
           unitPrice: price,
           ...(rate > 0 ? { listPrice } : {}),

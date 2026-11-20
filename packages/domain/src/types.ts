@@ -208,6 +208,8 @@ export type OrderStatus = 'paid' | 'permit-review' | 'preparing' | 'shipped' | '
 export interface OrderLine {
   swordId: string;
   name: string;
+  /** 영어 이름(영어 화면 영수증). 주문할 때 남기며, 남기기 전 주문은 Mock API가 돌려줄 때 지금 도검 목록에서 채웁니다. */
+  nameEn?: string;
   origin: CountryCode;
   /** 실제로 받은 1점 가격(할인 적용 뒤) */
   unitPrice: number;

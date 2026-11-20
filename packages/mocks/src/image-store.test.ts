@@ -1,9 +1,9 @@
 import { setupServer } from 'msw/node';
 import { afterAll, beforeAll, describe, expect, it } from 'vitest';
 
-import { createDb } from './db';
 import { createHandlers } from './handlers';
 import { createIndexedDbImageStore, ImageStoreUnavailableError } from './image-store';
+import { createDb } from './seed-bundle';
 
 describe('createIndexedDbImageStore', () => {
   it('IndexedDB가 없으면 메모리에 두지 않고 올리기를 거절한다', async () => {

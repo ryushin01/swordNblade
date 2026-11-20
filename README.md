@@ -1,6 +1,6 @@
 # Sword & Blade - 도검의 벽
 
-[![CI](https://github.com/ryushin01/swordnblade/actions/workflows/ci.yml/badge.svg)](https://github.com/ryushin01/swordnblade/actions/workflows/ci.yml)
+[![CI](https://github.com/ryushin01/swordNblade/actions/workflows/ci.yml/badge.svg)](https://github.com/ryushin01/swordNblade/actions/workflows/ci.yml)
 ![version](https://img.shields.io/badge/version-1.3.0-7a4a35)
 ![Storybook](https://img.shields.io/badge/Storybook-10-FF4785?logo=storybook&logoColor=white)
 

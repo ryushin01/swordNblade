@@ -67,6 +67,10 @@ test('상품 할인: 기간을 잘못 고르면 고칠 방법을 알리고, 맞�
   await page.getByLabel('시작일').fill('');
   await page.getByLabel('종료일').fill('2999-12-31');
   await expect(page.getByRole('status').filter({ hasText: '판매가 2,560,000원' })).toContainText('지금 할인 중');
+  // 고치면 오류 문구가 사라집니다. 사라지는 애니메이션 중에는 글자가 흐려 명도 대비 검사에 걸리므로 다 사라진 뒤 검사합니다.
+  await expect(page.getByText('종료일을 시작일과 같거나 그 뒤의 날짜로 골라 주세요.')).toBeHidden();
+  // 오류 문구가 사라지며 칸이 올라가 마우스 아래에 다른 버튼이 오면 그 버튼의 hover 색까지 검사하게 되므로, 마우스를 제목으로 옮깁니다.
+  await page.getByRole('heading', { level: 1, name: '환도 수정' }).hover();
   await expectNoA11yViolations(page);
   await page.getByRole('button', { name: '변경 저장' }).click();
   await expect(page.getByText('상품을 저장했습니다.')).toBeVisible();

@@ -1,6 +1,6 @@
 {
   "name": "@snb/shop",
-  "version": "0.19.0",
+  "version": "1.0.0",
   "private": true,
   "type": "module",
   "scripts": {
@@ -12,6 +12,7 @@
     "typecheck": "tsc --noEmit",
     "lint": "eslint . --max-warnings 0 && steiger ./src",
     "test": "vitest run --project unit",
+    "test:coverage": "vitest run --project unit --coverage",
     "storybook": "storybook dev -p 6006",
     "build-storybook": "storybook build -o public/storybook --quiet",
     "e2e": "playwright test",

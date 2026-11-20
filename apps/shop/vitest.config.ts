@@ -8,6 +8,14 @@ const alias = { '@': fileURLToPath(new URL('./src', import.meta.url)) };
 
 export default defineConfig({
   test: {
+    // pnpm test:coverage(CI)는 단위 테스트(unit)만 잽니다. 하한은 2026-11-16에 잰 값보다 조금 낮게 둡니다.
+    coverage: {
+      provider: 'v8',
+      include: ['src/**'],
+      exclude: ['src/**/*.test.*', 'src/**/*.stories.tsx', 'src/app/**'],
+      reporter: ['text-summary'],
+      thresholds: { statements: 51, branches: 48, functions: 45, lines: 51 },
+    },
     projects: [
       /** 단위·컴포넌트 테스트 (pnpm test, 커밋 전 검사) */
       {

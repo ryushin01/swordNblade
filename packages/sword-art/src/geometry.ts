@@ -59,6 +59,22 @@ function tipLength(art: SwordArt): number {
   }
 }
 
+/** 칼끝 부분이 시작되는 위치(t). 이보다 밑동 쪽이 칼날 몸통입니다. */
+export function bladeTipStart(art: SwordArt): number {
+  return 1 - tipLength(art) / art.blade.length;
+}
+
+/** 칼날 몸통 위의 한 점. t는 밑동(0)~칼끝(1), ratio는 등(0)~날(1) 쪽으로 잰 너비 비율 */
+export function bladePoint(art: SwordArt, t: number, ratio: number): Point {
+  const w = bladeWidthAt(art, t);
+  return { x: bladeCenterX(art, t) - w / 2 + w * ratio, y: -t * art.blade.length };
+}
+
+/** 칼날을 따라가는 선: from~to 구간에서 너비 비율 ratio 자리를 잇습니다. */
+export function bladeLine(art: SwordArt, from: number, to: number, ratio: number, steps = 24): Point[] {
+  return Array.from({ length: steps + 1 }, (_, i) => bladePoint(art, from + ((to - from) * i) / steps, ratio));
+}
+
 /** 칼날 외곽선. 등 쪽을 밑동→끝, 날 쪽을 끝→밑동 순서로 돌려줍니다. */
 export function bladeOutline(art: SwordArt): Point[] {
   const { length, edge, tip } = art.blade;
@@ -280,7 +296,8 @@ export interface Bounds {
 export function localBounds(art: SwordArt): Bounds {
   const layout = hiltLayout(art);
   const { blade, guard } = art;
-  const maxWidth = blade.width * (blade.flare ?? 1) * (1 + (blade.bulge ?? 0));
+  // flare가 1보다 작으면(칼끝으로 좁아지는 친퀘데아) 밑동이 가장 넓습니다.
+  const maxWidth = blade.width * Math.max(1, blade.flare ?? 1) * (1 + (blade.bulge ?? 0));
   const halfBlade = maxWidth / 2 + Math.abs(blade.curve) + (blade.wave ?? 0) + (blade.teeth ? blade.width * 0.4 : 0);
   const sickle = blade.tip === 'sickle' ? blade.width * 2.4 : 0;
   const hook = blade.tip === 'hook' ? blade.width * 2.8 : 0;
@@ -372,11 +389,26 @@ export function focusViewBox(art: SwordArt, focus: ReliefFocus): string {
       maxY: width,
     },
   };
-  const bounds = regions[focus];
-  const b = rotatedBounds(bounds);
-  const cx = (b.minX + b.maxX) / 2;
-  const cy = (b.minY + b.maxY) / 2;
-  const side = Math.max(b.maxX - b.minX, b.maxY - b.minY) * 1.16;
+  const square = (bounds: Bounds) => {
+    const b = rotatedBounds(bounds);
+    return {
+      cx: (b.minX + b.maxX) / 2,
+      cy: (b.minY + b.maxY) / 2,
+      side: Math.max(b.maxX - b.minX, b.maxY - b.minY) * 1.16,
+    };
+  };
+  const region = regions[focus];
+  let view = square(region);
+  // 짧고 넓은 칼(친퀘데아 등)은 칼날 너비로 잡은 영역이 그림 전체보다 커질 수 있어, 그때만 그림 범위 안으로 자릅니다.
+  if (view.side > square(full).side) {
+    view = square({
+      minX: Math.max(region.minX, full.minX),
+      maxX: Math.min(region.maxX, full.maxX),
+      minY: Math.max(region.minY, full.minY),
+      maxY: Math.min(region.maxY, full.maxY),
+    });
+  }
+  const { cx, cy, side } = view;
   return `${(cx - side / 2).toFixed(1)} ${(cy - side / 2).toFixed(1)} ${side.toFixed(1)} ${side.toFixed(1)}`;
 }
 

@@ -1,6 +1,6 @@
 import { getTranslations, setRequestLocale } from 'next-intl/server';
 
-import { categoryLabel, type Locale, SWORD_CATEGORIES } from '@snb/domain';
+import { categoryLabel, isHistorical, type Locale, SWORD_CATEGORIES } from '@snb/domain';
 import { SEED_SWORDS } from '@snb/mocks';
 
 import { localizeForLocale } from '@/entities/sword';
@@ -23,8 +23,8 @@ export async function TimelinePage({ params }: { params: Params }) {
   const { locale } = await params;
   setRequestLocale(locale);
   const t = await getTranslations('Timeline');
-  const regions = SWORD_CATEGORIES.filter((category) => category !== 'legend');
-  const historical = SEED_SWORDS.filter((sword) => sword.category !== 'legend');
+  const regions = SWORD_CATEGORIES.filter(isHistorical);
+  const historical = SEED_SWORDS.filter((sword) => isHistorical(sword.category));
   const rows: PeriodKey[] = [...PERIODS.map((period) => period.key), 'unknown'];
 
   return (

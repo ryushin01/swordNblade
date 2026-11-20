@@ -1,6 +1,7 @@
 // @vitest-environment jsdom
 import { beforeEach, describe, expect, it } from 'vitest';
 
+import { CATALOG_V11_IDS } from './catalog';
 import { createDb } from './db';
 import { SEED_SWORDS } from './seed';
 
@@ -165,6 +166,22 @@ describe('migrateSeed (시드 버전)', () => {
     const swords = createDb({ storageKey: 'test-db' }).read().swords;
     expect(swords.find((sword) => sword.id === 'sw-006')?.discount).toEqual(seeded);
     expect(swords.find((sword) => sword.id === 'sw-009')?.discount).toEqual({ rate: 30 });
+  });
+
+  it('1.0.0(시드 버전 10) 데이터에는 1.1.0에 더한 단검·대검·판타지 도검을 뒤에 붙이고, 고친 판매 정보는 둔다', () => {
+    const fresh = createDb({ storageKey: 'test-db' }).read();
+    const legacy = {
+      ...fresh,
+      seedVersion: 10,
+      swords: fresh.swords
+        .filter((sword) => !CATALOG_V11_IDS.includes(sword.id))
+        .map((sword) => (sword.id === 'sw-tanto' ? { ...sword, price: 1_234_000, stock: 0 } : sword)),
+    };
+    localStorage.setItem('test-db', JSON.stringify(legacy));
+    const swords = createDb({ storageKey: 'test-db' }).read().swords;
+    expect(swords).toHaveLength(SEED_SWORDS.length);
+    expect(swords.slice(-CATALOG_V11_IDS.length).map((sword) => sword.id)).toEqual(CATALOG_V11_IDS);
+    expect(swords.find((sword) => sword.id === 'sw-tanto')).toMatchObject({ price: 1_234_000, stock: 0 });
   });
 
   it('할인을 넣은 뒤의 데이터에서 어드민이 지운 할인은 되살리지 않는다', () => {

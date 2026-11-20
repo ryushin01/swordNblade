@@ -1,3 +1,4 @@
+import { isHistorical } from '@snb/domain';
 import { SEED_SWORDS } from '@snb/mocks';
 
 import { earliestYear, periodOf } from './period';
@@ -20,7 +21,7 @@ describe('periodOf', () => {
   });
 
   it('시기 미상은 몇 점 안 된다', () => {
-    const unknown = SEED_SWORDS.filter((s) => s.category !== 'legend' && earliestYear(s.era) === null);
+    const unknown = SEED_SWORDS.filter((s) => isHistorical(s.category) && earliestYear(s.era) === null);
     expect(unknown.length).toBeLessThanOrEqual(8);
   });
 });

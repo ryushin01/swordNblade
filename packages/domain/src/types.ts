@@ -41,8 +41,11 @@ export type CountryCode =
 
 export type CurrencyCode = 'KRW' | 'USD' | 'JPY' | 'CNY' | 'GBP' | 'EUR' | 'AUD' | 'CAD';
 
-/** 지역(나무위키 '고대~근세기 무기'의 구분을 따름). legend는 신화·전설 재현품 */
-export type SwordCategory = 'east' | 'west' | 'middle' | 'americas' | 'legend';
+/**
+ * 지역(나무위키 '고대~근세기 무기'의 구분을 따름). legend는 신화·전설 재현품,
+ * fantasy는 판타지 소설·게임의 형식을 빌려 이 쇼핑몰이 새로 디자인한 창작품(특정 작품의 검은 옮기지 않음)
+ */
+export type SwordCategory = 'east' | 'west' | 'middle' | 'americas' | 'legend' | 'fantasy';
 
 /** 형태: 곧은 검, 휜 도, 양손검·대도, 단검, 특수(물결·갈고리·카타르 등), 연습용(가검) */
 export type SwordKind = 'straight' | 'curved' | 'great' | 'dagger' | 'exotic' | 'training';
@@ -73,14 +76,20 @@ export interface SwordArt {
     flare?: number;
     /** 칼날 중간이 불룩한 정도(0~1). 비파형 동검 */
     bulge?: number;
-    /** 칼날 재질. 기본 steel */
-    material?: 'steel' | 'bronze' | 'wood' | 'bamboo' | 'foam';
+    /** 칼날 재질. 기본 steel. crystal은 옅은 청색에 능선과 면 경계를 새깁니다(판타지). */
+    material?: 'steel' | 'bronze' | 'wood' | 'bamboo' | 'foam' | 'crystal';
     /** 재질 색을 바꿀 때(스펀지 검 등) */
     color?: string;
     /** 양쪽 날에 흑요석 조각을 박음(마쿠아후이틀) */
     teeth?: boolean;
     /** 칼날 밑동을 감싼 덧쇠(쌍수도의 구리 덧쇠). 리벳 네 개 */
     sleeve?: { length: number; color: string };
+    /** 합체 칼날: 길이 방향으로 맞물린 칼날 판 수(2~4). 판 사이 이음선과 판마다 볼트를 새깁니다. */
+    segments?: number;
+    /** 마디 칼날(사복검): 칼날 마디를 잇는 이음매 수(2~16, 마디는 하나 더 많음). 이음매마다 V자 이음선과 핀을 새깁니다. */
+    links?: number;
+    /** 권총 검: 칼등을 따라 붙인 총열 장식(밑동부터 length mm, 칼날의 6할까지)과 총구 */
+    barrel?: { length: number; color: string };
   };
   collar?: { color: string };
   guard: {

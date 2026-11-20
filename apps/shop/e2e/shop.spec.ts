@@ -17,16 +17,34 @@ test('도검의 벽: 한 쪽에 24점씩 보이고 분류로 거를 수 있다',
   await page.goto('/');
   await expect(page.getByRole('heading', { level: 1, name: '도검의 벽' })).toBeVisible();
   await expect(tiles(page)).toHaveCount(24);
-  await expect(page.getByRole('status').filter({ hasText: '213점 가운데 1–24번째' })).toBeVisible();
+  await expect(page.getByRole('status').filter({ hasText: '247점 가운데 1–24번째' })).toBeVisible();
 
   const categories = page.getByRole('navigation', { name: '도검 분류' });
-  await expect(categories.getByRole('link')).toHaveCount(6);
+  await expect(categories.getByRole('link')).toHaveCount(7);
   await categories.getByRole('link', { name: '신화·전설' }).click();
   await expect(page).toHaveURL(/category=legend/);
   await expect(page.getByRole('heading', { level: 1, name: '신화·전설' })).toBeVisible();
   await expect(page.getByRole('status').filter({ hasText: '112점 가운데 1–24번째' })).toBeVisible();
   await expect(categories.getByRole('link', { name: '신화·전설' })).toHaveAttribute('aria-current', 'page');
 
+  await expectNoA11yViolations(page);
+  await expectNoHorizontalOverflow(page);
+});
+
+test('판타지·게임: 창작 도검을 따로 거르고, 상세에 창작품이라고 알린다', async ({ page }) => {
+  await page.goto('/');
+  await page.getByRole('navigation', { name: '도검 분류' }).getByRole('link', { name: '판타지·게임' }).click();
+  await expect(page).toHaveURL(/category=fantasy/);
+  await expect(page.getByRole('heading', { level: 1, name: '판타지·게임' })).toBeVisible();
+  // 한 쪽에 다 들어가면 결과 수만 알립니다.
+  await expect(page.getByRole('status').filter({ hasText: /^13점$/ })).toBeVisible();
+
+  await page.goto('/swords/threefold-greatsword');
+  await expect(page.getByRole('heading', { level: 1, name: '삼합 대검' })).toBeVisible();
+  await expect(page.getByText('장식용 창작품', { exact: true })).toBeVisible();
+  await expect(page.getByText('특정 작품의 검을 옮기지 않고', { exact: false })).toBeVisible();
+  // 원어 이름이 영어 이름과 같으면 한 번만 보여 줍니다.
+  await expect(page.getByText('Threefold Greatsword', { exact: true })).toHaveCount(1);
   await expectNoA11yViolations(page);
   await expectNoHorizontalOverflow(page);
 });
@@ -329,6 +347,9 @@ test('도검 연표: 시대와 지역 표로 역사 도검을 본다', async ({ 
   const table = page.getByRole('table', { name: '시대와 지역별 역사 도검' });
   await expect(table.getByRole('rowheader', { name: '18~19세기' })).toBeVisible();
   await expect(table.getByRole('columnheader', { name: '동양 도검' })).toBeVisible();
+  // 연대가 없는 신화·전설과 판타지·게임은 연표에 넣지 않습니다.
+  await expect(table.getByRole('columnheader', { name: '신화·전설' })).toHaveCount(0);
+  await expect(table.getByRole('columnheader', { name: '판타지·게임' })).toHaveCount(0);
   await table.getByRole('link', { name: '쌍수도' }).click();
   await expect(page).toHaveURL(/\/swords\/ssangsudo$/);
   await page.goto('/timeline');

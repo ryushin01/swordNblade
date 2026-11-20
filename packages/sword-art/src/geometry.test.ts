@@ -27,6 +27,15 @@ describe('sword geometry', () => {
     expect(side).toBeGreaterThanOrEqual(CATALOG_SIDE);
   });
 
+  it('모든 시드 도검의 칼날 외곽선이 그림 범위 안에 든다(칼끝으로 갈수록 좁아지는 칼날 포함)', () => {
+    for (const sword of SEED_SWORDS) {
+      const bounds = localBounds(sword.art);
+      const xs = bladeOutline(sword.art).map((point) => point.x);
+      expect(Math.min(...xs), sword.slug).toBeGreaterThanOrEqual(bounds.minX);
+      expect(Math.max(...xs), sword.slug).toBeLessThanOrEqual(bounds.maxX);
+    }
+  });
+
   it('칼날 외곽선은 칼끝(-length)까지 닿는다', () => {
     const katana = SEED_SWORDS.find((s) => s.slug === 'uchigatana')!;
     const outline = bladeOutline(katana.art);

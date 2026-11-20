@@ -2,14 +2,18 @@ import { type ReactNode, useId } from 'react';
 
 import {
   bladeCenterX,
+  bladeLine,
   bladeOutline,
+  bladePoint,
   bladeStrip,
+  bladeTipStart,
   bladeWidthAt,
   focusViewBox,
   hamonPath,
   type HiltLayout,
   hiltLayout,
   hookTipPath,
+  type Point,
   pointsToPath,
   type ReliefFocus,
   ROTATION_DEG,
@@ -41,7 +45,11 @@ const BLADE_PIGMENT: Record<NonNullable<SwordArt['blade']['material']>, [string,
   wood: ['#8b5a2b', 0.85],
   bamboo: ['#d9c486', 0.85],
   foam: ['#3b6fb6', 0.85],
+  crystal: ['#8fb8cc', 0.62],
 };
+
+/** polyline의 points 값 */
+const toPoints = (points: Point[]): string => points.map((p) => `${p.x.toFixed(2)},${p.y.toFixed(2)}`).join(' ');
 
 export interface SwordReliefProps {
   art: SwordArt;
@@ -239,9 +247,137 @@ function Blade({ art, fill, opacity, layer }: { art: SwordArt; fill: string; opa
         />
       ) : null}
 
+      {blade.material === 'crystal' ? <CrystalFacets art={art} layer={layer} /> : null}
+      {blade.segments ? <Segments art={art} layer={layer} /> : null}
+      {blade.links ? <Links art={art} layer={layer} /> : null}
+      {blade.barrel ? <Barrel art={art} layer={layer} /> : null}
+
       {blade.inscription === 'stars' ? <Stars art={art} layer={layer} /> : null}
       {blade.inscription === 'runes' ? <Runes art={art} layer={layer} /> : null}
       {blade.sleeve ? <Sleeve art={art} layer={layer} /> : null}
+    </g>
+  );
+}
+
+/**
+ * 합체 대검: 길이 방향으로 맞물린 칼날 판 사이의 이음선과 판마다 볼트 두 개.
+ * 가운데 판이 칼끝까지 가고, 바깥 판은 그 앞에서 비스듬히 끝나 저마다 칼끝을 이룹니다(날 쪽 판이 조금 더 깁니다).
+ */
+function Segments({ art, layer }: { art: SwordArt; layer: Layer }) {
+  const isHeight = layer === 'height';
+  const plates = Math.min(4, Math.max(2, Math.round(art.blade.segments ?? 2)));
+  const end = bladeTipStart(art);
+  const w = art.blade.width;
+  const seams = Array.from({ length: plates - 1 }, (_, index) => {
+    const ratio = (index + 1) / plates;
+    const towardSpine = ratio <= 0.5;
+    const stop = end * (towardSpine ? 0.7 + 0.2 * ratio : 0.78 + 0.2 * (1 - ratio));
+    const corner = bladePoint(art, Math.min(end, stop + end * 0.1), towardSpine ? 0 : 1);
+    return [...bladeLine(art, 0.012, stop, ratio), corner];
+  });
+  const bolts = Array.from({ length: plates }, (_, index) => (index + 0.5) / plates).flatMap((ratio) =>
+    [0.04, 0.1].map((t) => bladePoint(art, t, ratio)),
+  );
+  return (
+    <g>
+      {seams.map((points, index) => (
+        <polyline
+          key={index}
+          points={toPoints(points)}
+          fill="none"
+          stroke={isHeight ? H.low : '#00000040'}
+          strokeWidth={w * (isHeight ? 0.035 : 0.02)}
+          strokeLinejoin="round"
+        />
+      ))}
+      {bolts.map((p, index) => (
+        <g key={index}>
+          <circle cx={p.x} cy={p.y} r={w * 0.055} fill={isHeight ? H.low : '#00000055'} />
+          <circle cx={p.x} cy={p.y} r={w * 0.035} fill={isHeight ? H.top : '#8a9096'} />
+        </g>
+      ))}
+    </g>
+  );
+}
+
+/** 사복검: 칼날 마디를 잇는 이음매마다 칼끝 쪽으로 솟은 V자 이음선과 가운데 핀 */
+function Links({ art, layer }: { art: SwordArt; layer: Layer }) {
+  const isHeight = layer === 'height';
+  const count = Math.min(16, Math.max(2, Math.round(art.blade.links ?? 2)));
+  const end = bladeTipStart(art) * 0.97;
+  const { length, width } = art.blade;
+  const joints = Array.from({ length: count }, (_, index) => {
+    const t = (end * (index + 1)) / (count + 1);
+    const rise = (bladeWidthAt(art, t) * 0.35) / length;
+    return {
+      line: [bladePoint(art, t, 0), bladePoint(art, t + rise, 0.5), bladePoint(art, t, 1)],
+      pin: bladePoint(art, t + rise * 0.35, 0.5),
+    };
+  });
+  return (
+    <g>
+      {joints.map(({ line, pin }, index) => (
+        <g key={index}>
+          <polyline
+            points={toPoints(line)}
+            fill="none"
+            stroke={isHeight ? H.low : '#00000059'}
+            strokeWidth={width * (isHeight ? 0.06 : 0.035)}
+            strokeLinejoin="round"
+          />
+          <circle cx={pin.x} cy={pin.y} r={width * 0.06} fill={isHeight ? H.top : '#7d838a'} />
+        </g>
+      ))}
+    </g>
+  );
+}
+
+/** 권총 검: 칼등을 따라 붙인 둥근 총열과 그 끝의 총구(칼날의 6할까지) */
+function Barrel({ art, layer }: { art: SwordArt; layer: Layer }) {
+  const barrel = art.blade.barrel;
+  if (!barrel) return null;
+  const isHeight = layer === 'height';
+  const to = Math.min(0.6, barrel.length / art.blade.length);
+  // 칼등에서 조금 밖으로 나와 칼날 너비의 4할쯤을 덮습니다.
+  const tube = [...bladeLine(art, 0, to, -0.04, 16), ...bladeLine(art, 0, to, 0.38, 16).reverse()];
+  const muzzle = bladePoint(art, to, 0.17);
+  const width = art.blade.width;
+  return (
+    <g>
+      <path d={pointsToPath(tube)} fill={isHeight ? H.raised : barrel.color} />
+      <polyline
+        points={toPoints(bladeLine(art, 0.01, to - 0.01, 0.17, 16))}
+        fill="none"
+        stroke={isHeight ? H.top : '#00000033'}
+        strokeWidth={width * 0.06}
+        strokeLinecap="round"
+      />
+      <circle cx={muzzle.x} cy={muzzle.y} r={width * 0.13} fill={isHeight ? H.low : '#000000aa'} />
+    </g>
+  );
+}
+
+/** 수정 칼날: 가운데 능선과, 등에서 능선을 거쳐 날로 비스듬히 오르는 면 경계 */
+function CrystalFacets({ art, layer }: { art: SwordArt; layer: Layer }) {
+  const isHeight = layer === 'height';
+  const end = bladeTipStart(art);
+  const { length, width } = art.blade;
+  const facets: Point[][] = [bladeLine(art, 0.01, 0.995, 0.5)];
+  for (let t = 0.1; t < end - 0.04; t += 0.16) {
+    const rise = (bladeWidthAt(art, t) * 0.8) / length;
+    facets.push([bladePoint(art, t, 0.03), bladePoint(art, t + rise, 0.5), bladePoint(art, t, 0.97)]);
+  }
+  return (
+    <g
+      fill="none"
+      stroke={isHeight ? H.top : '#5f8fa8'}
+      strokeOpacity={isHeight ? 1 : 0.55}
+      strokeWidth={width * 0.025}
+      strokeLinejoin="round"
+    >
+      {facets.map((points, index) => (
+        <polyline key={index} points={toPoints(points)} />
+      ))}
     </g>
   );
 }

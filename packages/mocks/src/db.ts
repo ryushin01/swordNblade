@@ -1,5 +1,6 @@
 import { type CustomsConfig, DEFAULT_CUSTOMS_CONFIG, type Order, type Sword, type User } from '@snb/domain';
 
+import { CATALOG_V11_IDS } from './catalog';
 import { SEED_ORDERS, SEED_SWORDS, SEED_VERSION } from './seed';
 
 export interface DbState {
@@ -60,6 +61,8 @@ const ADDED_IN: Record<string, number> = {
   'sw-egeking': 6,
   'sw-dojigiri': 6,
   'sw-wallace-sword': 6,
+  // 1.1.0: 단검·대검 보충, 게임에 자주 나오는 이름의 실제 칼, 판타지·게임 분류
+  ...Object.fromEntries(CATALOG_V11_IDS.map((id) => [id, 11])),
 };
 
 export function seedAddedIn(id: string): number {

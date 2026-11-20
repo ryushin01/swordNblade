@@ -3,13 +3,16 @@
  * 부조 그림은 SVG 필터를 쓰므로 실제 브라우저로 그려 저장합니다. 시드 도검이 바뀌면 다시 돌립니다.
  *
  * 프로덕션 서버를 띄운 뒤 실행합니다: node scripts/generate-og.mjs http://localhost:3101
+ * 새로 더한 도검만 만들려면 `--missing`을 붙입니다(이미 있는 이미지는 건너뜀).
  */
 import { chromium } from '@playwright/test';
+import { existsSync } from 'node:fs';
 
-const base = process.argv[2] ?? 'http://localhost:3101';
+const base = process.argv.slice(2).find((arg) => !arg.startsWith('--')) ?? 'http://localhost:3101';
+const onlyMissing = process.argv.includes('--missing');
 const sitemap = await (await fetch(`${base}/sitemap.xml`)).text();
 const slugs = [...sitemap.matchAll(/<loc>[^<]*?\/swords\/([^<]+)<\/loc>/g)].map((match) => match[1]);
-const unique = [...new Set(slugs)];
+const unique = [...new Set(slugs)].filter((slug) => !onlyMissing || !existsSync(`public/og/swords/${slug}.jpg`));
 
 const browser = await chromium.launch();
 const page = await browser.newPage({ viewport: { width: 1200, height: 630 } });

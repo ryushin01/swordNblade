@@ -48,6 +48,12 @@ const BLADE_PIGMENT: Record<NonNullable<SwordArt['blade']['material']>, [string,
   crystal: ['#8fb8cc', 0.62],
 };
 
+/**
+ * 강철 칼날에 색을 따로 정했을 때의 진하기. 기본 강철(0.55)처럼 옅게 얹으면 회색 강철이 절반 넘게 비쳐
+ * 검은 칼날·붉은 칼날이 옅은 회색·분홍으로 보이므로, 정한 색이 드러나게 진하게 얹습니다. 명암은 높이 층이 그대로 줍니다.
+ */
+const CUSTOM_STEEL_OPACITY = 0.9;
+
 /** polyline의 points 값 */
 const toPoints = (points: Point[]): string => points.map((p) => `${p.x.toFixed(2)},${p.y.toFixed(2)}`).join(' ');
 
@@ -184,7 +190,7 @@ function renderParts(art: SwordArt, layout: HiltLayout, layer: Layer, id: (name:
       ? H.mid
       : `url(#${id(art.blade.edge === 'single' ? 'blade-single' : 'blade-double')})`
     : (art.blade.color ?? pigmentColor);
-  const bladeOpacity = isHeight ? 1 : pigmentOpacity;
+  const bladeOpacity = isHeight ? 1 : material === 'steel' && art.blade.color ? CUSTOM_STEEL_OPACITY : pigmentOpacity;
 
   return (
     <>
@@ -570,8 +576,12 @@ function Stars({ art, layer }: { art: SwordArt; layer: Layer }) {
 }
 
 /** 룬 문자처럼 보이는 새김 (특정 문자를 쓰지 않은 장식 획) */
+/**
+ * 룬 새김: 칼날 가운데 줄을 따라 작은 룬 글자를 새깁니다. 높이 층에서는 얕게 파인 선으로 그려 돋을새김 덩어리처럼
+ * 번지지 않게 하고, 글자는 칼날 너비의 45% 높이로 작게, 칼날 밑동부터 6할 남짓까지 고르게 늘어놓습니다.
+ */
 function Runes({ art, layer }: { art: SwordArt; layer: Layer }) {
-  const stroke = layer === 'height' ? H.top : GOLD;
+  const stroke = layer === 'height' ? H.base : GOLD;
   const { length } = art.blade;
   const glyphs = [
     'M0 -6 L0 6 M0 -6 L4 -2 M0 -1 L4 3',
@@ -580,18 +590,21 @@ function Runes({ art, layer }: { art: SwordArt; layer: Layer }) {
     'M0 -6 L0 6 M0 0 L4 -4 M0 0 L4 4',
     'M-3 6 L0 -6 L3 6 M-2 1 L2 1',
   ];
-  const items = Array.from({ length: 9 }, (_, index) => index);
+  const end = Math.min(0.62, bladeTipStart(art) - 0.04);
+  const step = Math.max(0.03, (art.blade.width * 0.9) / length);
+  const count = Math.max(3, Math.floor((end - 0.08) / step));
   return (
-    <g stroke={stroke} strokeWidth={art.blade.width * 0.035} fill="none" strokeLinecap="round" strokeLinejoin="round">
-      {items.map((index) => {
-        const t = 0.06 + index * 0.055;
-        const w = bladeWidthAt(art, t);
-        const scale = w / 22;
+    <g stroke={stroke} fill="none" strokeLinecap="round" strokeLinejoin="round" opacity={layer === 'height' ? 1 : 0.85}>
+      {Array.from({ length: count }, (_, index) => {
+        const t = 0.08 + index * step;
+        const center = bladePoint(art, t, 0.5);
+        const scale = (bladeWidthAt(art, t) * 0.45) / 12;
         return (
           <path
             key={index}
             d={glyphs[index % glyphs.length]}
-            transform={`translate(${-art.blade.curve * t * t} ${-t * length}) scale(${scale})`}
+            strokeWidth={1.7}
+            transform={`translate(${center.x} ${center.y}) scale(${scale})`}
           />
         );
       })}

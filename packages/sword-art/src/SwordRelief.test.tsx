@@ -109,6 +109,23 @@ describe('SwordRelief 칼날 장식', () => {
     expect(markup.split(`clip-path="url(#${clipId})"`).length - 1).toBe(2);
   });
 
+  it('강철 칼날에 색을 지정하면 기본 강철보다 진하게 칠해, 어둡거나 붉은 칼날이 옅어지지 않는다', () => {
+    const opacityOf = (markup: string, fill: string) =>
+      Number(markup.match(new RegExp(`fill="${fill}" fill-opacity="([0-9.]+)"`))?.[1]);
+    expect(opacityOf(draw({}), '#bfc5ca')).toBe(0.55);
+    expect(opacityOf(draw({ color: '#1f2420' }), '#1f2420')).toBe(0.9);
+    // 다른 재질은 재질 진하기를 그대로 씁니다.
+    expect(opacityOf(draw({ material: 'bronze', color: '#a0702a' }), '#a0702a')).toBe(0.8);
+  });
+
+  it('칼날 메달리온은 두 층에 원 네 개씩을 그리고, 위치와 크기를 칼날 안쪽으로 맞춘다', () => {
+    const plain = draw({});
+    const medal = draw({ medallion: { at: 0.5, size: 0.6, color: '#e8b830' } });
+    expect(count(medal, 'circle') - count(plain, 'circle')).toBe(2 * 4);
+    expect(medal).toContain('fill="#e8b830"');
+    expect(draw({ medallion: { at: 3, size: 9, color: '#e8b830' } })).not.toMatch(BROKEN);
+  });
+
   it('칼날 구멍(holes)은 구멍마다 테두리와 안쪽을 두 층에 그리고, 1~4개로 맞춘다', () => {
     const plain = draw({});
     const two = draw({ holes: 2 });

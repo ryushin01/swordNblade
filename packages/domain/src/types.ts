@@ -43,9 +43,10 @@ export type CurrencyCode = 'KRW' | 'USD' | 'JPY' | 'CNY' | 'GBP' | 'EUR' | 'AUD'
 
 /**
  * 지역(나무위키 '고대~근세기 무기'의 구분을 따름). legend는 신화·전설 재현품,
- * fantasy는 판타지 소설·게임의 형식을 빌려 이 쇼핑몰이 새로 디자인한 창작품(특정 작품의 검은 옮기지 않음)
+ * fantasy는 판타지 소설·게임의 형식을 빌려 이 쇼핑몰이 새로 디자인한 창작품(특정 작품의 검은 옮기지 않음),
+ * fiction은 게임·만화 등 작품 속 검을 원작 이름 그대로 본뜬 비공식 팬 재현품(나무위키 '가공의 도검')
  */
-export type SwordCategory = 'east' | 'west' | 'middle' | 'americas' | 'legend' | 'fantasy';
+export type SwordCategory = 'east' | 'west' | 'middle' | 'americas' | 'legend' | 'fantasy' | 'fiction';
 
 /** 형태: 곧은 검, 휜 도, 양손검·대도, 단검, 특수(물결·갈고리·카타르 등), 연습용(가검) */
 export type SwordKind = 'straight' | 'curved' | 'great' | 'dagger' | 'exotic' | 'training';
@@ -62,8 +63,11 @@ export interface SwordArt {
     /** 휘어짐(sori), mm. 0이면 직검, 음수면 날 쪽으로 휨(쿠크리·팔카타) */
     curve: number;
     edge: 'single' | 'double';
-    /** kissaki 휜 칼끝, spear 뾰족, round 둥긂, sickle 낫, square 사각(처형검), clip 클립 포인트, hook 갈고리(구), needle 바늘(찌르기 검), fork 두 갈래(줄피카르) */
-    tip: 'kissaki' | 'spear' | 'round' | 'sickle' | 'square' | 'clip' | 'hook' | 'needle' | 'fork';
+    /**
+     * kissaki 휜 칼끝, spear 뾰족, round 둥긂, sickle 낫, square 사각(처형검), clip 클립 포인트, hook 갈고리(구),
+     * needle 바늘(찌르기 검), fork 두 갈래(줄피카르), angled 날 쪽을 곧게 깎아 등에서 끝나는 각진 칼끝(버스터 소드)
+     */
+    tip: 'kissaki' | 'spear' | 'round' | 'sickle' | 'square' | 'clip' | 'hook' | 'needle' | 'fork' | 'angled';
     fuller?: boolean;
     ridge?: boolean;
     hamon?: boolean;
@@ -90,6 +94,8 @@ export interface SwordArt {
     links?: number;
     /** 권총 검: 칼등을 따라 붙인 총열 장식(밑동부터 length mm, 칼날의 6할까지)과 총구 */
     barrel?: { length: number; color: string };
+    /** 칼날 밑동 가운데에 길이 방향으로 뚫은 둥근 구멍 수(1~4, 버스터 소드) */
+    holes?: number;
   };
   collar?: { color: string };
   guard: {

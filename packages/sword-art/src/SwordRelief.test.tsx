@@ -101,6 +101,22 @@ describe('SwordRelief 칼날 장식', () => {
     expect(crystal).not.toMatch(BROKEN);
   });
 
+  it('칼날 표면 장식(능선·홈·이음선 등)은 칼날 외곽선으로 잘라 칼날 밖으로 나가지 않는다', () => {
+    const markup = draw({ tip: 'angled', ridge: true, segments: 3 });
+    const clipId = markup.match(/<clipPath id="([^"]+-blade)">/)?.[1];
+    expect(clipId).toBeTruthy();
+    // 높이·채색 두 층의 장식 묶음이 같은 외곽선으로 잘립니다.
+    expect(markup.split(`clip-path="url(#${clipId})"`).length - 1).toBe(2);
+  });
+
+  it('칼날 구멍(holes)은 구멍마다 테두리와 안쪽을 두 층에 그리고, 1~4개로 맞춘다', () => {
+    const plain = draw({});
+    const two = draw({ holes: 2 });
+    expect(count(two, 'circle') - count(plain, 'circle')).toBe(2 * 2 * 2);
+    expect(count(draw({ holes: 9 }), 'circle')).toBe(count(draw({ holes: 4 }), 'circle'));
+    expect(two).not.toMatch(BROKEN);
+  });
+
   it('권총 검(barrel)은 칼등을 따라 총열과 총구를 두 층에 그리고, 총열은 칼날의 6할을 넘지 않는다', () => {
     const plain = draw({});
     const gun = draw({ barrel: { length: 300, color: '#3a3532' } });

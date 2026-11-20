@@ -4,6 +4,7 @@ import { SEED_SWORDS } from '@snb/mocks';
 
 import {
   bladeOutline,
+  bladeTipStart,
   CATALOG_SIDE,
   focusViewBox,
   hiltLayout,
@@ -34,6 +35,26 @@ describe('sword geometry', () => {
       expect(Math.min(...xs), sword.slug).toBeGreaterThanOrEqual(bounds.minX);
       expect(Math.max(...xs), sword.slug).toBeLessThanOrEqual(bounds.maxX);
     }
+  });
+
+  it('각진 칼끝(angled, 버스터 소드)은 창끝보다 짧게 날 쪽을 곧게 깎아 칼끝에서 등과 만난다', () => {
+    const art = SEED_SWORDS[0]!.art;
+    const angled = { ...art, blade: { ...art.blade, edge: 'single' as const, tip: 'angled' as const, width: 200 } };
+    const spear = { ...angled, blade: { ...angled.blade, tip: 'spear' as const } };
+    expect(bladeTipStart(angled)).toBeGreaterThan(bladeTipStart(spear));
+    const points = bladeOutline(angled);
+    // 등 쪽 마지막 점(칼끝)과 날 쪽 첫 점(칼끝)이 같은 자리입니다.
+    expect(points[64]!.x).toBeCloseTo(points[65]!.x, 5);
+    expect(points[64]!.y).toBeCloseTo(-angled.blade.length, 5);
+  });
+
+  it('양날 칼의 각진 칼끝도 대칭 창끝이 아니라 한쪽 날을 곧게 깎아 다른 쪽 날 끝에서 만난다', () => {
+    const art = SEED_SWORDS[0]!.art;
+    const angled = { ...art, blade: { ...art.blade, edge: 'double' as const, tip: 'angled' as const, width: 120 } };
+    const points = bladeOutline(angled);
+    expect(points[64]!.x).toBeCloseTo(points[65]!.x, 5);
+    // 칼끝은 가운데가 아니라 왼쪽(등 쪽) 가장자리에 있습니다.
+    expect(points[64]!.x).toBeLessThan(-angled.blade.width * 0.3);
   });
 
   it('칼날 외곽선은 칼끝(-length)까지 닿는다', () => {

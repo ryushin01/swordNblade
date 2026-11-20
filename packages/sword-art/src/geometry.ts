@@ -56,6 +56,8 @@ function tipLength(art: SwordArt): number {
       return width * 4;
     case 'fork':
       return width * 1.1;
+    case 'angled':
+      return width * 0.9;
   }
 }
 
@@ -102,11 +104,19 @@ export function bladeOutline(art: SwordArt): Point[] {
         const drop = w * 0.55 * u;
         spine.push({ x: spineX + drop, y });
         edgeSide.push({ x: spineX + drop + (w - drop) * Math.sqrt(Math.max(0, 1 - u * u)), y });
+      } else if (tip === 'angled') {
+        // 등은 곧게 두고 날 쪽만 곧게 깎아 칼끝에서 등과 만납니다(버스터 소드).
+        spine.push({ x: spineX, y });
+        edgeSide.push({ x: spineX + w * (1 - u), y });
       } else {
         const curveIn = tip === 'kissaki' || tip === 'round' ? Math.sqrt(Math.max(0, 1 - u * u)) : Math.pow(1 - u, 0.9);
         spine.push({ x: spineX + w * 0.12 * u * u, y });
         edgeSide.push({ x: spineX + w * 0.12 * u * u + (w - w * 0.12 * u * u) * curveIn, y });
       }
+    } else if (tip === 'angled' && u > 0) {
+      // 양날이어도 한쪽(날 쪽) 날을 곧게 깎아 다른 쪽 날 끝에서 만납니다(대칭 창끝이 되지 않게).
+      spine.push({ x: cx - w / 2, y });
+      edgeSide.push({ x: cx - w / 2 + w * (1 - u), y });
     } else {
       let half = w / 2;
       if (u > 0 && tip !== 'square') {

@@ -1,7 +1,7 @@
 // @vitest-environment jsdom
 import { beforeEach, describe, expect, it } from 'vitest';
 
-import { CATALOG_V11_IDS } from './catalog';
+import { CATALOG_V11_IDS, CATALOG_V12_IDS } from './catalog';
 import { createDb } from './db';
 import { SEED_SWORDS } from './seed';
 
@@ -200,6 +200,21 @@ describe('migrateSeed (시드 버전)', () => {
     expect(swords).toHaveLength(SEED_SWORDS.length);
     expect(swords.slice(-CATALOG_V11_IDS.length).map((sword) => sword.id)).toEqual(CATALOG_V11_IDS);
     expect(swords.find((sword) => sword.id === 'sw-tanto')).toMatchObject({ price: 1_234_000, stock: 0 });
+  });
+
+  it('1.1.0(시드 버전 11) 데이터에서는 원작 합체검으로 바꾼 삼합 대검을 지우고, 게임·작품 속 검 10점을 뒤에 붙인다', () => {
+    const fresh = createDb({ storageKey: 'test-db' }).read();
+    const threefold = { ...fresh.swords[0]!, id: 'sw-threefold-greatsword', slug: 'threefold-greatsword' };
+    const legacy = {
+      ...fresh,
+      seedVersion: 11,
+      swords: [...fresh.swords.filter((sword) => !CATALOG_V12_IDS.includes(sword.id)), threefold],
+    };
+    localStorage.setItem('test-db', JSON.stringify(legacy));
+    const swords = createDb({ storageKey: 'test-db' }).read().swords;
+    expect(swords.some((sword) => sword.id === 'sw-threefold-greatsword')).toBe(false);
+    expect(swords.slice(-CATALOG_V12_IDS.length).map((sword) => sword.id)).toEqual(CATALOG_V12_IDS);
+    expect(swords).toHaveLength(SEED_SWORDS.length);
   });
 
   it('할인을 넣은 뒤의 데이터에서 어드민이 지운 할인은 되살리지 않는다', () => {

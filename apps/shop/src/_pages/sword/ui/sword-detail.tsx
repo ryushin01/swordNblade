@@ -137,7 +137,11 @@ function SwordDetailView({ sword: source }: { sword: Sword }) {
               ) : (
                 <>
                   <strong className="font-semibold text-accent">
-                    {sword.category === 'fantasy' ? t('originalTitle') : t('bluntTitle')}
+                    {sword.category === 'fantasy'
+                      ? t('originalTitle')
+                      : sword.category === 'fiction'
+                        ? t('fanTitle')
+                        : t('bluntTitle')}
                   </strong>{' '}
                   · {t('bluntBody')}
                 </>

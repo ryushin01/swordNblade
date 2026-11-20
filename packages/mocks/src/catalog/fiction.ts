@@ -49,8 +49,8 @@ export const FICTION_ENTRIES: CatalogEntry[] = [
       'Cloud’s greatsword made of six blades that lock together into one.',
     ],
     description: [
-      '메인 블레이드에 할로우 블레이드, 백 블레이드 두 자루, 사이드 블레이드 두 자루를 맞물린 최종 형태를 칼날 판의 이음선과 볼트로 새기고, 메인 블레이드의 붉은 긴 손잡이와 큰 코등이를 달았습니다. 실제로 나뉘지는 않습니다.',
-      'The final form—the main blade locked together with the hollow blade, two back blades and two side blades—is carved as plate seams and bolts, with the main blade’s long red grip and large guard. It does not actually come apart.',
+      '문서 구조도의 다 합친 모습(1+2+3·4+5·6번 검)대로, 칼끝을 비스듬히 자른 넓은 사다리꼴 칼날에 할로우 블레이드의 밝은 날 띠, 백 블레이드 이음매의 네모 홈, 사이드 블레이드 판의 이음선과 볼트를 새기고, 볼트 박은 네모 코등이와 메인 블레이드의 붉은 긴 손잡이를 달았습니다. 실제로 나뉘지는 않습니다.',
+      'Following the fully assembled form in the structure diagram (blades 1+2+3·4+5·6): a broad trapezoid blade with an angled tip, carrying the hollow blade’s bright edge band, square notches along the back blades’ seam and the side blades’ plate seams and bolts, with a bolted rectangular guard and the main blade’s long red grip. It does not actually come apart.',
     ],
     story: [
       '제작',
@@ -70,9 +70,19 @@ export const FICTION_ENTRIES: CatalogEntry[] = [
     specs: [1300, 1760, 5200],
     price: 9_500_000,
     art: {
-      blade: { length: 1300, width: 200, curve: 0, edge: 'single', tip: 'angled', segments: 4 },
-      guard: { type: 'block', width: 250, color: '#3a3a40' },
-      grip: { length: 400, color: '#7a1f1f', wrap: 'ribbed' },
+      blade: {
+        length: 1300,
+        width: 220,
+        curve: 0,
+        edge: 'single',
+        tip: 'angled',
+        segments: 3,
+        color: '#a4a8ae',
+        edgeBand: { width: 0.2, color: '#eef0f2' },
+        notches: { count: 7, at: 0.7 },
+      },
+      guard: { type: 'block', width: 280, color: '#8a8e94' },
+      grip: { length: 400, color: '#5a1414', wrap: 'ribbed' },
       pommel: { type: 'cap', color: '#3a3a40' },
     },
   }),

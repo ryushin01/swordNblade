@@ -8,7 +8,12 @@ const NOW = Date.parse('2026-11-13T12:00:00+09:00');
 describe('filterSwords', () => {
   it('한글·영문·원어 이름으로 찾는다(대소문자, 띄어쓰기 무시)', () => {
     expect(filterSwords(SEED_SWORDS, { q: '쌍수' }).map((s) => s.slug)).toEqual(['ssangsudo']);
-    expect(filterSwords(SEED_SWORDS, { q: 'EXCALIBUR' }).map((s) => s.slug)).toEqual(['excalibur']);
+    // 신화·전설의 엑스칼리버 뒤에 Fate 시리즈의 두 자루(Excalibur (Fate), Excalibur (Fate/Prototype))가 함께 나옵니다.
+    expect(filterSwords(SEED_SWORDS, { q: 'EXCALIBUR' }).map((s) => s.slug)).toEqual([
+      'excalibur',
+      'excalibur-fate',
+      'excalibur-prototype',
+    ]);
     expect(filterSwords(SEED_SWORDS, { q: '草薙' }).map((s) => s.slug)).toEqual(['kusanagi']);
     expect(filterSwords(SEED_SWORDS, { q: '바이킹소드' }).map((s) => s.slug)).toEqual(['viking-sword']);
   });

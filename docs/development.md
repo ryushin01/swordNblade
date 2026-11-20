@@ -5,7 +5,7 @@
 | 패키지 | 역할 |
 |---|---|
 | `@snb/domain` | 타입(`Sword`, `Order`, `CustomsConfig`), 관세 계산 `estimateCustoms`, 소지허가 판단, 금액·길이 표시 형식 |
-| `@snb/mocks` | 256점 시드 데이터(`seed.ts`의 16점과 `catalog/`의 240점), 메모리 DB(`createDb`), MSW 핸들러, 브라우저(`/browser`)·Node(`/node`) 진입점 |
+| `@snb/mocks` | 283점 시드 데이터(`seed.ts`의 16점과 `catalog/`의 267점), 메모리 DB(`createDb`), MSW 핸들러, 브라우저(`/browser`)·Node(`/node`) 진입점 |
 | `@snb/sword-art` | 도검 부조 `SwordRelief`, 칼날 로고 `BladeMark` |
 | `@snb/shop` | 쇼핑몰 (포트 3000) |
 | `@snb/admin` | 어드민 (포트 3001, `basePath: '/admin'`) |
@@ -34,6 +34,7 @@
 - Mock DB는 읽고 쓸 때마다 저장소를 다시 읽어, 다른 앱이 바꾼 값을 바로 봅니다. 저장된 값이 없으면 지금 메모리 상태를 유지합니다(시드로 되돌리지 않음).
 - 시드 버전 11(1.1.0)에서 도검 34점(단검·대검 보충, 게임 속 검의 실제 원형, 판타지·게임 분류)을 더했습니다. 예전 데이터에는 뒤에 붙이고, 이미 있는 도검의 판매 정보(이름·가격·재고·할인)는 그대로 둡니다. 새로 더한 id는 `catalog/index.ts`의 `CATALOG_V11_IDS`이고, `db.ts`가 이를 버전 11에 들어온 도검으로 적습니다.
 - 시드 버전 12(1.2.0)에서 게임·작품 속 검 10점(`CATALOG_V12_IDS`, 원작 이름 그대로 본뜬 비공식 팬 재현품)을 더하고, 원작의 합체검으로 바꾼 창작품 삼합 대검을 뺐습니다(`REMOVED_SEED_IDS`, 예전 데이터에서도 지움).
+- 시드 버전 13(1.3.0)에서 Fate 시리즈 12점과 다른 작품의 검 15점(`CATALOG_V13_IDS`)을 더했습니다. 게임·작품 속 검은 작품별 파일(`catalog/fiction*.ts`)에 두고 `fiction-kit.ts`의 `fiction()`으로 적습니다.
 - 어드민만 따로 열리면 루트에 워커가 없으므로 `/admin/mockServiceWorker.js`를 `/admin` 범위로 등록합니다(`Service-Worker-Allowed` 헤더). 이때는 데이터가 쇼핑몰과 공유되지 않습니다.
 - 테스트: `NEXT_PUBLIC_API_MOCKING=off`로 브라우저 워커를 끄고 `createMockServer()`(MSW Node)를 씁니다.
 - 주문 금액은 클라이언트가 보낸 값을 쓰지 않고 Mock 서버가 주문 시각의 판매가(할인 적용)와 `estimateCustoms`로 다시 계산합니다. 재고 부족(409), 입력 오류(422)도 서버에서 판단합니다.

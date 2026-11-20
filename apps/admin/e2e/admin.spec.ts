@@ -27,7 +27,7 @@ test.beforeEach(async ({ page }) => {
 test('대시보드: 통계와 최근 주문을 보여 준다', async ({ page }) => {
   await page.goto('/admin/');
   await expect(page.getByRole('heading', { level: 1, name: '대시보드' })).toBeVisible();
-  await expect(page.getByText('256', { exact: true })).toBeVisible();
+  await expect(page.getByText('283', { exact: true })).toBeVisible();
   await expect(page.getByRole('cell', { name: 'SNB-20261103-0002' })).toBeVisible();
   await expectNoA11yViolations(page);
 });
@@ -144,8 +144,10 @@ test('상품: 이름으로 찾으면 목록과 개수가 바뀐다', async ({ pa
   await page.goto('/admin/products');
   await expect(page.getByRole('link', { name: '환도 수정' })).toBeVisible();
   await page.getByLabel('이름으로 찾기').fill('Excalibur');
-  await expect(page.getByRole('status').filter({ hasText: '1점' })).toBeVisible();
+  // 신화·전설의 엑스칼리버와 Fate 시리즈의 두 자루(Excalibur (Fate), Excalibur (Fate/Prototype))가 나옵니다.
+  await expect(page.getByRole('status').filter({ hasText: '3점' })).toBeVisible();
   await expect(page.getByRole('link', { name: '엑스칼리버 수정' })).toBeVisible();
+  await expect(page.getByRole('link', { name: '약속된 승리의 검(엑스칼리버) 수정' })).toBeVisible();
   await expect(page.getByRole('link', { name: '환도 수정' })).toHaveCount(0);
   await expectNoA11yViolations(page);
 });

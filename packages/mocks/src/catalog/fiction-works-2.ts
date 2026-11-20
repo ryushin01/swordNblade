@@ -1,5 +1,5 @@
 import { fiction, STEEL_BLUNT, STEEL_BLUNT_EN } from './fiction-kit';
-import { GOLD, IRON, RUBY, SILVER } from './legend-kit';
+import { GOLD, IRON, RUBY } from './legend-kit';
 
 import type { CatalogEntry } from './build';
 
@@ -39,9 +39,9 @@ export const WORKS2_ENTRIES: CatalogEntry[] = [
     stock: 2,
     art: {
       blade: { length: 900, width: 44, curve: 0, edge: 'double', tip: 'spear', fuller: true, inscription: 'runes' },
-      guard: { type: 'cross', width: 190, color: SILVER },
+      guard: { type: 'cross', width: 190, color: GOLD },
       grip: { length: 230, color: '#e6dcc4', wrap: 'plain' },
-      pommel: { type: 'cap', color: SILVER },
+      pommel: { type: 'cap', color: GOLD },
     },
   }),
   fiction({
@@ -67,8 +67,8 @@ export const WORKS2_ENTRIES: CatalogEntry[] = [
     stock: 2,
     art: {
       blade: { length: 1000, width: 46, curve: 0, edge: 'double', tip: 'spear', fuller: true, color: '#7d828a' },
-      guard: { type: 'cross', width: 210, color: IRON },
-      grip: { length: 300, color: '#2a2420', wrap: 'leather' },
+      guard: { type: 'crescent', width: 210, color: '#a8acb0' },
+      grip: { length: 300, color: '#1e1c1a', wrap: 'leather' },
       pommel: { type: 'ball', color: '#cfc6b4' },
     },
   }),
@@ -82,8 +82,8 @@ export const WORKS2_ENTRIES: CatalogEntry[] = [
       'The Valyrian steel dagger with a dragonbone hilt, used in the attempt on Bran Stark’s life.',
     ],
     description: [
-      '곧은 양날 칼날에 드래곤 뼈를 본뜬 미색 손잡이를 맞췄습니다.',
-      'A straight double-edged blade with a cream hilt in the likeness of dragonbone.',
+      '어두운 발리리아 강철 칼날에, 드라마 소품처럼 마디진 드래곤 뼈 손잡이를 맞췄습니다.',
+      'A dark Valyrian steel blade with a ridged dragonbone hilt, as in the series prop.',
     ],
     story: [
       '얼음과 불의 노래',
@@ -95,10 +95,10 @@ export const WORKS2_ENTRIES: CatalogEntry[] = [
     price: 2_200_000,
     stock: 3,
     art: {
-      blade: { length: 300, width: 34, curve: 0, edge: 'double', tip: 'spear', ridge: true, color: '#7d828a' },
+      blade: { length: 300, width: 34, curve: 0, edge: 'double', tip: 'spear', ridge: true, color: '#5a5e64' },
       guard: { type: 'cross', width: 80, color: IRON },
-      grip: { length: 120, color: '#e6dccb', wrap: 'plain' },
-      pommel: { type: 'cap', color: '#e6dccb' },
+      grip: { length: 120, color: '#4a4846', wrap: 'ribbed' },
+      pommel: { type: 'cap', color: '#4a4846' },
     },
   }),
   fiction({

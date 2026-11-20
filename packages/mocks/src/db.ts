@@ -1,6 +1,6 @@
 import { type CustomsConfig, DEFAULT_CUSTOMS_CONFIG, type Order, type Sword, type User } from '@snb/domain';
 
-import { CATALOG_V11_IDS } from './catalog';
+import { CATALOG_V11_IDS, CATALOG_V12_IDS } from './catalog';
 import { SEED_ORDERS, SEED_SWORDS, SEED_VERSION } from './seed';
 
 export interface DbState {
@@ -63,6 +63,8 @@ const ADDED_IN: Record<string, number> = {
   'sw-wallace-sword': 6,
   // 1.1.0: 단검·대검 보충, 게임에 자주 나오는 이름의 실제 칼, 판타지·게임 분류
   ...Object.fromEntries(CATALOG_V11_IDS.map((id) => [id, 11])),
+  // 1.2.0: 게임·작품 속 검(원작 이름 그대로 본뜬 팬 재현품)
+  ...Object.fromEntries(CATALOG_V12_IDS.map((id) => [id, 12])),
 };
 
 export function seedAddedIn(id: string): number {
@@ -84,7 +86,14 @@ const PRICE_FIXES: Record<string, { from: number; to: number; before: number }> 
 const IDENTITY_FIXED_IN: Record<string, number> = { 'sw-kuruchi': 7 };
 
 /** 출처를 확인하지 못했거나 다른 도검으로 바꿔 시드에서 뺀 도검. 예전 데이터에서도 지웁니다. */
-const REMOVED_SEED_IDS = ['sw-ings-sword', 'sw-hwer', 'sw-ecke-king', 'sw-samingeom'];
+const REMOVED_SEED_IDS = [
+  'sw-ings-sword',
+  'sw-hwer',
+  'sw-ecke-king',
+  'sw-samingeom',
+  // 1.2.0: 원작의 합체검(fusion-swords)으로 바꾼 창작 대검
+  'sw-threefold-greatsword',
+];
 
 const clone = <T>(value: T): T => structuredClone(value);
 

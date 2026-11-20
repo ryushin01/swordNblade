@@ -54,9 +54,10 @@ function fantasy(spec: FantasySpec): CatalogEntry {
 }
 
 /**
- * 1.1.0 판타지·게임 13점. 판타지 소설과 게임에 흔한 형식(요정의 검·마검·합체검·사복검 등)을 빌려 새로 디자인했고,
- * 특정 작품의 검(이름·모양)은 옮기지 않습니다(Fate 시리즈를 넣지 않은 것과 같은 이유).
- * 계열 이름(마검·성검·마법의 검·용살검·합체검·사복검)은 나무위키 「가공의 도검」과 그 관련 문서에서 가져왔습니다.
+ * 판타지 창작 12점(1.1.0). 판타지 소설과 게임에 흔한 형식(요정의 검·마검·사복검 등)을 빌려 새로 디자인했고,
+ * 특정 작품의 검(이름·모양)은 옮기지 않습니다. 계열 이름(마검·성검·마법의 검·용살검·사복검)은 나무위키 「가공의 도검」과
+ * 그 관련 문서에서 가져왔습니다. 작품 속 검을 원작 이름 그대로 본뜬 것은 fiction.ts(게임·작품 속 검)에 있습니다
+ * (1.2.0에서 삼합 대검을 빼고 원작의 합체검으로 바꿈).
  */
 export const FANTASY_ENTRIES: CatalogEntry[] = [
   fantasy({
@@ -319,34 +320,6 @@ export const FANTASY_ENTRIES: CatalogEntry[] = [
       guard: { type: 'block', width: 90, color: '#6a4a2a' },
       grip: { length: 190, color: '#5a3a1e', wrap: 'cord', wrapColor: '#3a2a14' },
       pommel: { type: 'gem', color: GOLD, gem: AMBER },
-    },
-  }),
-  fantasy({
-    slug: 'threefold-greatsword',
-    name: ['삼합 대검', 'Threefold Greatsword', 'Threefold Greatsword'],
-    kind: 'great',
-    style: ['게임풍 · 합체검', 'Game style · combining sword'],
-    summary: [
-      '칼날 세 장을 맞물려 하나로 만든 합체 대검.',
-      'A combining greatsword built from three interlocking blades.',
-    ],
-    description: [
-      '가운데 대검 양옆에 칼 두 자루를 볼트로 맞물렸다는 설정을 칼날의 이음선과 볼트로 새겼습니다. 게임 속 거대한 합체검의 형식을 빌렸고, 실제로 나뉘지는 않습니다.',
-      'The idea—two blades bolted to either side of a central greatsword—is carved as seams and bolts along the blade. The form borrows from the giant combining swords of games; it does not actually come apart.',
-    ],
-    lore: [
-      '평소에는 한 자루 대검으로 쓰다가, 상대에 따라 풀어서 가벼운 칼 두 자루와 대검으로 바꿔 든다는 설정입니다.',
-      'In its lore it is wielded as a single greatsword, then unlocked into two light blades and a greatsword as the fight demands.',
-    ],
-    material: [`${STEEL_BLUNT}, 강철 볼트, 가죽`, `${STEEL_BLUNT_EN}, steel bolts, leather`],
-    specs: [1300, 1720, 4800],
-    price: 9_200_000,
-    stock: 1,
-    art: {
-      blade: { length: 1300, width: 130, curve: 0, edge: 'single', tip: 'clip', segments: 3 },
-      guard: { type: 'block', width: 200, color: '#4a4a4e' },
-      grip: { length: 340, color: '#2a2622', wrap: 'ribbed' },
-      pommel: { type: 'ring', color: '#4a4a4e' },
     },
   }),
   fantasy({

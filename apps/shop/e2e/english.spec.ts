@@ -14,7 +14,7 @@ test('영어 화면: /en에서 영어로 보이고 lang이 en이다', async ({ p
   await expect(page.locator('html')).toHaveAttribute('lang', 'en');
   await expect(page.getByRole('heading', { level: 1, name: 'The Wall of Blades' })).toBeVisible();
   await expect(page.getByRole('link', { name: /Excalibur.*₩12,000,000/ })).toBeVisible();
-  await expect(page.getByRole('status').filter({ hasText: '1–24 of 247 swords' })).toBeVisible();
+  await expect(page.getByRole('status').filter({ hasText: '1–24 of 256 swords' })).toBeVisible();
   await expectNoA11yViolations(page);
   await expectNoHorizontalOverflow(page);
 });
@@ -64,10 +64,11 @@ test('영어 상세와 구매 흐름: 번역된 이야기, 영어 관세 안내,
 });
 
 test('영어 404와 검색', async ({ page }) => {
+  // 신화·전설 112점에 출전이 「The Legend of Zelda」인 마스터 소드가 더해집니다.
   await page.goto('/en/no-such-page');
   await expect(page.getByRole('heading', { level: 1, name: 'Nothing is carved in this spot' })).toBeVisible();
   await page.goto('/en?q=legend');
-  await expect(page.getByRole('status').filter({ hasText: '1–24 of 112 results for “legend”' })).toBeVisible();
+  await expect(page.getByRole('status').filter({ hasText: '1–24 of 113 results for “legend”' })).toBeVisible();
 });
 
 test('언어별 대체 주소(hreflang)를 절대 주소로 알린다', async ({ page }) => {

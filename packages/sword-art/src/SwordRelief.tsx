@@ -251,6 +251,7 @@ function Blade({ art, fill, opacity, layer }: { art: SwordArt; fill: string; opa
       {blade.segments ? <Segments art={art} layer={layer} /> : null}
       {blade.links ? <Links art={art} layer={layer} /> : null}
       {blade.barrel ? <Barrel art={art} layer={layer} /> : null}
+      {blade.holes ? <Holes art={art} layer={layer} /> : null}
 
       {blade.inscription === 'stars' ? <Stars art={art} layer={layer} /> : null}
       {blade.inscription === 'runes' ? <Runes art={art} layer={layer} /> : null}
@@ -353,6 +354,29 @@ function Barrel({ art, layer }: { art: SwordArt; layer: Layer }) {
         strokeLinecap="round"
       />
       <circle cx={muzzle.x} cy={muzzle.y} r={width * 0.13} fill={isHeight ? H.low : '#000000aa'} />
+    </g>
+  );
+}
+
+/** 칼날 밑동 가운데에 길이 방향으로 뚫은 둥근 구멍(버스터 소드). 깃(collar)이 있으면 그 바로 위부터 */
+function Holes({ art, layer }: { art: SwordArt; layer: Layer }) {
+  const isHeight = layer === 'height';
+  const count = Math.min(4, Math.max(1, Math.round(art.blade.holes ?? 1)));
+  const { length, width } = art.blade;
+  const r = width * 0.075;
+  const start = (hiltLayout(art).collarHeight + r * 1.8) / length;
+  const step = (r * 2.8) / length;
+  return (
+    <g>
+      {Array.from({ length: count }, (_, index) => {
+        const p = bladePoint(art, start + index * step, 0.5);
+        return (
+          <g key={index}>
+            <circle cx={p.x} cy={p.y} r={r} fill={isHeight ? H.low : '#00000055'} />
+            <circle cx={p.x} cy={p.y} r={r * 0.72} fill={isHeight ? '#4a4a4a' : '#00000044'} />
+          </g>
+        );
+      })}
     </g>
   );
 }

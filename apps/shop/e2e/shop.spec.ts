@@ -17,10 +17,10 @@ test('도검의 벽: 한 쪽에 24점씩 보이고 분류로 거를 수 있다',
   await page.goto('/');
   await expect(page.getByRole('heading', { level: 1, name: '도검의 벽' })).toBeVisible();
   await expect(tiles(page)).toHaveCount(24);
-  await expect(page.getByRole('status').filter({ hasText: '247점 가운데 1–24번째' })).toBeVisible();
+  await expect(page.getByRole('status').filter({ hasText: '256점 가운데 1–24번째' })).toBeVisible();
 
   const categories = page.getByRole('navigation', { name: '도검 분류' });
-  await expect(categories.getByRole('link')).toHaveCount(7);
+  await expect(categories.getByRole('link')).toHaveCount(8);
   await categories.getByRole('link', { name: '신화·전설' }).click();
   await expect(page).toHaveURL(/category=legend/);
   await expect(page.getByRole('heading', { level: 1, name: '신화·전설' })).toBeVisible();
@@ -31,20 +31,37 @@ test('도검의 벽: 한 쪽에 24점씩 보이고 분류로 거를 수 있다',
   await expectNoHorizontalOverflow(page);
 });
 
-test('판타지·게임: 창작 도검을 따로 거르고, 상세에 창작품이라고 알린다', async ({ page }) => {
+test('판타지 창작: 창작 도검을 따로 거르고, 상세에 창작품이라고 알린다', async ({ page }) => {
   await page.goto('/');
-  await page.getByRole('navigation', { name: '도검 분류' }).getByRole('link', { name: '판타지·게임' }).click();
+  await page.getByRole('navigation', { name: '도검 분류' }).getByRole('link', { name: '판타지 창작' }).click();
   await expect(page).toHaveURL(/category=fantasy/);
-  await expect(page.getByRole('heading', { level: 1, name: '판타지·게임' })).toBeVisible();
+  await expect(page.getByRole('heading', { level: 1, name: '판타지 창작' })).toBeVisible();
   // 한 쪽에 다 들어가면 결과 수만 알립니다.
-  await expect(page.getByRole('status').filter({ hasText: /^13점$/ })).toBeVisible();
+  await expect(page.getByRole('status').filter({ hasText: /^12점$/ })).toBeVisible();
 
-  await page.goto('/swords/threefold-greatsword');
-  await expect(page.getByRole('heading', { level: 1, name: '삼합 대검' })).toBeVisible();
+  await page.goto('/swords/steamwork-greatsword');
+  await expect(page.getByRole('heading', { level: 1, name: '증기 기관 대검' })).toBeVisible();
   await expect(page.getByText('장식용 창작품', { exact: true })).toBeVisible();
   await expect(page.getByText('특정 작품의 검을 옮기지 않고', { exact: false })).toBeVisible();
   // 원어 이름이 영어 이름과 같으면 한 번만 보여 줍니다.
-  await expect(page.getByText('Threefold Greatsword', { exact: true })).toHaveCount(1);
+  await expect(page.getByText('Steamwork Greatsword', { exact: true })).toHaveCount(1);
+  await expectNoA11yViolations(page);
+  await expectNoHorizontalOverflow(page);
+});
+
+test('게임·작품 속 검: 원작 이름과 출전을 보여 주고, 비공식 팬 재현품이라고 알린다', async ({ page }) => {
+  await page.goto('/');
+  await page.getByRole('navigation', { name: '도검 분류' }).getByRole('link', { name: '게임·작품 속 검' }).click();
+  await expect(page).toHaveURL(/category=fiction/);
+  await expect(page.getByRole('heading', { level: 1, name: '게임·작품 속 검' })).toBeVisible();
+  await expect(page.getByRole('status').filter({ hasText: /^10점$/ })).toBeVisible();
+
+  await page.goto('/swords/buster-sword');
+  await expect(page.getByRole('heading', { level: 1, name: '버스터 소드' })).toBeVisible();
+  await expect(page.getByText('バスターソード', { exact: false })).toBeVisible();
+  await expect(page.getByText(/파이널 판타지 VII · 1997/)).toBeVisible();
+  await expect(page.getByText('비공식 팬 재현품', { exact: true })).toBeVisible();
+  await expect(page.getByText('이 쇼핑몰은 권리자와 관계가 없습니다', { exact: false })).toBeVisible();
   await expectNoA11yViolations(page);
   await expectNoHorizontalOverflow(page);
 });
@@ -354,9 +371,10 @@ test('도검 연표: 시대와 지역 표로 역사 도검을 본다', async ({ 
   const table = page.getByRole('table', { name: '시대와 지역별 역사 도검' });
   await expect(table.getByRole('rowheader', { name: '18~19세기' })).toBeVisible();
   await expect(table.getByRole('columnheader', { name: '동양 도검' })).toBeVisible();
-  // 연대가 없는 신화·전설과 판타지·게임은 연표에 넣지 않습니다.
+  // 연대가 없는 신화·전설, 판타지 창작, 게임·작품 속 검은 연표에 넣지 않습니다.
   await expect(table.getByRole('columnheader', { name: '신화·전설' })).toHaveCount(0);
-  await expect(table.getByRole('columnheader', { name: '판타지·게임' })).toHaveCount(0);
+  await expect(table.getByRole('columnheader', { name: '판타지 창작' })).toHaveCount(0);
+  await expect(table.getByRole('columnheader', { name: '게임·작품 속 검' })).toHaveCount(0);
   await table.getByRole('link', { name: '쌍수도' }).click();
   await expect(page).toHaveURL(/\/swords\/ssangsudo$/);
   await page.goto('/timeline');

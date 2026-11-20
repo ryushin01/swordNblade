@@ -6,14 +6,15 @@ export const CATEGORY_LABEL: Record<SwordCategory, string> = {
   middle: '중동·아프리카',
   americas: '신대륙',
   legend: '신화·전설',
-  fantasy: '판타지·게임',
+  fantasy: '판타지 창작',
+  fiction: '게임·작품 속 검',
 };
 
 /** 분류를 보여 주는 순서 */
-export const SWORD_CATEGORIES: SwordCategory[] = ['east', 'west', 'middle', 'americas', 'legend', 'fantasy'];
+export const SWORD_CATEGORIES: SwordCategory[] = ['east', 'west', 'middle', 'americas', 'legend', 'fantasy', 'fiction'];
 
-/** 실제 역사가 없는 분류(신화·전설 재현품, 판타지·게임 창작품). 연대가 없어 연표에서 빼고, 날을 세우지 않습니다. */
-export const FICTIONAL_CATEGORIES: readonly SwordCategory[] = ['legend', 'fantasy'];
+/** 실제 역사가 없는 분류(신화·전설 재현품, 판타지 창작품, 작품 속 검의 팬 재현품). 연대가 없어 연표에서 빼고, 날을 세우지 않습니다. */
+export const FICTIONAL_CATEGORIES: readonly SwordCategory[] = ['legend', 'fantasy', 'fiction'];
 
 /** 역사 도검 분류인지(연표에 놓을 수 있는지) */
 export const isHistorical = (category: SwordCategory): boolean => !FICTIONAL_CATEGORIES.includes(category);
@@ -44,7 +45,8 @@ export const CATEGORY_LABEL_EN: Record<SwordCategory, string> = {
   middle: 'Middle East & Africa',
   americas: 'The Americas',
   legend: 'Myth & Legend',
-  fantasy: 'Fantasy & Games',
+  fantasy: 'Original Fantasy',
+  fiction: 'Swords from Games & Fiction',
 };
 
 export const COUNTRY_NAME: Record<CountryCode, string> = {

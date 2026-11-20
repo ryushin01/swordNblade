@@ -96,6 +96,7 @@ const TIP_LABEL: Record<SwordArt['blade']['tip'], string> = {
   hook: '갈고리(호두구)',
   needle: '바늘(찌르기 검)',
   fork: '두 갈래(줄피카르)',
+  angled: '각진 칼끝(버스터 소드)',
 };
 const INSCRIPTION_OPTIONS = [
   { value: 'stars', label: '별자리 상감' },

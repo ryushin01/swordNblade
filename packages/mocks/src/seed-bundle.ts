@@ -1,4 +1,4 @@
-import { CATALOG_V11_IDS, CATALOG_V12_IDS, CATALOG_V13_IDS, CATALOG_V14_IDS } from './catalog';
+import { CATALOG_V11_IDS, CATALOG_V12_IDS, CATALOG_V13_IDS, CATALOG_V14_IDS, CATALOG_V15_IDS } from './catalog';
 import { createDbWithSeed, type Db, seedAddedInFrom, type SeedBundle } from './db';
 import { SEED_ORDERS, SEED_SWORDS, SEED_VERSION } from './seed';
 
@@ -20,6 +20,8 @@ const ADDED_IN: Record<string, number> = {
   ...Object.fromEntries(CATALOG_V13_IDS.map((id) => [id, 13])),
   // 1.5.0: 「가공의 도검」 3단계 1차 16점
   ...Object.fromEntries(CATALOG_V14_IDS.map((id) => [id, 14])),
+  // 1.6.0: 「가공의 도검」 3단계 2차 30점(사용자가 고른 목록과 봉뢰검)
+  ...Object.fromEntries(CATALOG_V15_IDS.map((id) => [id, 15])),
 };
 
 /**

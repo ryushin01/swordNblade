@@ -96,6 +96,11 @@ export interface SwordArt {
     barrel?: { length: number; color: string };
     /** 칼날 밑동 가운데에 길이 방향으로 뚫은 둥근 구멍 수(1~4, 버스터 소드) */
     holes?: number;
+    /**
+     * 칼날에 박은 둥근 메달리온(파멸의 인도자). at은 밑동에서 칼끝까지의 위치(0~1), size는 그 자리 칼날 너비에 대한 지름 비율,
+     * across는 너비 방향 위치(0 등 ~ 1 날, 기본 0.5)입니다. 칼등 밖으로 조금 나와도 됩니다.
+     */
+    medallion?: { at: number; size: number; color: string; across?: number };
   };
   collar?: { color: string };
   guard: {

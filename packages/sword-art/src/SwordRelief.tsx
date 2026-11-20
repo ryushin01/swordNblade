@@ -277,6 +277,7 @@ function Blade({
       {/* 총열은 칼등 밖으로 조금 나오므로 자르지 않습니다. */}
       {blade.barrel ? <Barrel art={art} layer={layer} /> : null}
       {blade.sleeve ? <Sleeve art={art} layer={layer} /> : null}
+      {blade.medallion ? <Medallion art={art} layer={layer} /> : null}
     </g>
   );
 }
@@ -398,6 +399,31 @@ function Holes({ art, layer }: { art: SwordArt; layer: Layer }) {
           </g>
         );
       })}
+    </g>
+  );
+}
+
+/** 칼날에 박은 둥근 메달리온: 테두리, 면, 안쪽 고리, 가운데 돋을새김. 칼날 외곽선으로 자르지 않습니다. */
+function Medallion({ art, layer }: { art: SwordArt; layer: Layer }) {
+  const medallion = art.blade.medallion;
+  if (!medallion) return null;
+  const isHeight = layer === 'height';
+  const t = Math.min(0.95, Math.max(0.02, medallion.at));
+  const center = bladePoint(art, t, Math.min(1, Math.max(0, medallion.across ?? 0.5)));
+  const r = (bladeWidthAt(art, t) * Math.min(1.2, Math.max(0.15, medallion.size))) / 2;
+  return (
+    <g>
+      <circle cx={center.x} cy={center.y} r={r} fill={isHeight ? H.base : '#00000055'} />
+      <circle cx={center.x} cy={center.y} r={r * 0.9} fill={isHeight ? H.top : medallion.color} />
+      <circle
+        cx={center.x}
+        cy={center.y}
+        r={r * 0.68}
+        fill="none"
+        stroke={isHeight ? H.mid : '#00000033'}
+        strokeWidth={r * 0.07}
+      />
+      <circle cx={center.x} cy={center.y} r={r * 0.34} fill={isHeight ? H.raised : '#ffffff33'} />
     </g>
   );
 }

@@ -1,7 +1,7 @@
 // @vitest-environment jsdom
 import { beforeEach, describe, expect, it } from 'vitest';
 
-import { CATALOG_V11_IDS, CATALOG_V12_IDS, CATALOG_V13_IDS, CATALOG_V14_IDS } from './catalog';
+import { CATALOG_V11_IDS, CATALOG_V12_IDS, CATALOG_V13_IDS, CATALOG_V14_IDS, CATALOG_V15_IDS } from './catalog';
 import { SEED_SWORDS } from './seed';
 import { createDb } from './seed-bundle';
 
@@ -265,6 +265,23 @@ describe('시드 버전 14', () => {
     const swords = createDb({ storageKey: 'test-db' }).read().swords;
     expect(swords).toHaveLength(SEED_SWORDS.length);
     expect(swords.slice(-CATALOG_V14_IDS.length).map((sword) => sword.id)).toEqual(CATALOG_V14_IDS);
+  });
+});
+
+describe('시드 버전 15', () => {
+  beforeEach(() => localStorage.clear());
+
+  it('1.5.0(시드 버전 14) 데이터에는 3단계 2차 30점을 뒤에 붙인다', () => {
+    const fresh = createDb({ storageKey: 'test-db' }).read();
+    const legacy = {
+      ...fresh,
+      seedVersion: 14,
+      swords: fresh.swords.filter((sword) => !CATALOG_V15_IDS.includes(sword.id)),
+    };
+    localStorage.setItem('test-db', JSON.stringify(legacy));
+    const swords = createDb({ storageKey: 'test-db' }).read().swords;
+    expect(swords).toHaveLength(SEED_SWORDS.length);
+    expect(swords.slice(-CATALOG_V15_IDS.length).map((sword) => sword.id)).toEqual(CATALOG_V15_IDS);
   });
 });
 

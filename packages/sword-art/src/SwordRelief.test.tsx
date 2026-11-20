@@ -147,6 +147,17 @@ describe('SwordRelief 칼날 장식', () => {
     expect(localBounds(art({ keyBit: true })).maxX).toBeGreaterThan(localBounds(art({})).maxX + 40);
   });
 
+  it('날 띠(edgeBand)와 이음매 홈(notches)은 칼날 외곽선 안에 두 층으로 그린다', () => {
+    const plain = draw({});
+    const banded = draw({ edgeBand: { width: 0.2, color: '#eef0f2' } });
+    expect(count(banded, 'path') - count(plain, 'path')).toBe(2);
+    expect(banded).toContain('fill="#eef0f2"');
+    const notched = draw({ notches: { count: 6 } });
+    expect(count(notched, 'rect') - count(plain, 'rect')).toBe(2 * 6);
+    expect(draw({ notches: { count: 99 } })).toBe(draw({ notches: { count: 12 } }));
+    expect(notched).not.toMatch(BROKEN);
+  });
+
   it('칼날 메달리온은 두 층에 원 네 개씩을 그리고, 위치와 크기를 칼날 안쪽으로 맞춘다', () => {
     const plain = draw({});
     const medal = draw({ medallion: { at: 0.5, size: 0.6, color: '#e8b830' } });

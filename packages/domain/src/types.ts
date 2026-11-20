@@ -115,6 +115,10 @@ export interface SwordArt {
     twin?: { width: number; gap: number; length?: number };
     /** 열쇠 이빨(키블레이드): 칼끝 날 쪽에 홈이 셋 진 열쇠 이빨을 붙입니다. 칼날 너비의 1.8배만큼 날 쪽으로 나옵니다. */
     keyBit?: boolean;
+    /** 날을 따라 덧댄 밝은 띠(합체검의 할로우 블레이드 날). width는 칼날 너비에 대한 비율(0.05~0.5)입니다. */
+    edgeBand?: { width: number; color: string };
+    /** 칼날 판 이음매를 따라 판 네모 홈(합체검의 백 블레이드). count는 1~12, at은 너비 방향 위치(0 등 ~ 1 날, 기본 0.72)입니다. */
+    notches?: { count: number; at?: number };
   };
   collar?: { color: string };
   guard: {

@@ -280,6 +280,8 @@ function Blade({
         {blade.segments ? <Segments art={art} layer={layer} /> : null}
         {blade.links ? <Links art={art} layer={layer} /> : null}
         {blade.holes ? <Holes art={art} layer={layer} /> : null}
+        {blade.edgeBand ? <EdgeBand art={art} layer={layer} /> : null}
+        {blade.notches ? <Notches art={art} layer={layer} /> : null}
 
         {blade.inscription === 'stars' ? <Stars art={art} layer={layer} /> : null}
         {blade.inscription === 'runes' ? <Runes art={art} layer={layer} /> : null}
@@ -459,6 +461,39 @@ const EMBLEMS: Record<NonNullable<NonNullable<SwordArt['blade']['medallion']>['e
   cross: 'M-0.18 -0.85 H0.18 V-0.18 H0.85 V0.18 H0.18 V0.85 H-0.18 V0.18 H-0.85 V-0.18 H-0.18 Z',
   star: 'M0 -0.9 L0.21 -0.29 L0.86 -0.28 L0.34 0.11 L0.53 0.73 L0 0.36 L-0.53 0.73 L-0.34 0.11 L-0.86 -0.28 L-0.21 -0.29 Z',
 };
+
+/** 날 띠: 날 쪽 가장자리를 따라 밝은 띠를 덧댑니다. 칼날 외곽선으로 잘리므로 칼끝 모양을 그대로 따릅니다. */
+function EdgeBand({ art, layer }: { art: SwordArt; layer: Layer }) {
+  const band = art.blade.edgeBand;
+  if (!band) return null;
+  const width = Math.min(0.5, Math.max(0.05, band.width));
+  return (
+    <path
+      d={pointsToPath(bladeStrip(art, 0, 1, 1 - width / 2, width))}
+      fill={layer === 'height' ? H.top : band.color}
+      fillOpacity={layer === 'height' ? 1 : 0.9}
+    />
+  );
+}
+
+/** 이음매 홈: 칼날 판 이음매를 따라 밑동 3할부터 8할 앞까지 네모 홈을 고르게 팝니다. */
+function Notches({ art, layer }: { art: SwordArt; layer: Layer }) {
+  const notches = art.blade.notches;
+  if (!notches) return null;
+  const count = Math.min(12, Math.max(1, Math.round(notches.count)));
+  const at = Math.min(1, Math.max(0, notches.at ?? 0.72));
+  const end = Math.min(0.78, bladeTipStart(art) - 0.04);
+  return (
+    <g fill={layer === 'height' ? H.low : '#00000070'}>
+      {Array.from({ length: count }, (_, index) => {
+        const t = 0.3 + ((end - 0.3) * (index + 0.5)) / count;
+        const p = bladePoint(art, t, at);
+        const size = bladeWidthAt(art, t) * 0.085;
+        return <rect key={index} x={p.x - size / 2} y={p.y - size / 2} width={size} height={size} />;
+      })}
+    </g>
+  );
+}
 
 /** 열쇠 이빨: 큰 칼날과 같은 칠로, 칼끝 날 쪽에 붙입니다. */
 function KeyBit({ art, fill, opacity }: { art: SwordArt; fill: string; opacity: number }) {

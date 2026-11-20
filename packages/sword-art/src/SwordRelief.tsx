@@ -144,6 +144,10 @@ export function SwordRelief({
         <clipPath id={id('grip')}>
           <path d={gripPath(layout)} />
         </clipPath>
+        {/* 칼날 표면 장식(능선·홈·하몬·새김·이음선 등)이 칼날 밖으로 나가지 않게 자릅니다. */}
+        <clipPath id={id('blade')}>
+          <path d={pointsToPath(bladeOutline(art))} />
+        </clipPath>
       </defs>
 
       <g filter={`url(#${id('relief')})`}>
@@ -184,7 +188,7 @@ function renderParts(art: SwordArt, layout: HiltLayout, layer: Layer, id: (name:
 
   return (
     <>
-      <Blade art={art} fill={bladeFill} opacity={bladeOpacity} layer={layer} />
+      <Blade art={art} fill={bladeFill} opacity={bladeOpacity} layer={layer} clipId={id('blade')} />
       {art.collar ? <Collar art={art} layout={layout} layer={layer} /> : null}
       <Guard art={art} layout={layout} layer={layer} />
       <Grip art={art} layout={layout} layer={layer} clipId={id('grip')} />
@@ -194,7 +198,19 @@ function renderParts(art: SwordArt, layout: HiltLayout, layer: Layer, id: (name:
   );
 }
 
-function Blade({ art, fill, opacity, layer }: { art: SwordArt; fill: string; opacity: number; layer: Layer }) {
+function Blade({
+  art,
+  fill,
+  opacity,
+  layer,
+  clipId,
+}: {
+  art: SwordArt;
+  fill: string;
+  opacity: number;
+  layer: Layer;
+  clipId: string;
+}) {
   const isHeight = layer === 'height';
   const { blade } = art;
   const outline = pointsToPath(bladeOutline(art));
@@ -218,43 +234,48 @@ function Blade({ art, fill, opacity, layer }: { art: SwordArt; fill: string; opa
       {blade.material === 'bamboo' ? <BambooSlats art={art} layer={layer} /> : null}
       {blade.teeth ? <ObsidianTeeth art={art} layer={layer} /> : null}
 
-      {blade.fuller ? (
-        <path
-          d={pointsToPath(
-            blade.edge === 'single' ? bladeStrip(art, 0.02, 0.72, 0.24, 0.16) : bladeStrip(art, 0.02, 0.74, 0.5, 0.26),
-          )}
-          fill={isHeight ? H.low : '#a3abb1'}
-          fillOpacity={isHeight ? 1 : 0.7}
-        />
-      ) : null}
+      <g clipPath={`url(#${clipId})`}>
+        {blade.fuller ? (
+          <path
+            d={pointsToPath(
+              blade.edge === 'single'
+                ? bladeStrip(art, 0.02, 0.72, 0.24, 0.16)
+                : bladeStrip(art, 0.02, 0.74, 0.5, 0.26),
+            )}
+            fill={isHeight ? H.low : '#a3abb1'}
+            fillOpacity={isHeight ? 1 : 0.7}
+          />
+        ) : null}
 
-      {blade.ridge && !blade.fuller ? (
-        <path
-          d={pointsToPath(bladeStrip(art, 0.0, 0.985, 0.5, 0.05))}
-          fill={isHeight ? H.top : '#d7dbde'}
-          fillOpacity={isHeight ? 1 : 0.6}
-        />
-      ) : null}
+        {blade.ridge && !blade.fuller ? (
+          <path
+            d={pointsToPath(bladeStrip(art, 0.0, 0.985, 0.5, 0.05))}
+            fill={isHeight ? H.top : '#d7dbde'}
+            fillOpacity={isHeight ? 1 : 0.6}
+          />
+        ) : null}
 
-      {blade.hamon ? (
-        <path
-          d={hamonPath(art)}
-          fill="none"
-          stroke={isHeight ? H.base : '#8f989f'}
-          strokeWidth={blade.width * 0.06}
-          strokeLinecap="round"
-          opacity={isHeight ? 0.9 : 0.75}
-        />
-      ) : null}
+        {blade.hamon ? (
+          <path
+            d={hamonPath(art)}
+            fill="none"
+            stroke={isHeight ? H.base : '#8f989f'}
+            strokeWidth={blade.width * 0.06}
+            strokeLinecap="round"
+            opacity={isHeight ? 0.9 : 0.75}
+          />
+        ) : null}
 
-      {blade.material === 'crystal' ? <CrystalFacets art={art} layer={layer} /> : null}
-      {blade.segments ? <Segments art={art} layer={layer} /> : null}
-      {blade.links ? <Links art={art} layer={layer} /> : null}
+        {blade.material === 'crystal' ? <CrystalFacets art={art} layer={layer} /> : null}
+        {blade.segments ? <Segments art={art} layer={layer} /> : null}
+        {blade.links ? <Links art={art} layer={layer} /> : null}
+        {blade.holes ? <Holes art={art} layer={layer} /> : null}
+
+        {blade.inscription === 'stars' ? <Stars art={art} layer={layer} /> : null}
+        {blade.inscription === 'runes' ? <Runes art={art} layer={layer} /> : null}
+      </g>
+      {/* 총열은 칼등 밖으로 조금 나오므로 자르지 않습니다. */}
       {blade.barrel ? <Barrel art={art} layer={layer} /> : null}
-      {blade.holes ? <Holes art={art} layer={layer} /> : null}
-
-      {blade.inscription === 'stars' ? <Stars art={art} layer={layer} /> : null}
-      {blade.inscription === 'runes' ? <Runes art={art} layer={layer} /> : null}
       {blade.sleeve ? <Sleeve art={art} layer={layer} /> : null}
     </g>
   );

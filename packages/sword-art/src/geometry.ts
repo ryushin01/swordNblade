@@ -113,6 +113,10 @@ export function bladeOutline(art: SwordArt): Point[] {
         spine.push({ x: spineX + w * 0.12 * u * u, y });
         edgeSide.push({ x: spineX + w * 0.12 * u * u + (w - w * 0.12 * u * u) * curveIn, y });
       }
+    } else if (tip === 'angled' && u > 0) {
+      // 양날이어도 한쪽(날 쪽) 날을 곧게 깎아 다른 쪽 날 끝에서 만납니다(대칭 창끝이 되지 않게).
+      spine.push({ x: cx - w / 2, y });
+      edgeSide.push({ x: cx - w / 2 + w * (1 - u), y });
     } else {
       let half = w / 2;
       if (u > 0 && tip !== 'square') {

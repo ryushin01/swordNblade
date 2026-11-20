@@ -1,7 +1,7 @@
 // @vitest-environment jsdom
 import { beforeEach, describe, expect, it } from 'vitest';
 
-import { CATALOG_V11_IDS, CATALOG_V12_IDS } from './catalog';
+import { CATALOG_V11_IDS, CATALOG_V12_IDS, CATALOG_V13_IDS } from './catalog';
 import { createDb } from './db';
 import { SEED_SWORDS } from './seed';
 
@@ -208,13 +208,32 @@ describe('migrateSeed (시드 버전)', () => {
     const legacy = {
       ...fresh,
       seedVersion: 11,
-      swords: [...fresh.swords.filter((sword) => !CATALOG_V12_IDS.includes(sword.id)), threefold],
+      swords: [
+        ...fresh.swords.filter((sword) => ![...CATALOG_V12_IDS, ...CATALOG_V13_IDS].includes(sword.id)),
+        threefold,
+      ],
     };
     localStorage.setItem('test-db', JSON.stringify(legacy));
     const swords = createDb({ storageKey: 'test-db' }).read().swords;
     expect(swords.some((sword) => sword.id === 'sw-threefold-greatsword')).toBe(false);
-    expect(swords.slice(-CATALOG_V12_IDS.length).map((sword) => sword.id)).toEqual(CATALOG_V12_IDS);
+    expect(swords.slice(-(CATALOG_V12_IDS.length + CATALOG_V13_IDS.length)).map((sword) => sword.id)).toEqual([
+      ...CATALOG_V12_IDS,
+      ...CATALOG_V13_IDS,
+    ]);
     expect(swords).toHaveLength(SEED_SWORDS.length);
+  });
+
+  it('1.2.0(시드 버전 12) 데이터에는 Fate 시리즈와 다른 작품의 검 27점을 뒤에 붙인다', () => {
+    const fresh = createDb({ storageKey: 'test-db' }).read();
+    const legacy = {
+      ...fresh,
+      seedVersion: 12,
+      swords: fresh.swords.filter((sword) => !CATALOG_V13_IDS.includes(sword.id)),
+    };
+    localStorage.setItem('test-db', JSON.stringify(legacy));
+    const swords = createDb({ storageKey: 'test-db' }).read().swords;
+    expect(swords).toHaveLength(SEED_SWORDS.length);
+    expect(swords.slice(-CATALOG_V13_IDS.length).map((sword) => sword.id)).toEqual(CATALOG_V13_IDS);
   });
 
   it('할인을 넣은 뒤의 데이터에서 어드민이 지운 할인은 되살리지 않는다', () => {

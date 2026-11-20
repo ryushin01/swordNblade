@@ -1,7 +1,7 @@
 // @vitest-environment jsdom
 import { beforeEach, describe, expect, it } from 'vitest';
 
-import { CATALOG_V11_IDS, CATALOG_V12_IDS, CATALOG_V13_IDS } from './catalog';
+import { CATALOG_V11_IDS, CATALOG_V12_IDS, CATALOG_V13_IDS, CATALOG_V14_IDS } from './catalog';
 import { SEED_SWORDS } from './seed';
 import { createDb } from './seed-bundle';
 
@@ -248,6 +248,23 @@ describe('migrateSeed (시드 버전)', () => {
         .read()
         .swords.some((sword) => sword.discount),
     ).toBe(false);
+  });
+});
+
+describe('시드 버전 14', () => {
+  beforeEach(() => localStorage.clear());
+
+  it('1.4.0(시드 버전 13) 데이터에는 「가공의 도검」 3단계 1차 16점을 뒤에 붙인다', () => {
+    const fresh = createDb({ storageKey: 'test-db' }).read();
+    const legacy = {
+      ...fresh,
+      seedVersion: 13,
+      swords: fresh.swords.filter((sword) => !CATALOG_V14_IDS.includes(sword.id)),
+    };
+    localStorage.setItem('test-db', JSON.stringify(legacy));
+    const swords = createDb({ storageKey: 'test-db' }).read().swords;
+    expect(swords).toHaveLength(SEED_SWORDS.length);
+    expect(swords.slice(-CATALOG_V14_IDS.length).map((sword) => sword.id)).toEqual(CATALOG_V14_IDS);
   });
 });
 

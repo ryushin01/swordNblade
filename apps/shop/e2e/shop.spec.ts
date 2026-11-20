@@ -17,7 +17,7 @@ test('도검의 벽: 한 쪽에 24점씩 보이고 분류로 거를 수 있다',
   await page.goto('/');
   await expect(page.getByRole('heading', { level: 1, name: '도검의 벽' })).toBeVisible();
   await expect(tiles(page)).toHaveCount(24);
-  await expect(page.getByRole('status').filter({ hasText: '283점 가운데 1–24번째' })).toBeVisible();
+  await expect(page.getByRole('status').filter({ hasText: '299점 가운데 1–24번째' })).toBeVisible();
 
   const categories = page.getByRole('navigation', { name: '도검 분류' });
   await expect(categories.getByRole('link')).toHaveCount(8);
@@ -54,7 +54,7 @@ test('게임·작품 속 검: 원작 이름과 출전을 보여 주고, 비공�
   await page.getByRole('navigation', { name: '도검 분류' }).getByRole('link', { name: '게임·작품 속 검' }).click();
   await expect(page).toHaveURL(/category=fiction/);
   await expect(page.getByRole('heading', { level: 1, name: '게임·작품 속 검' })).toBeVisible();
-  await expect(page.getByRole('status').filter({ hasText: '37점 가운데 1–24번째' })).toBeVisible();
+  await expect(page.getByRole('status').filter({ hasText: '53점 가운데 1–24번째' })).toBeVisible();
 
   await page.goto('/swords/buster-sword');
   await expect(page.getByRole('heading', { level: 1, name: '버스터 소드' })).toBeVisible();

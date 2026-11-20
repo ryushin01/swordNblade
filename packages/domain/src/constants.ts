@@ -6,10 +6,17 @@ export const CATEGORY_LABEL: Record<SwordCategory, string> = {
   middle: '중동·아프리카',
   americas: '신대륙',
   legend: '신화·전설',
+  fantasy: '판타지·게임',
 };
 
 /** 분류를 보여 주는 순서 */
-export const SWORD_CATEGORIES: SwordCategory[] = ['east', 'west', 'middle', 'americas', 'legend'];
+export const SWORD_CATEGORIES: SwordCategory[] = ['east', 'west', 'middle', 'americas', 'legend', 'fantasy'];
+
+/** 실제 역사가 없는 분류(신화·전설 재현품, 판타지·게임 창작품). 연대가 없어 연표에서 빼고, 날을 세우지 않습니다. */
+export const FICTIONAL_CATEGORIES: readonly SwordCategory[] = ['legend', 'fantasy'];
+
+/** 역사 도검 분류인지(연표에 놓을 수 있는지) */
+export const isHistorical = (category: SwordCategory): boolean => !FICTIONAL_CATEGORIES.includes(category);
 
 export const KIND_LABEL: Record<SwordKind, string> = {
   straight: '검(곧은 칼)',
@@ -37,6 +44,7 @@ export const CATEGORY_LABEL_EN: Record<SwordCategory, string> = {
   middle: 'Middle East & Africa',
   americas: 'The Americas',
   legend: 'Myth & Legend',
+  fantasy: 'Fantasy & Games',
 };
 
 export const COUNTRY_NAME: Record<CountryCode, string> = {

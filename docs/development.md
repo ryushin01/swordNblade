@@ -5,7 +5,7 @@
 | 패키지 | 역할 |
 |---|---|
 | `@snb/domain` | 타입(`Sword`, `Order`, `CustomsConfig`), 관세 계산 `estimateCustoms`, 소지허가 판단, 금액·길이 표시 형식 |
-| `@snb/mocks` | 213점 시드 데이터(`seed.ts`의 16점과 `catalog/`의 197점), 메모리 DB(`createDb`), MSW 핸들러, 브라우저(`/browser`)·Node(`/node`) 진입점 |
+| `@snb/mocks` | 247점 시드 데이터(`seed.ts`의 16점과 `catalog/`의 231점), 메모리 DB(`createDb`), MSW 핸들러, 브라우저(`/browser`)·Node(`/node`) 진입점 |
 | `@snb/sword-art` | 도검 부조 `SwordRelief`, 칼날 로고 `BladeMark` |
 | `@snb/shop` | 쇼핑몰 (포트 3000) |
 | `@snb/admin` | 어드민 (포트 3001, `basePath: '/admin'`) |
@@ -32,6 +32,7 @@
 
 - 브라우저: 첫 API 요청 전에 `startMockApi`가 MSW 워커를 켭니다(`shared/api/client.ts`). 두 앱이 같은 워커(`/mockServiceWorker.js`)와 같은 localStorage 키(`snb-db-v1`)를 써서 데이터를 함께 씁니다. 새로고침해도 남고, 저장소를 못 쓰는 환경에서는 메모리로만 동작합니다.
 - Mock DB는 읽고 쓸 때마다 저장소를 다시 읽어, 다른 앱이 바꾼 값을 바로 봅니다. 저장된 값이 없으면 지금 메모리 상태를 유지합니다(시드로 되돌리지 않음).
+- 시드 버전 11(1.1.0)에서 도검 34점(단검·대검 보충, 게임 속 검의 실제 원형, 판타지·게임 분류)을 더했습니다. 예전 데이터에는 뒤에 붙이고, 이미 있는 도검의 판매 정보(이름·가격·재고·할인)는 그대로 둡니다. 새로 더한 id는 `catalog/index.ts`의 `CATALOG_V11_IDS`이고, `db.ts`가 이를 버전 11에 들어온 도검으로 적습니다.
 - 어드민만 따로 열리면 루트에 워커가 없으므로 `/admin/mockServiceWorker.js`를 `/admin` 범위로 등록합니다(`Service-Worker-Allowed` 헤더). 이때는 데이터가 쇼핑몰과 공유되지 않습니다.
 - 테스트: `NEXT_PUBLIC_API_MOCKING=off`로 브라우저 워커를 끄고 `createMockServer()`(MSW Node)를 씁니다.
 - 주문 금액은 클라이언트가 보낸 값을 쓰지 않고 Mock 서버가 주문 시각의 판매가(할인 적용)와 `estimateCustoms`로 다시 계산합니다. 재고 부족(409), 입력 오류(422)도 서버에서 판단합니다.
@@ -128,7 +129,7 @@ E2E는 `next start`(프로덕션 빌드)를 띄워 데스크톱·모바일(Pixel
 
 ## 도검별 공유 이미지
 
-`apps/shop/public/og/swords/<slug>.jpg`(1200×630)는 부조 그림의 SVG 필터 때문에 실제 브라우저로 그려 저장합니다. 시드 도검이 바뀌면 프로덕션 서버를 띄우고 `node scripts/generate-og.mjs http://localhost:3101`을 `apps/shop`에서 실행합니다. 파일이 빠지면 단위 테스트가 실패합니다.
+`apps/shop/public/og/swords/<slug>.jpg`(1200×630)는 부조 그림의 SVG 필터 때문에 실제 브라우저로 그려 저장합니다. 시드 도검이 바뀌면 프로덕션 서버를 띄우고 `node scripts/generate-og.mjs http://localhost:3101`을 `apps/shop`에서 실행합니다. 새로 더한 도검만 만들 때는 `--missing`을 붙입니다(이미 있는 이미지는 그대로). 파일이 빠지면 단위 테스트가 실패합니다.
 
 ## 성능 (Lighthouse, 모바일)
 
@@ -183,7 +184,7 @@ VoiceOver로 직접 들어 보는 점검은 사람이 해야 합니다. 다음�
 ## 품질 예산
 
 - **접근성 린트:** `eslint-config-next`는 jsx-a11y 규칙을 몇 개만 켭니다. 루트 `eslint.config.mjs`에서 이미 등록된 플러그인의 recommended 규칙을 모두 켭니다. 가로 스크롤용 `role="region"` + `tabIndex={0}`은 허용합니다.
-- **번들 크기:** `pnpm --filter @snb/shop size`가 쇼핑몰 전체 JS 550 kB, CSS 10 kB(gzip)를 넘으면 실패합니다. 기준은 `apps/shop/.size-limit.json`에 있습니다. 0.12.0에서 화면 전환(SSGOI, 약 31 kB)을 넣으며 520 kB에서 올렸습니다. 슬라이스 공개 API(`index.ts`)로 내보낸 모듈은 그 슬라이스를 가져오는 화면 묶음마다 들어가므로, 한 화면에서만 쓰는 컴포넌트는 그 페이지 슬라이스에 두고, 화면에 들어가는 공통 모듈에는 다른 곳에서만 쓰는 코드(예: 할인 입력 검증 `discount-validation.ts`)를 섞지 않습니다.
+- **번들 크기:** `pnpm --filter @snb/shop size`가 쇼핑몰 전체 JS 575 kB, CSS 12 kB(gzip)를 넘으면 실패합니다. 기준은 `apps/shop/.size-limit.json`에 있습니다. 0.12.0에서 화면 전환(SSGOI, 약 31 kB)을 넣으며 520 kB에서, 1.1.0에서 도검 34점(브라우저 Mock API가 쓰는 시드 데이터, 약 18 kB)을 더하며 550 kB에서 올렸습니다. 슬라이스 공개 API(`index.ts`)로 내보낸 모듈은 그 슬라이스를 가져오는 화면 묶음마다 들어가므로, 한 화면에서만 쓰는 컴포넌트는 그 페이지 슬라이스에 두고, 화면에 들어가는 공통 모듈에는 다른 곳에서만 쓰는 코드(예: 할인 입력 검증 `discount-validation.ts`)를 섞지 않습니다.
 - **화면 전환(SSGOI):** 제공자는 `_app/transitions/page-transitions.tsx`, 규칙은 `config.ts`, 경계(`RouteBoundary`)는 루트 레이아웃의 `main` 안에 둡니다.
   - 경계는 Suspense 없이 직접 만듭니다. `@ssgoi/react/nextjs`의 `SsgoiRouteBoundary`는 Suspense를 품어, 자바스크립트 없이 열면 비동기로 그리는 화면이 숨은 채로 남고, 경계 안에서 `notFound()`가 스트리밍 뒤에 나면 404 대신 200이 됩니다(이 앱은 `cacheComponents`를 쓰지 않아 `usePathname`이 멈추지 않음).
   - 404 화면도 경계 안에 둡니다. 경계 밖에 두면 앱 안에서 없는 주소로 이동할 때 떠나는 화면이 지워지지 않고 남습니다.

@@ -91,8 +91,14 @@ function SwordDetailView({ sword: source }: { sword: Sword }) {
             </OrnamentHeading>
             <h1 className="font-sword text-4xl text-carved">{sword.name}</h1>
             <p className="small-caps text-ink-muted">
-              {locale === 'ko' ? <span lang="en">{sword.nameEn}</span> : <span lang="ko">{source.name}</span>} ·{' '}
-              <span>{sword.nameOriginal}</span>
+              {locale === 'ko' ? <span lang="en">{sword.nameEn}</span> : <span lang="ko">{source.name}</span>}
+              {/* 원어 이름이 영어 이름과 같으면(Zweihänder, 판타지 창작품 등) 한 번만 보여 줍니다. */}
+              {locale === 'ko' && sword.nameOriginal === sword.nameEn ? null : (
+                <>
+                  {' '}
+                  · <span>{sword.nameOriginal}</span>
+                </>
+              )}
             </p>
             <p className="text-sm small-caps text-ink-muted">
               {t('origin', { era: sword.era, country: countryName(sword.origin, locale) })}
@@ -123,9 +129,17 @@ function SwordDetailView({ sword: source }: { sword: Sword }) {
                 <>
                   <strong className="font-semibold text-accent">{t('permitTitle')}</strong> · {t('permitBody')}
                 </>
+              ) : sword.specs.edge === 'sharp' ? (
+                // 날이 선 15cm 미만 칼(장도·마키리·코즈카)은 장식용이 아니므로 따로 알립니다.
+                <>
+                  <strong className="font-semibold text-accent">{t('shortBladeTitle')}</strong> · {t('shortBladeBody')}
+                </>
               ) : (
                 <>
-                  <strong className="font-semibold text-accent">{t('bluntTitle')}</strong> · {t('bluntBody')}
+                  <strong className="font-semibold text-accent">
+                    {sword.category === 'fantasy' ? t('originalTitle') : t('bluntTitle')}
+                  </strong>{' '}
+                  · {t('bluntBody')}
                 </>
               )}
             </p>

@@ -1,6 +1,7 @@
 // @vitest-environment jsdom
 import { beforeEach, describe, expect, it } from 'vitest';
 
+import { CATALOG_V11_IDS } from './catalog';
 import { createDb } from './db';
 import { SEED_SWORDS } from './seed';
 
@@ -150,6 +151,24 @@ describe('migrateSeed (시드 버전)', () => {
     localStorage.setItem('test-db', JSON.stringify(legacy(7_000_000)));
     expect(createDb({ storageKey: 'test-db' }).read().swords[0]?.price).toBe(7_000_000);
   });
+
+  it('가격·출처 보정 뒤의 데이터(버전 10)에서 어드민이 정한 쌍수도 가격과 쿠루찌 원어·출고국은 다시 바꾸지 않는다', () => {
+    const fresh = createDb({ storageKey: 'test-db' }).read();
+    const current = {
+      ...fresh,
+      seedVersion: 10,
+      swords: fresh.swords.map((sword) => {
+        if (sword.id === 'sw-001') return { ...sword, price: 6_800_000 };
+        if (sword.id === 'sw-kuruchi') return { ...sword, origin: 'IQ' as const, nameEn: 'Kuruchi' };
+        return sword;
+      }),
+    };
+    localStorage.setItem('test-db', JSON.stringify(current));
+    const swords = createDb({ storageKey: 'test-db' }).read().swords;
+    expect(swords.find((sword) => sword.id === 'sw-001')?.price).toBe(6_800_000);
+    expect(swords.find((sword) => sword.id === 'sw-kuruchi')).toMatchObject({ origin: 'IQ', nameEn: 'Kuruchi' });
+  });
+
   it('할인이 생기기 전 데이터에는 시드 할인을 채우고, 어드민에서 정한 할인은 둔다', () => {
     const fresh = createDb({ storageKey: 'test-db' }).read();
     const seeded = fresh.swords.find((sword) => sword.id === 'sw-006')?.discount;
@@ -165,6 +184,22 @@ describe('migrateSeed (시드 버전)', () => {
     const swords = createDb({ storageKey: 'test-db' }).read().swords;
     expect(swords.find((sword) => sword.id === 'sw-006')?.discount).toEqual(seeded);
     expect(swords.find((sword) => sword.id === 'sw-009')?.discount).toEqual({ rate: 30 });
+  });
+
+  it('1.0.0(시드 버전 10) 데이터에는 1.1.0에 더한 단검·대검·판타지 도검을 뒤에 붙이고, 고친 판매 정보는 둔다', () => {
+    const fresh = createDb({ storageKey: 'test-db' }).read();
+    const legacy = {
+      ...fresh,
+      seedVersion: 10,
+      swords: fresh.swords
+        .filter((sword) => !CATALOG_V11_IDS.includes(sword.id))
+        .map((sword) => (sword.id === 'sw-tanto' ? { ...sword, price: 1_234_000, stock: 0 } : sword)),
+    };
+    localStorage.setItem('test-db', JSON.stringify(legacy));
+    const swords = createDb({ storageKey: 'test-db' }).read().swords;
+    expect(swords).toHaveLength(SEED_SWORDS.length);
+    expect(swords.slice(-CATALOG_V11_IDS.length).map((sword) => sword.id)).toEqual(CATALOG_V11_IDS);
+    expect(swords.find((sword) => sword.id === 'sw-tanto')).toMatchObject({ price: 1_234_000, stock: 0 });
   });
 
   it('할인을 넣은 뒤의 데이터에서 어드민이 지운 할인은 되살리지 않는다', () => {

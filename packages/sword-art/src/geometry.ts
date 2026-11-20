@@ -311,6 +311,8 @@ export function localBounds(art: SwordArt): Bounds {
   const halfBlade = maxWidth / 2 + Math.abs(blade.curve) + (blade.wave ?? 0) + (blade.teeth ? blade.width * 0.4 : 0);
   // 두 번째 칼날은 칼등 쪽(왼쪽)에 붙습니다.
   const twin = blade.twin ? blade.twin.gap + blade.twin.width : 0;
+  // 열쇠 이빨은 칼끝 날 쪽(오른쪽)으로 나옵니다.
+  const keyBit = blade.keyBit ? blade.width * 1.8 : 0;
   const sickle = blade.tip === 'sickle' ? blade.width * 2.4 : 0;
   const hook = blade.tip === 'hook' ? blade.width * 2.8 : 0;
   // 손등 보호대·바구니는 손잡이 옆(날 쪽)으로 나옵니다.
@@ -320,7 +322,7 @@ export function localBounds(art: SwordArt): Bounds {
   const tassel = art.tassel ? 120 : 0;
   return {
     minX: -Math.max(halfBlade + hook + twin, halfGuard, crook, 40),
-    maxX: Math.max(halfBlade + sickle, halfGuard, bow, 40) + tassel * 0.7,
+    maxX: Math.max(halfBlade + sickle + keyBit, halfGuard, bow, 40) + tassel * 0.7,
     minY: -blade.length - 4 - (hook ? blade.width * 1.8 : 0),
     maxY: layout.pommelEnd + tassel,
   };
@@ -345,6 +347,34 @@ export function twinBladeOutline(art: SwordArt): Point[] | null {
   }
   const tip = bladePoint(art, end, 0);
   return [...back, { x: tip.x - twin.gap - twin.width * 0.15, y: tip.y }, ...front.reverse()];
+}
+
+/**
+ * 열쇠 이빨(keyBit)의 외곽선. 칼끝 앞 1할 남짓 구간의 날 쪽에, 바깥쪽으로 칼날 너비의 1.8배만큼 나온 판에 홈 두 개를 파
+ * 이빨 셋을 만듭니다. keyBit이 없으면 null입니다.
+ */
+export function keyBitOutline(art: SwordArt): Point[] | null {
+  if (!art.blade.keyBit) return null;
+  const from = Math.max(0.5, bladeTipStart(art) - (art.blade.width * 2.2) / art.blade.length);
+  const to = Math.max(from + 0.02, bladeTipStart(art) - 0.005);
+  const depth = art.blade.width * 1.8;
+  const at = (ratio: number, out: number): Point => {
+    const p = bladePoint(art, from + (to - from) * ratio, 1);
+    return { x: p.x + out, y: p.y };
+  };
+  const profile: Array<[number, number]> = [
+    [0, depth],
+    [0.22, depth],
+    [0.22, depth * 0.55],
+    [0.4, depth * 0.55],
+    [0.4, depth],
+    [0.6, depth],
+    [0.6, depth * 0.55],
+    [0.78, depth * 0.55],
+    [0.78, depth],
+    [1, depth],
+  ];
+  return [at(0, 0), ...profile.map(([ratio, out]) => at(ratio, out)), at(1, 0)];
 }
 
 export const ROTATION_DEG = 45;

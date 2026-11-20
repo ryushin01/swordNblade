@@ -97,7 +97,7 @@ export interface SwordArt {
     /** 칼날 밑동 가운데에 길이 방향으로 뚫은 둥근 구멍 수(1~4, 버스터 소드) */
     holes?: number;
     /**
-     * 칼날에 박은 둥근 메달리온(파멸의 인도자). at은 밑동에서 칼끝까지의 위치(0~1), size는 그 자리 칼날 너비에 대한 지름 비율,
+     * 칼날에 박은 둥근 메달리온(파멸의 인도자). at은 밑동에서 칼끝까지의 위치(0~1), size는 그 자리 칼날 너비에 대한 지름 비율(0.15~2),
      * across는 너비 방향 위치(0 등 ~ 1 날, 기본 0.5)입니다. 칼등 밖으로 조금 나와도 됩니다.
      */
     medallion?: {
@@ -113,6 +113,8 @@ export interface SwordArt {
      * length는 큰 칼날 길이에 대한 비율(기본 0.9)입니다. 끝은 뾰족합니다.
      */
     twin?: { width: number; gap: number; length?: number };
+    /** 열쇠 이빨(키블레이드): 칼끝 날 쪽에 홈이 셋 진 열쇠 이빨을 붙입니다. 칼날 너비의 1.8배만큼 날 쪽으로 나옵니다. */
+    keyBit?: boolean;
   };
   collar?: { color: string };
   guard: {

@@ -1,0 +1,13 @@
+name: 설치
+description: pnpm·Node 준비와 의존성 설치(작업마다 같은 단계)
+runs:
+  using: composite
+  steps:
+    # pnpm 버전은 package.json의 packageManager를 따름
+    - uses: pnpm/action-setup@v4
+    - uses: actions/setup-node@v5
+      with:
+        node-version-file: .nvmrc
+        cache: pnpm
+    - run: pnpm install --frozen-lockfile
+      shell: bash

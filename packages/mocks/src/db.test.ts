@@ -151,6 +151,24 @@ describe('migrateSeed (시드 버전)', () => {
     localStorage.setItem('test-db', JSON.stringify(legacy(7_000_000)));
     expect(createDb({ storageKey: 'test-db' }).read().swords[0]?.price).toBe(7_000_000);
   });
+
+  it('가격·출처 보정 뒤의 데이터(버전 10)에서 어드민이 정한 쌍수도 가격과 쿠루찌 원어·출고국은 다시 바꾸지 않는다', () => {
+    const fresh = createDb({ storageKey: 'test-db' }).read();
+    const current = {
+      ...fresh,
+      seedVersion: 10,
+      swords: fresh.swords.map((sword) => {
+        if (sword.id === 'sw-001') return { ...sword, price: 6_800_000 };
+        if (sword.id === 'sw-kuruchi') return { ...sword, origin: 'IQ' as const, nameEn: 'Kuruchi' };
+        return sword;
+      }),
+    };
+    localStorage.setItem('test-db', JSON.stringify(current));
+    const swords = createDb({ storageKey: 'test-db' }).read().swords;
+    expect(swords.find((sword) => sword.id === 'sw-001')?.price).toBe(6_800_000);
+    expect(swords.find((sword) => sword.id === 'sw-kuruchi')).toMatchObject({ origin: 'IQ', nameEn: 'Kuruchi' });
+  });
+
   it('할인이 생기기 전 데이터에는 시드 할인을 채우고, 어드민에서 정한 할인은 둔다', () => {
     const fresh = createDb({ storageKey: 'test-db' }).read();
     const seeded = fresh.swords.find((sword) => sword.id === 'sw-006')?.discount;

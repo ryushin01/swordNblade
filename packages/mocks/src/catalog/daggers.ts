@@ -102,8 +102,8 @@ export const DAGGER_ENTRIES: CatalogEntry[] = [
       'A small utility knife slotted into the side of a sword scabbard.',
     ],
     description: [
-      `칼자루(코즈카)에 작은 칼날(코가타나)을 끼운 손칼로, 칼집 옆 홈에 꽂아 다녔습니다. 칼날이 15cm에 못 미쳐 한국에서는 도검 소지 허가 대상이 아닙니다. ${REPLICA_KO}`,
-      `A small blade (kogatana) set in a handle (kozuka), carried in a slot on the side of the scabbard. With a blade under 15 cm, it needs no sword possession permit in Korea. ${REPLICA_EN}`,
+      `칼자루(코즈카)에 작은 칼날(코가타나)을 끼운 손칼로, 칼집 옆 홈에 꽂아 다녔습니다. ${REPLICA_KO}`,
+      `A small blade (kogatana) set in a handle (kozuka), carried in a slot on the side of the scabbard. ${REPLICA_EN}`,
     ],
     material: ['고탄소강, 구리 합금(시부이치) 칼자루', 'High-carbon steel, copper-alloy (shibuichi) handle'],
     stories: [

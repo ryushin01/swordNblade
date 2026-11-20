@@ -49,6 +49,13 @@ test('판타지·게임: 창작 도검을 따로 거르고, 상세에 창작품�
   await expectNoHorizontalOverflow(page);
 });
 
+test('상세: 날이 선 15cm 미만 칼(장도)은 장식용이 아니라 15cm 미만 진검이라고 알린다', async ({ page }) => {
+  await page.goto('/swords/jangdo');
+  await expect(page.getByText('15cm 미만 진검', { exact: true })).toBeVisible();
+  await expect(page.getByText('장식용 재현품', { exact: true })).toHaveCount(0);
+  await expect(page.getByText('소지허가 대상', { exact: true })).toHaveCount(0);
+});
+
 test('쪽 이동과 형태 거르기: 조건이 주소에 남는다', async ({ page }) => {
   await page.goto('/?category=legend');
   const pages = page.getByRole('navigation', { name: '목록 쪽 이동' });

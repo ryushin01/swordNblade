@@ -69,13 +69,19 @@ export function seedAddedIn(id: string): number {
   return ADDED_IN[id] ?? (/^sw-\d{3}$/.test(id) ? 1 : 3);
 }
 
-/** 시드 가격을 바꾼 도검(옛 기본값 → 새 값) */
-const PRICE_FIXES: Record<string, { from: number; to: number }> = {
-  'sw-001': { from: 6_800_000, to: 17_600_000 },
+/**
+ * 시드 가격을 바꾼 도검(옛 기본값 → 새 값). before 버전보다 낮은 데이터에만 적용합니다.
+ * 그 뒤의 데이터에서 어드민이 옛 기본값과 같은 가격을 정했으면 그대로 둡니다(시드 버전이 오를 때마다 다시 바꾸지 않음).
+ */
+const PRICE_FIXES: Record<string, { from: number; to: number; before: number }> = {
+  'sw-001': { from: 6_800_000, to: 17_600_000, before: 9 },
 };
 
-/** 출처 대조로 원어·영어 이름과 출고국을 바로잡은 도검. 예전 데이터에서도 새 값으로 바꿉니다(한국어 이름·가격은 둠). */
-const IDENTITY_FIXED_IDS = ['sw-kuruchi'];
+/**
+ * 출처 대조로 원어·영어 이름과 출고국을 바로잡은 도검과 바로잡은 시드 버전. 그보다 낮은 데이터에서만 새 값으로 바꿉니다
+ * (한국어 이름·가격은 둠, 그 뒤 어드민이 고친 값은 둠).
+ */
+const IDENTITY_FIXED_IN: Record<string, number> = { 'sw-kuruchi': 7 };
 
 /** 출처를 확인하지 못했거나 다른 도검으로 바꿔 시드에서 뺀 도검. 예전 데이터에서도 지웁니다. */
 const REMOVED_SEED_IDS = ['sw-ings-sword', 'sw-hwer', 'sw-ecke-king', 'sw-samingeom'];
@@ -103,7 +109,7 @@ export function migrateSeed(state: DbState): DbState {
     if (!seed) return sword;
     return {
       ...sword,
-      ...(IDENTITY_FIXED_IDS.includes(sword.id)
+      ...(storedVersion < (IDENTITY_FIXED_IN[sword.id] ?? 0)
         ? { nameOriginal: seed.nameOriginal, nameEn: seed.nameEn, origin: seed.origin }
         : {}),
       kind: seed.kind,
@@ -132,7 +138,7 @@ export function migrateSeed(state: DbState): DbState {
   // 시드 가격을 바꾼 도검은, 저장된 가격이 옛 기본값 그대로일 때만 새 가격으로 맞춥니다(어드민에서 고친 가격은 둠).
   const repriced = kept.map((sword) => {
     const fix = PRICE_FIXES[sword.id];
-    return fix && sword.price === fix.from ? { ...sword, price: fix.to } : sword;
+    return fix && storedVersion < fix.before && sword.price === fix.from ? { ...sword, price: fix.to } : sword;
   });
   return { ...state, swords: [...repriced, ...added], seedVersion: SEED_VERSION };
 }

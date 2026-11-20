@@ -105,6 +105,8 @@
     "edgeBlunt": "Decorative (unsharpened)",
     "permitTitle": "Permit required",
     "permitBody": "This is a live blade of 15 cm or longer. Owning it in Korea requires a permit from the local police.",
+    "shortBladeTitle": "Live blade under 15 cm",
+    "shortBladeBody": "The edge is sharp, but the blade is under 15 cm, below Korea's 15 cm permit threshold. Carrying it concealed without good reason can still be an offence. We will remind you of your country’s rules before payment.",
     "bluntTitle": "Decorative replica",
     "originalTitle": "Decorative original",
     "bluntBody": "The edge is not sharpened. We will remind you of your country’s rules before payment.",

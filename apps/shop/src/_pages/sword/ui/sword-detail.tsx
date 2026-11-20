@@ -129,6 +129,11 @@ function SwordDetailView({ sword: source }: { sword: Sword }) {
                 <>
                   <strong className="font-semibold text-accent">{t('permitTitle')}</strong> · {t('permitBody')}
                 </>
+              ) : sword.specs.edge === 'sharp' ? (
+                // 날이 선 15cm 미만 칼(장도·마키리·코즈카)은 장식용이 아니므로 따로 알립니다.
+                <>
+                  <strong className="font-semibold text-accent">{t('shortBladeTitle')}</strong> · {t('shortBladeBody')}
+                </>
               ) : (
                 <>
                   <strong className="font-semibold text-accent">

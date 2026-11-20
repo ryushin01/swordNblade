@@ -2,15 +2,18 @@
 
 ## GitHub Actions (`.github/workflows/ci.yml`)
 
-`main` 푸시와 PR마다 실행합니다.
+`main` 푸시와 PR마다 실행합니다. 서로 기다릴 필요 없는 검사는 작업을 나눠 동시에 돌립니다. 작업마다 같은 설치 단계는 `.github/actions/setup`(pnpm·Node 준비, `pnpm install --frozen-lockfile`)으로 묶었습니다.
 
-1. `pnpm install --frozen-lockfile`
-2. `pnpm lint` (ESLint + Steiger FSD 규칙), `pnpm format:check`
-3. `pnpm typecheck`
-4. `pnpm test`
-5. Chromium 설치 후 `pnpm test:storybook` (모든 스토리 렌더링 + axe)
-6. `pnpm build` (두 앱, Storybook 포함)
-7. 두 앱 E2E (프로덕션 빌드, 데스크톱·모바일, axe, 두 앱 데이터 공유)
+| 작업 | 내용 | 기다리는 작업 |
+| --- | --- | --- |
+| 바뀐 파일 분류 | 바뀐 파일이 모두 Markdown(`*.md`)인지 확인 | - |
+| Lint · Format · Typecheck · Test | `pnpm lint`(ESLint + Steiger FSD 규칙), `pnpm format:check`, `pnpm typecheck`, `pnpm test:coverage` | - |
+| Storybook | Chromium 설치 후 `pnpm test:storybook`(모든 스토리 렌더링 + axe) | 분류 |
+| Build · Size | `pnpm build`(두 앱, Storybook 포함), 쇼핑몰 `size`. 빌드 결과물(`.next`, `public/storybook`)을 `build.tar` 하나로 올림 | 분류 |
+| E2E (쇼핑몰) · E2E (어드민) | 빌드 결과물을 받아 각 앱 E2E(프로덕션 빌드, 데스크톱·모바일, axe, 두 앱 데이터 공유) | 빌드 |
+| Lighthouse | 빌드 결과물을 받아 쇼핑몰 `lhci` | 빌드 |
+
+문서·기록만 바뀐 변경(바뀐 파일이 모두 Markdown)은 Storybook·E2E·Lighthouse를 건너뜁니다. 코드·설정·데이터·이미지가 하나라도 바뀌면 전체 검사를 돕니다. `main`에는 필수 상태 검사를 걸지 않았으므로 작업 이름을 바꿔도 막히는 조건은 없습니다.
 
 CI는 `ADMIN_ORIGIN=http://localhost:3102`로 빌드해, 쇼핑몰의 `/admin`이 로컬 어드민 서버로 넘어가게 합니다.
 

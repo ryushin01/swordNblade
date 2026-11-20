@@ -1,5 +1,5 @@
 import { fiction, STEEL_BLUNT, STEEL_BLUNT_EN } from './fiction-kit';
-import { BRONZE, GOLD, GOLD_LIGHT, IRON, RUBY, SAPPHIRE, SILVER } from './legend-kit';
+import { GOLD, GOLD_LIGHT, IRON, RUBY, SAPPHIRE, SILVER } from './legend-kit';
 
 import type { CatalogEntry } from './build';
 
@@ -32,7 +32,7 @@ export const FATE_ENTRIES: CatalogEntry[] = [
     price: 7_800_000,
     art: {
       blade: { length: 900, width: 50, curve: 0, edge: 'double', tip: 'spear', fuller: true, color: '#e6e2d0' },
-      guard: { type: 'cross', width: 220, color: GOLD, accent: SAPPHIRE },
+      guard: { type: 'crescent', width: 260, color: GOLD, accent: SAPPHIRE },
       grip: { length: 220, color: '#2f4f9a', wrap: 'wire', wrapColor: GOLD },
       pommel: { type: 'gem', color: GOLD, gem: SAPPHIRE },
     },
@@ -59,8 +59,8 @@ export const FATE_ENTRIES: CatalogEntry[] = [
     price: 7_200_000,
     art: {
       blade: { length: 1000, width: 46, curve: 0, edge: 'double', tip: 'spear', ridge: true, color: '#e6d8a8' },
-      guard: { type: 'quillon', width: 240, color: GOLD_LIGHT, accent: RUBY },
-      grip: { length: 220, color: '#e8dcc0', wrap: 'wire', wrapColor: GOLD },
+      guard: { type: 'cross', width: 230, color: GOLD_LIGHT, accent: SAPPHIRE },
+      grip: { length: 220, color: '#2a3a7a', wrap: 'wire', wrapColor: GOLD },
       pommel: { type: 'gem', color: GOLD, gem: RUBY },
     },
   }),
@@ -90,16 +90,16 @@ export const FATE_ENTRIES: CatalogEntry[] = [
     art: {
       blade: {
         length: 450,
-        width: 60,
-        curve: 20,
+        width: 56,
+        curve: 45,
         edge: 'single',
         tip: 'clip',
+        flare: 1.5,
         color: '#2a2826',
-        inscription: 'runes',
       },
-      guard: { type: 'block', width: 60, color: '#2a2826' },
-      grip: { length: 140, color: '#3a3634', wrap: 'cord', wrapColor: '#1f1c1a' },
-      pommel: { type: 'ring', color: '#2a2826' },
+      guard: { type: 'crescent', width: 110, color: '#8a4a2a' },
+      grip: { length: 140, color: '#1f1c1a', wrap: 'cord', wrapColor: '#3a3634' },
+      pommel: { type: 'cap', color: '#8a4a2a' },
     },
   }),
   fiction({
@@ -130,12 +130,11 @@ export const FATE_ENTRIES: CatalogEntry[] = [
         curve: 0,
         edge: 'double',
         tip: 'spear',
-        links: 2,
-        color: '#3a3436',
-        inscription: 'runes',
+        segments: 3,
+        color: '#3a1616',
       },
-      guard: { type: 'block', width: 140, color: GOLD, accent: RUBY },
-      grip: { length: 200, color: '#1f1c1a', wrap: 'ribbed' },
+      guard: { type: 'crescent', width: 200, color: GOLD, accent: SAPPHIRE },
+      grip: { length: 200, color: GOLD, wrap: 'ribbed' },
       pommel: { type: 'gem', color: GOLD, gem: RUBY },
     },
   }),
@@ -168,7 +167,6 @@ export const FATE_ENTRIES: CatalogEntry[] = [
         tip: 'spear',
         fuller: true,
         color: '#c8d4e0',
-        inscription: 'runes',
       },
       guard: { type: 'cross', width: 220, color: GOLD, accent: '#e8e4d8' },
       grip: { length: 210, color: '#ece6d6', wrap: 'wire', wrapColor: GOLD },
@@ -229,7 +227,7 @@ export const FATE_ENTRIES: CatalogEntry[] = [
         tip: 'spear',
         material: 'crystal',
         color: '#c46a5a',
-        inscription: 'runes',
+        teeth: true,
       },
       guard: { type: 'block', width: 160, color: IRON },
       grip: { length: 220, color: '#2a2420', wrap: 'cord', wrapColor: '#5a3a2a' },
@@ -246,8 +244,8 @@ export const FATE_ENTRIES: CatalogEntry[] = [
       'Fergus mac Róich’s rainbow sword, its blade twisted into a spiral.',
     ],
     description: [
-      '드릴처럼 깎아 내는 나선형 칼날을 물결로 그렸고, 길이는 쓰는 이의 키보다 조금 큽니다. 랭크 A++의 대군보구입니다.',
-      'Its spiral blade, which grinds like a drill, is drawn as a rippling edge, a little taller than its wielder—an A++ rank Anti-Army Noble Phantasm.',
+      '드릴처럼 깎아 내는 나선형 칼날을 칼끝으로 좁아지는 원뿔과 나선 이음매로 그리고, 초록 코등이와 붕대 감은 손잡이를 맞췄습니다. 길이는 쓰는 이의 키보다 조금 큽니다. 랭크 A++의 대군보구입니다.',
+      'Its spiral blade, which grinds like a drill, is drawn as a cone narrowing to the tip with spiral seams, with a green guard and a bandaged grip; a little taller than its wielder—an A++ rank Anti-Army Noble Phantasm.',
     ],
     story: [
       'Fate/Grand Order',
@@ -260,18 +258,17 @@ export const FATE_ENTRIES: CatalogEntry[] = [
     art: {
       blade: {
         length: 1450,
-        width: 64,
+        width: 200,
         curve: 0,
         edge: 'double',
         tip: 'spear',
-        wave: 7,
-        waves: 14,
-        ridge: true,
-        color: '#b8bcd8',
+        flare: 0.2,
+        segments: 4,
+        color: '#e6e6e2',
       },
-      guard: { type: 'block', width: 180, color: BRONZE },
-      grip: { length: 280, color: '#3a2a20', wrap: 'leather' },
-      pommel: { type: 'ball', color: IRON },
+      guard: { type: 'disc', width: 260, color: '#2f7a4a', accent: GOLD },
+      grip: { length: 280, color: '#e8e4da', wrap: 'cord', wrapColor: '#cfc8b4' },
+      pommel: { type: 'ball', color: '#2f7a4a' },
     },
   }),
   fiction({
@@ -297,7 +294,7 @@ export const FATE_ENTRIES: CatalogEntry[] = [
     price: 7_300_000,
     art: {
       blade: { length: 1150, width: 60, curve: 0, edge: 'double', tip: 'spear', ridge: true, color: '#e8eaf0' },
-      guard: { type: 'quillon', width: 260, color: SILVER, accent: RUBY },
+      guard: { type: 'cross', width: 300, color: SILVER, accent: RUBY },
       grip: { length: 280, color: '#7a1f2a', wrap: 'wire', wrapColor: SILVER },
       pommel: { type: 'gem', color: SILVER, gem: RUBY },
     },
@@ -351,7 +348,7 @@ export const FATE_ENTRIES: CatalogEntry[] = [
     price: 7_500_000,
     art: {
       blade: { length: 920, width: 52, curve: 0, edge: 'double', tip: 'spear', ridge: true, color: '#f0ecdc' },
-      guard: { type: 'cross', width: 220, color: GOLD_LIGHT, accent: SAPPHIRE },
+      guard: { type: 'crescent', width: 260, color: GOLD_LIGHT, accent: SAPPHIRE },
       grip: { length: 220, color: '#ece6d6', wrap: 'wire', wrapColor: GOLD },
       pommel: { type: 'gem', color: GOLD, gem: SAPPHIRE },
     },

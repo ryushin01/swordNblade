@@ -7,6 +7,7 @@ import { FATE_ENTRIES } from './fiction-fate';
 import { WORKS_ENTRIES } from './fiction-works';
 import { WORKS2_ENTRIES } from './fiction-works-2';
 import { WORKS3_ENTRIES } from './fiction-works-3';
+import { WORKS4_ENTRIES } from './fiction-works-4';
 import { GAME_ORIGIN_ENTRIES } from './game-origins';
 import { GREATSWORD_ENTRIES } from './greatswords';
 import { LEGEND_A } from './legend-a';
@@ -45,6 +46,7 @@ export const CATALOG_SWORDS = buildCatalog([
   ...WORKS_ENTRIES,
   ...WORKS2_ENTRIES,
   ...WORKS3_ENTRIES,
+  ...WORKS4_ENTRIES,
 ]);
 
 const V11_SLUGS = new Set([...V11_HISTORICAL, ...FANTASY_ENTRIES].map((entry) => entry.slug));
@@ -79,5 +81,12 @@ const V15_SLUGS = new Set(WORKS3_ENTRIES.map((entry) => entry.slug));
 
 /** 시드 버전 15에 들어온 도검 id(「가공의 도검」 3단계 2차, 사용자가 고른 목록과 봉뢰검, 시드 순서). */
 export const CATALOG_V15_IDS: readonly string[] = CATALOG_SWORDS.filter((sword) => V15_SLUGS.has(sword.slug)).map(
+  (sword) => sword.id,
+);
+
+const V18_SLUGS = new Set(WORKS4_ENTRIES.map((entry) => entry.slug));
+
+/** 시드 버전 18에 들어온 도검 id(생김새를 확인하지 못해 미뤘던 검 5점, 시드 순서). */
+export const CATALOG_V18_IDS: readonly string[] = CATALOG_SWORDS.filter((sword) => V18_SLUGS.has(sword.slug)).map(
   (sword) => sword.id,
 );

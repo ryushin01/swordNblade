@@ -13,6 +13,7 @@ import {
   type HiltLayout,
   hiltLayout,
   hookTipPath,
+  keyBitOutline,
   type Point,
   pointsToPath,
   type ReliefFocus,
@@ -197,6 +198,7 @@ function renderParts(art: SwordArt, layout: HiltLayout, layer: Layer, id: (name:
     <>
       {art.blade.twin ? <TwinBlade art={art} fill={bladeFill} opacity={bladeOpacity} /> : null}
       <Blade art={art} fill={bladeFill} opacity={bladeOpacity} layer={layer} clipId={id('blade')} />
+      {art.blade.keyBit ? <KeyBit art={art} fill={bladeFill} opacity={bladeOpacity} /> : null}
       {art.collar ? <Collar art={art} layout={layout} layer={layer} /> : null}
       <Guard art={art} layout={layout} layer={layer} />
       <Grip art={art} layout={layout} layer={layer} clipId={id('grip')} />
@@ -418,7 +420,7 @@ function Medallion({ art, layer }: { art: SwordArt; layer: Layer }) {
   const isHeight = layer === 'height';
   const t = Math.min(0.95, Math.max(0.02, medallion.at));
   const center = bladePoint(art, t, Math.min(1, Math.max(0, medallion.across ?? 0.5)));
-  const r = (bladeWidthAt(art, t) * Math.min(1.2, Math.max(0.15, medallion.size))) / 2;
+  const r = (bladeWidthAt(art, t) * Math.min(2, Math.max(0.15, medallion.size))) / 2;
   return (
     <g>
       <circle cx={center.x} cy={center.y} r={r} fill={isHeight ? H.base : '#00000055'} />
@@ -457,6 +459,13 @@ const EMBLEMS: Record<NonNullable<NonNullable<SwordArt['blade']['medallion']>['e
   cross: 'M-0.18 -0.85 H0.18 V-0.18 H0.85 V0.18 H0.18 V0.85 H-0.18 V0.18 H-0.85 V-0.18 H-0.18 Z',
   star: 'M0 -0.9 L0.21 -0.29 L0.86 -0.28 L0.34 0.11 L0.53 0.73 L0 0.36 L-0.53 0.73 L-0.34 0.11 L-0.86 -0.28 L-0.21 -0.29 Z',
 };
+
+/** 열쇠 이빨: 큰 칼날과 같은 칠로, 칼끝 날 쪽에 붙입니다. */
+function KeyBit({ art, fill, opacity }: { art: SwordArt; fill: string; opacity: number }) {
+  const outline = keyBitOutline(art);
+  if (!outline) return null;
+  return <path d={pointsToPath(outline)} fill={fill} fillOpacity={opacity} />;
+}
 
 /** 나란한 두 번째 칼날: 큰 칼날과 같은 칠로, 칼날 외곽선 밖에 따로 그립니다. */
 function TwinBlade({ art, fill, opacity }: { art: SwordArt; fill: string; opacity: number }) {

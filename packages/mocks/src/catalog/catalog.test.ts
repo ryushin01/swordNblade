@@ -4,7 +4,14 @@ import { isHistorical } from '@snb/domain';
 
 import { SEED_SWORDS } from '../seed';
 import { seedAddedIn } from '../seed-bundle';
-import { CATALOG_V11_IDS, CATALOG_V12_IDS, CATALOG_V13_IDS, CATALOG_V14_IDS, CATALOG_V15_IDS } from './index';
+import {
+  CATALOG_V11_IDS,
+  CATALOG_V12_IDS,
+  CATALOG_V13_IDS,
+  CATALOG_V14_IDS,
+  CATALOG_V15_IDS,
+  CATALOG_V18_IDS,
+} from './index';
 
 describe('시드 도검 목록', () => {
   it('id, 주소(slug), 이름이 겹치지 않는다', () => {
@@ -15,11 +22,11 @@ describe('시드 도검 목록', () => {
     }
   });
 
-  it('역사 도검 122점, 신화·전설 112점, 판타지 창작 12점, 게임·작품 속 검 83점이 있다', () => {
+  it('역사 도검 122점, 신화·전설 112점, 판타지 창작 12점, 게임·작품 속 검 88점이 있다', () => {
     expect(SEED_SWORDS.filter((sword) => isHistorical(sword.category))).toHaveLength(122);
     expect(SEED_SWORDS.filter((sword) => sword.category === 'legend')).toHaveLength(112);
     expect(SEED_SWORDS.filter((sword) => sword.category === 'fantasy')).toHaveLength(12);
-    expect(SEED_SWORDS.filter((sword) => sword.category === 'fiction')).toHaveLength(83);
+    expect(SEED_SWORDS.filter((sword) => sword.category === 'fiction')).toHaveLength(88);
   });
 
   it('원작의 합체검으로 바꾼 삼합 대검은 시드에서 뺐다', () => {
@@ -55,6 +62,14 @@ describe('시드 도검 목록', () => {
     for (const id of CATALOG_V15_IDS) {
       expect(SEED_SWORDS.find((sword) => sword.id === id)?.category, id).toBe('fiction');
       expect(seedAddedIn(id), id).toBe(15);
+    }
+  });
+
+  it('1.10.0에 더한 미뤘던 검 5점은 시드 버전 18에 들어온 게임·작품 속 검으로 적혀 있다', () => {
+    expect(CATALOG_V18_IDS).toHaveLength(5);
+    for (const id of CATALOG_V18_IDS) {
+      expect(SEED_SWORDS.find((sword) => sword.id === id)?.category, id).toBe('fiction');
+      expect(seedAddedIn(id), id).toBe(18);
     }
   });
 

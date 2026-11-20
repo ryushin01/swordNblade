@@ -138,6 +138,15 @@ describe('SwordRelief 칼날 장식', () => {
     expect(localBounds(art({ twin: { width: 60, gap: 20 } })).minX).toBeLessThan(localBounds(art({})).minX - 30);
   });
 
+  it('열쇠 이빨(keyBit)은 칼끝 날 쪽에 두 층으로 그리고, 그림 범위를 날 쪽으로 넓힌다', () => {
+    const plain = draw({});
+    const key = draw({ keyBit: true });
+    expect(count(key, 'path') - count(plain, 'path')).toBe(2);
+    expect(key).not.toMatch(BROKEN);
+    const art = (blade: Partial<SwordArt['blade']>) => ({ ...base, blade: { ...base.blade, ...blade } });
+    expect(localBounds(art({ keyBit: true })).maxX).toBeGreaterThan(localBounds(art({})).maxX + 40);
+  });
+
   it('칼날 메달리온은 두 층에 원 네 개씩을 그리고, 위치와 크기를 칼날 안쪽으로 맞춘다', () => {
     const plain = draw({});
     const medal = draw({ medallion: { at: 0.5, size: 0.6, color: '#e8b830' } });

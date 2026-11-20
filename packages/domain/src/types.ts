@@ -100,7 +100,19 @@ export interface SwordArt {
      * 칼날에 박은 둥근 메달리온(파멸의 인도자). at은 밑동에서 칼끝까지의 위치(0~1), size는 그 자리 칼날 너비에 대한 지름 비율,
      * across는 너비 방향 위치(0 등 ~ 1 날, 기본 0.5)입니다. 칼등 밖으로 조금 나와도 됩니다.
      */
-    medallion?: { at: number; size: number; color: string; across?: number };
+    medallion?: {
+      at: number;
+      size: number;
+      color: string;
+      across?: number;
+      /** 메달리온 가운데 돋을새김 문양. hand 편 손바닥(파멸의 인도자), cross 십자, star 별 */
+      emblem?: 'hand' | 'cross' | 'star';
+    };
+    /**
+     * 한 코등이에 나란히 붙은 두 번째 칼날(바라기). 칼등 쪽으로 gap mm 떨어져 width mm 너비로 붙고,
+     * length는 큰 칼날 길이에 대한 비율(기본 0.9)입니다. 끝은 뾰족합니다.
+     */
+    twin?: { width: number; gap: number; length?: number };
   };
   collar?: { color: string };
   guard: {

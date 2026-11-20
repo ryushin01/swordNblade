@@ -208,8 +208,8 @@ export const WORKS3_ENTRIES: CatalogEntry[] = [
       'The twin-bladed sword of the Rekon Hero King—Sunflower and Moonflower side by side on one guard.',
     ],
     description: [
-      '공식 설정화처럼 넓은 외날 칼날과 가는 칼날 두 개가 한 코등이에 나란히 붙은 모습을 넓은 칼날과 그 사이 홈으로 나타내고, 칼날 밑동을 리벳 박은 쇠판으로 묶었습니다. 손잡이는 올리브색 끈, 끝은 둥근 원판입니다. 두 날의 무게가 달라 "비틀린 검"이 됩니다.',
-      'After the official concept art, the broad cleaver blade and the narrow blade sharing one guard are shown as a wide blade split by a groove, bound at the base by riveted iron plates; the grip is olive cord and the pommel a round disc. The blades differ in weight, making a “twisted sword”.',
+      '공식 설정화처럼 넓은 외날 칼날과 가는 칼날 두 개를 한 코등이에 나란히 붙이고, 칼날 밑동을 리벳 박은 쇠판으로 묶었습니다. 손잡이는 올리브색 끈, 끝은 둥근 원판입니다. 두 날의 무게가 달라 "비틀린 검"이 됩니다.',
+      'After the official concept art, a broad cleaver blade and a narrow blade sit side by side on one guard, bound at the base by riveted iron plates; the grip is olive cord and the pommel a round disc. The blades differ in weight, making a “twisted sword”.',
     ],
     story: [
       '눈물을 마시는 새',
@@ -223,15 +223,15 @@ export const WORKS3_ENTRIES: CatalogEntry[] = [
     art: {
       blade: {
         length: 1200,
-        width: 120,
+        width: 100,
         curve: 0,
         edge: 'single',
         tip: 'angled',
-        fuller: true,
         color: '#5c5e62',
         sleeve: { length: 260, color: '#3a3a3c' },
+        twin: { width: 34, gap: 14, length: 0.82 },
       },
-      guard: { type: 'block', width: 150, color: '#3a3a3c' },
+      guard: { type: 'block', width: 190, color: '#3a3a3c' },
       grip: { length: 300, color: '#6a6a4a', wrap: 'cord', wrapColor: '#4a4a32' },
       pommel: { type: 'wheel', color: '#3a3a3c' },
     },
@@ -807,7 +807,7 @@ export const WORKS3_ENTRIES: CatalogEntry[] = [
         tip: 'angled',
         flare: 1.3,
         color: '#d8dcdf',
-        medallion: { at: 0.6, size: 0.78, across: 0.4, color: '#e8b830' },
+        medallion: { at: 0.6, size: 0.78, across: 0.4, color: '#e8b830', emblem: 'hand' },
       },
       guard: { type: 'block', width: 280, color: '#b0281e', accent: GOLD },
       grip: { length: 330, color: '#efe9df', wrap: 'cord', wrapColor: '#b0281e' },

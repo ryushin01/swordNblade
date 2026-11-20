@@ -20,6 +20,7 @@ import {
   sickleHookPath,
   sleevePoints,
   squareViewBox,
+  twinBladeOutline,
 } from './geometry';
 
 import type { SwordArt } from '@snb/domain';
@@ -194,6 +195,7 @@ function renderParts(art: SwordArt, layout: HiltLayout, layer: Layer, id: (name:
 
   return (
     <>
+      {art.blade.twin ? <TwinBlade art={art} fill={bladeFill} opacity={bladeOpacity} /> : null}
       <Blade art={art} fill={bladeFill} opacity={bladeOpacity} layer={layer} clipId={id('blade')} />
       {art.collar ? <Collar art={art} layout={layout} layer={layer} /> : null}
       <Guard art={art} layout={layout} layer={layer} />
@@ -429,9 +431,38 @@ function Medallion({ art, layer }: { art: SwordArt; layer: Layer }) {
         stroke={isHeight ? H.mid : '#00000033'}
         strokeWidth={r * 0.07}
       />
-      <circle cx={center.x} cy={center.y} r={r * 0.34} fill={isHeight ? H.raised : '#ffffff33'} />
+      {medallion.emblem ? (
+        <path
+          d={EMBLEMS[medallion.emblem]}
+          transform={`translate(${center.x} ${center.y}) scale(${r * 0.55})`}
+          fill={isHeight ? H.mid : '#00000055'}
+        />
+      ) : (
+        <circle cx={center.x} cy={center.y} r={r * 0.34} fill={isHeight ? H.raised : '#ffffff33'} />
+      )}
     </g>
   );
+}
+
+/** 메달리온 문양(가로세로 -1~1). 손바닥은 네 손가락·엄지·손바닥, 십자, 다섯 갈래 별 */
+const EMBLEMS: Record<NonNullable<NonNullable<SwordArt['blade']['medallion']>['emblem']>, string> = {
+  hand: [
+    'M-0.5 -0.05 H0.5 V0.55 Q0.5 0.9 0 0.9 Q-0.5 0.9 -0.5 0.55 Z',
+    'M-0.5 -0.1 V-0.62 Q-0.5 -0.72 -0.4 -0.72 Q-0.3 -0.72 -0.3 -0.62 V-0.1 Z',
+    'M-0.24 -0.1 V-0.84 Q-0.24 -0.94 -0.14 -0.94 Q-0.04 -0.94 -0.04 -0.84 V-0.1 Z',
+    'M0.02 -0.1 V-0.84 Q0.02 -0.94 0.12 -0.94 Q0.22 -0.94 0.22 -0.84 V-0.1 Z',
+    'M0.28 -0.1 V-0.66 Q0.28 -0.76 0.38 -0.76 Q0.48 -0.76 0.48 -0.66 V-0.1 Z',
+    'M-0.5 0.3 L-0.86 -0.02 Q-0.93 -0.1 -0.85 -0.17 Q-0.78 -0.22 -0.7 -0.15 L-0.42 0.08 Z',
+  ].join(' '),
+  cross: 'M-0.18 -0.85 H0.18 V-0.18 H0.85 V0.18 H0.18 V0.85 H-0.18 V0.18 H-0.85 V-0.18 H-0.18 Z',
+  star: 'M0 -0.9 L0.21 -0.29 L0.86 -0.28 L0.34 0.11 L0.53 0.73 L0 0.36 L-0.53 0.73 L-0.34 0.11 L-0.86 -0.28 L-0.21 -0.29 Z',
+};
+
+/** 나란한 두 번째 칼날: 큰 칼날과 같은 칠로, 칼날 외곽선 밖에 따로 그립니다. */
+function TwinBlade({ art, fill, opacity }: { art: SwordArt; fill: string; opacity: number }) {
+  const outline = twinBladeOutline(art);
+  if (!outline) return null;
+  return <path d={pointsToPath(outline)} fill={fill} fillOpacity={opacity} />;
 }
 
 /** 수정 칼날: 가운데 능선과, 등에서 능선을 거쳐 날로 비스듬히 오르는 면 경계 */

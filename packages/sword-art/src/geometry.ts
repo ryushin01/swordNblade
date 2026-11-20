@@ -309,6 +309,8 @@ export function localBounds(art: SwordArt): Bounds {
   // flare가 1보다 작으면(칼끝으로 좁아지는 친퀘데아) 밑동이 가장 넓습니다.
   const maxWidth = blade.width * Math.max(1, blade.flare ?? 1) * (1 + (blade.bulge ?? 0));
   const halfBlade = maxWidth / 2 + Math.abs(blade.curve) + (blade.wave ?? 0) + (blade.teeth ? blade.width * 0.4 : 0);
+  // 두 번째 칼날은 칼등 쪽(왼쪽)에 붙습니다.
+  const twin = blade.twin ? blade.twin.gap + blade.twin.width : 0;
   const sickle = blade.tip === 'sickle' ? blade.width * 2.4 : 0;
   const hook = blade.tip === 'hook' ? blade.width * 2.8 : 0;
   // 손등 보호대·바구니는 손잡이 옆(날 쪽)으로 나옵니다.
@@ -317,11 +319,32 @@ export function localBounds(art: SwordArt): Bounds {
   const crook = art.pommel.type === 'crook' ? 72 : 0;
   const tassel = art.tassel ? 120 : 0;
   return {
-    minX: -Math.max(halfBlade + hook, halfGuard, crook, 40),
+    minX: -Math.max(halfBlade + hook + twin, halfGuard, crook, 40),
     maxX: Math.max(halfBlade + sickle, halfGuard, bow, 40) + tassel * 0.7,
     minY: -blade.length - 4 - (hook ? blade.width * 1.8 : 0),
     maxY: layout.pommelEnd + tassel,
   };
+}
+
+/**
+ * 나란한 두 번째 칼날(twin)의 외곽선. 큰 칼날의 칼등 선을 따라 gap만큼 떨어져 width 너비로 가다가 끝을 뾰족하게 모읍니다.
+ * twin이 없으면 null입니다.
+ */
+export function twinBladeOutline(art: SwordArt): Point[] | null {
+  const twin = art.blade.twin;
+  if (!twin) return null;
+  const end = Math.min(0.98, Math.max(0.2, twin.length ?? 0.9));
+  const tipStart = Math.max(0.05, end - (twin.width * 1.8) / art.blade.length);
+  const steps = 24;
+  const back: Point[] = [];
+  const front: Point[] = [];
+  for (let i = 0; i <= steps; i += 1) {
+    const p = bladePoint(art, (tipStart * i) / steps, 0);
+    back.push({ x: p.x - twin.gap - twin.width, y: p.y });
+    front.push({ x: p.x - twin.gap, y: p.y });
+  }
+  const tip = bladePoint(art, end, 0);
+  return [...back, { x: tip.x - twin.gap - twin.width * 0.15, y: tip.y }, ...front.reverse()];
 }
 
 export const ROTATION_DEG = 45;

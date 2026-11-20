@@ -269,6 +269,26 @@ test('상세 화면을 열 때 머리글이나 본문이 밀리지 않는다(CLS
   expect(await page.evaluate(() => (window as unknown as { __cls: number }).__cls)).toBeLessThan(0.1);
 });
 
+test('글꼴: 도검의 벽은 화면 글자 파일만 받고, 설명 글자 파일은 상세 화면에서 받는다', async ({ page }) => {
+  const fonts: string[] = [];
+  page.on('request', (request) => {
+    if (request.resourceType() === 'font') fonts.push(new URL(request.url()).pathname);
+  });
+  const loaded = (name: string) => fonts.some((url) => url.includes(`snb-batang-400-${name}`));
+
+  await page.goto('/');
+  await expect(tiles(page).first()).toBeVisible();
+  await page.waitForLoadState('networkidle');
+  await page.evaluate(() => document.fonts.ready);
+  expect(loaded('ui')).toBe(true);
+  // 도검 설명·이야기에만 쓰인 글자는 첫 화면 글꼴에 넣지 않습니다(도검 자료가 늘어도 첫 화면 글꼴이 커지지 않게).
+  expect(loaded('detail')).toBe(false);
+
+  await page.goto('/swords/ssangsudo');
+  await expect(page.getByRole('heading', { level: 1, name: '쌍수도' })).toBeVisible();
+  await expect.poll(() => loaded('detail')).toBe(true);
+});
+
 test('어드민에서 아주 긴 이름을 붙여도 상세 화면이 가로로 넘치지 않는다', async ({ page }) => {
   await page.goto('/admin/login');
   await page.getByRole('button', { name: '데모 계정으로 로그인' }).click();

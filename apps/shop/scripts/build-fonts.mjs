@@ -5,11 +5,15 @@
  *
  * 1. 화면 글자 파일 `<slug>/<slug>-<굵기>-ui.woff2`
  *    소스의 문자열·JSX 글자에 쓰인 한글·기호만 담습니다. `<slug>.css`에 들어가 첫 화면 CSS와 함께 받습니다.
- * 2. 조각 파일 `<slug>/<slug>-<굵기>-<번호>.woff2`
+ * 2. 상세 글자 파일 `<slug>/<slug>-<굵기>-detail.woff2` (설정에 `detail`이 있을 때)
+ *    도검 설명·이야기처럼 상세 화면에만 나오는 긴 글(`detail.scan` 파일에서 `detail.properties` 속성 아래의 문자열)에만
+ *    쓰인 글자를 담습니다. 1과 같은 `<slug>.css`에 unicode-range가 겹치지 않게 적으므로, 그 글자를 쓰는 화면(상세)만
+ *    1과 함께 찾아 나란히 받고 다른 화면은 받지 않습니다. 도검 자료가 늘어도 첫 화면 글꼴이 커지지 않게 합니다.
+ * 3. 조각 파일 `<slug>/<slug>-<굵기>-<번호>.woff2`
  *    Google Fonts 한국어 글꼴과 같은 글자 묶음(최대 124조각)으로 나눈 파일입니다. `<slug>-rest.css`에 들어가
- *    첫 화면 뒤에 붙고, 1에 없는 글자(사용자가 입력한 글자 등)를 쓸 때 그 글자가 든 조각만 받습니다.
+ *    첫 화면 뒤에 붙고, 1·2에 없는 글자(사용자가 입력한 글자 등)를 쓸 때 그 글자가 든 조각만 받습니다.
  *
- * 화면 글자가 바뀌면 다시 실행합니다. `--check`는 1에 빠진 글자가 있으면 실패합니다(단위 테스트에서 씀).
+ * 화면 글자가 바뀌면 다시 실행합니다. `--check`는 1·2에 빠진 글자가 있으면 실패합니다(단위 테스트에서 씀).
  * 조각 파일은 글자가 바뀌어도 그대로라 없는 것만 만듭니다. 원본 글꼴을 바꿨으면 `--all`로 모두 다시 만듭니다.
  * 설정의 글꼴에 `license`(라이선스 원문 경로)가 있으면 만든 파일 옆에 원문을 함께 둡니다(`--check`는 빠졌는지 확인).
  */
@@ -39,6 +43,10 @@ const OUT = path.join(ROOT, config.outDir);
 // 나머지 조각은 따로 둘 수 있음(Next.js처럼 public에 두고 주소로 붙일 때)
 const REST = path.join(ROOT, config.restDir ?? config.outDir);
 const HEADER = '/* pnpm fonts로 만든 파일입니다. 직접 고치지 마세요. */\n';
+// 상세 화면에만 나오는 긴 글: 이 파일들에서 이 속성 아래에 있는 문자열(배열·템플릿 안 포함)
+const DETAIL_SCAN = (config.detail?.scan ?? []).map((file) => path.join(ROOT, file));
+const DETAIL_PROPERTIES = new Set(config.detail?.properties ?? []);
+const inDetailScan = (file) => DETAIL_SCAN.some((base) => file === base || file.startsWith(`${base}${path.sep}`));
 
 /** 'U+ac00-ac0f, U+ac11' 같은 unicode-range를 코드 포인트 집합으로 */
 function parseRange(text) {
@@ -91,9 +99,13 @@ async function* walk(dir) {
   }
 }
 
-/** 화면에 나올 수 있는 글자: 코드의 문자열·템플릿·JSX 글자와 JSON 등 자료 파일의 글자(주석은 뺌) */
+/**
+ * 화면에 나올 수 있는 글자: 코드의 문자열·템플릿·JSX 글자와 JSON 등 자료 파일의 글자(주석은 뺌).
+ * screen은 모든 화면, detail은 상세 화면에만 나오는 긴 글(설정의 detail)의 글자입니다.
+ */
 async function screenText() {
   const parts = [config.extra ?? ''];
+  const detailParts = [];
   for (const dir of config.scan) {
     for await (const file of walk(path.join(ROOT, dir))) {
       if (/\.(test|spec|stories)\.[jt]sx?$/.test(file)) continue;
@@ -105,7 +117,8 @@ async function screenText() {
         }
         const kind = file.endsWith('x') ? ts.ScriptKind.TSX : ts.ScriptKind.TS;
         const source = ts.createSourceFile(file, text, ts.ScriptTarget.Latest, false, kind);
-        const visit = (node) => {
+        const detailFile = inDetailScan(file);
+        const visit = (node, detail) => {
           if (
             ts.isStringLiteralLike(node) ||
             ts.isTemplateHead(node) ||
@@ -113,10 +126,12 @@ async function screenText() {
             ts.isTemplateTail(node) ||
             ts.isJsxText(node)
           )
-            parts.push(node.text);
-          ts.forEachChild(node, visit);
+            (detail ? detailParts : parts).push(node.text);
+          const inDetail =
+            detail || (detailFile && ts.isPropertyAssignment(node) && DETAIL_PROPERTIES.has(node.name.text));
+          ts.forEachChild(node, (child) => visit(child, inDetail));
         };
-        visit(source);
+        visit(source, false);
       } else if (file.endsWith('.json')) {
         // 이스케이프된 글자(\ud7a3 등)도 풀어서 세도록 문자열 값을 모음
         const text = await readFile(file, 'utf8');
@@ -134,10 +149,14 @@ async function screenText() {
       }
     }
   }
+  return { screen: codePoints(parts), detail: codePoints(detailParts) };
+}
+
+/** 글자 묶음의 코드 포인트. 영문·숫자(ASCII)는 영문 글꼴이 맡으므로 뺍니다. */
+function codePoints(parts) {
   const set = new Set();
   for (const ch of unescapeAll(parts.join(''))) {
     const cp = ch.codePointAt(0);
-    // 영문·숫자(ASCII)는 영문 글꼴이 맡음
     if (cp > 0x7e) set.add(cp);
   }
   return set;
@@ -153,9 +172,12 @@ const fontFace = (family, weight, url, range) =>
   `@font-face{font-family:'${family}';font-style:normal;font-weight:${weight};font-display:swap;` +
   `src:url('${url}') format('woff2');unicode-range:${range}}`;
 
-const screen = await screenText();
+const { screen, detail: detailText } = await screenText();
+// 다른 화면에도 쓰이는 글자는 화면 글자 파일에 두고, 상세 화면의 긴 글에만 쓰인 글자만 상세 글자 파일로
+const detailOnly = new Set([...detailText].filter((cp) => !screen.has(cp)));
 const missing = [];
 let checked = 0;
+let checkedDetail = 0;
 
 for (const font of config.fonts) {
   const { family, slug } = font;
@@ -173,20 +195,29 @@ for (const font of config.fonts) {
     const original = await readFile(path.join(ROOT, src));
     const cmap = cmapOf(await fontverter.convert(original, 'sfnt'));
     const ui = new Set([...screen].filter((cp) => cmap.has(cp)));
+    const detail = new Set([...detailOnly].filter((cp) => cmap.has(cp)));
 
     if (CHECK) {
-      // CSS의 unicode-range와 실제 화면 글자 파일의 글자 목록을 모두 확인
-      const rule = existingUi.split('\n').find((line) => line.includes(`font-weight:${weight};`));
-      const declared = rule ? parseRange(rule.match(/unicode-range:([^}]+)/)[1]) : new Set();
+      // CSS의 unicode-range와 실제 글자 파일의 글자 목록을 모두 확인(상세 글자는 화면 글자 파일에 있어도 됨)
+      const covered = async (name) => {
+        const file = path.join(dir, name);
+        if (!existsSync(file)) return null;
+        const rule = existingUi.split('\n').find((line) => line.includes(`/${name}'`));
+        const declared = rule ? parseRange(rule.match(/unicode-range:([^}]+)/)[1]) : new Set();
+        const inFile = cmapOf(await fontverter.convert(await readFile(file), 'sfnt'));
+        return (cp) => declared.has(cp) && inFile.has(cp);
+      };
       const uiPath = path.join(dir, `${slug}-${weight}-ui.woff2`);
-      if (!existsSync(uiPath)) {
+      const inUi = await covered(path.basename(uiPath));
+      if (!inUi) {
         missing.push(`${family} ${weight}: ${path.relative(ROOT, uiPath)} 파일이 없습니다`);
         continue;
       }
-      const inFile = cmapOf(await fontverter.convert(await readFile(uiPath), 'sfnt'));
-      const lack = [...ui].filter((cp) => !declared.has(cp) || !inFile.has(cp));
+      const inDetail = detail.size ? ((await covered(`${slug}-${weight}-detail.woff2`)) ?? (() => false)) : () => false;
+      const lack = [...ui, ...detail].filter((cp) => !inUi(cp) && !(detail.has(cp) && inDetail(cp)));
       if (lack.length) missing.push(`${family} ${weight}: ${String.fromCodePoint(...lack)}`);
       checked = Math.max(checked, ui.size);
+      checkedDetail = Math.max(checkedDetail, detail.size);
       continue;
     }
 
@@ -197,6 +228,14 @@ for (const font of config.fonts) {
     await writeFile(path.join(dir, uiName), uiFont);
     written.push(path.join(dir, uiName));
     uiRules.push(fontFace(family, weight, `./${slug}/${uiName}`, toRange(ui)));
+    let detailFont = null;
+    if (detail.size) {
+      const detailName = `${slug}-${weight}-detail.woff2`;
+      detailFont = await subsetFont(original, String.fromCodePoint(...detail), { targetFormat: 'woff2' });
+      await writeFile(path.join(dir, detailName), detailFont);
+      written.push(path.join(dir, detailName));
+      uiRules.push(fontFace(family, weight, `./${slug}/${detailName}`, toRange(detail)));
+    }
 
     for (const [index, range] of SLICES.entries()) {
       const inFont = [...parseRange(range)].filter((cp) => cmap.has(cp));
@@ -208,8 +247,8 @@ for (const font of config.fonts) {
         await writeFile(path.join(restDir, name), piece);
         written.push(path.join(restDir, name));
       }
-      // 화면 글자 파일에 있는 글자는 빼서, 같은 글자를 두 파일에서 받지 않게 함
-      const rest = new Set(inFont.filter((cp) => !ui.has(cp)));
+      // 화면·상세 글자 파일에 있는 글자는 빼서, 같은 글자를 두 파일에서 받지 않게 함
+      const rest = new Set(inFont.filter((cp) => !ui.has(cp) && !detail.has(cp)));
       if (rest.size)
         restRules.push({
           index,
@@ -217,7 +256,10 @@ for (const font of config.fonts) {
           rule: fontFace(family, weight, `./${slug}/${name}`, toRange(rest)),
         });
     }
-    console.log(`${family} ${weight}: 화면 글자 ${ui.size}자 (${(uiFont.length / 1024).toFixed(1)}KB)`);
+    console.log(
+      `${family} ${weight}: 화면 글자 ${ui.size}자 (${(uiFont.length / 1024).toFixed(1)}KB)` +
+        (detailFont ? `, 상세 글자 ${detail.size}자 (${(detailFont.length / 1024).toFixed(1)}KB)` : ''),
+    );
   }
 
   // 글꼴 라이선스 원문(OFL.txt 등)을 만든 파일 옆에 둠. OFL은 글꼴을 다시 배포할 때 라이선스를 함께 두도록 정함
@@ -250,5 +292,9 @@ if (CHECK) {
     console.error(`화면 글자 파일에 없는 글자가 있습니다. pnpm fonts로 다시 만드세요.\n${missing.join('\n')}`);
     process.exit(1);
   }
-  console.log(`OK: 화면 글자 ${checked}자가 모두 화면 글자 파일에 있습니다.`);
+  console.log(
+    checkedDetail
+      ? `OK: 화면 글자 ${checked}자와 상세 글자 ${checkedDetail}자가 모두 글자 파일에 있습니다.`
+      : `OK: 화면 글자 ${checked}자가 모두 화면 글자 파일에 있습니다.`,
+  );
 }

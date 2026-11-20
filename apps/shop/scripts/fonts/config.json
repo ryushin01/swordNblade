@@ -4,6 +4,14 @@
   "scan": ["src", "../../packages/mocks/src", "../../packages/domain/src", "../../packages/sword-art/src"],
   "dataExtensions": ["json"],
   "extra": "년월일시분초오전후요화수목금토만억조원",
+  "detail": {
+    "scan": [
+      "../../packages/mocks/src/catalog",
+      "../../packages/mocks/src/seed.ts",
+      "../../packages/mocks/src/seed-en.ts"
+    ],
+    "properties": ["summary", "description", "stories", "story", "extraStories", "lore"]
+  },
   "fonts": [
     {
       "family": "SnbBatang",

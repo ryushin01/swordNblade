@@ -1,5 +1,5 @@
 export { useSword, useSwords } from './api/queries';
-export { localizeForLocale, swordNameFor } from './lib/localize';
+export { localizeForLocale, orderLineName } from './lib/localize';
 export {
   filterSwords,
   paginate,

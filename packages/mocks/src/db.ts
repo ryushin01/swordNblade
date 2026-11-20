@@ -1,8 +1,5 @@
 import { type CustomsConfig, DEFAULT_CUSTOMS_CONFIG, type Order, type Sword, type User } from '@snb/domain';
 
-import { CATALOG_V11_IDS, CATALOG_V12_IDS, CATALOG_V13_IDS } from './catalog';
-import { SEED_ORDERS, SEED_SWORDS, SEED_VERSION } from './seed';
-
 export interface DbState {
   swords: Sword[];
   orders: Order[];
@@ -51,26 +48,22 @@ export interface Db {
   reset: () => void;
 }
 
-/** 도검이 처음 들어온 시드 버전. 처음 16점은 1, 도검 목록 확장은 3이고, 그 뒤에 더한 것만 따로 적습니다. */
-const ADDED_IN: Record<string, number> = {
-  'sw-sajingeom': 4,
-  'sw-chilseonggeom': 4,
-  'sw-byeorungeom': 4,
-  'sw-yedo': 4,
-  'sw-bongukgeom': 4,
-  'sw-egeking': 6,
-  'sw-dojigiri': 6,
-  'sw-wallace-sword': 6,
-  // 1.1.0: 단검·대검 보충, 게임에 자주 나오는 이름의 실제 칼, 판타지·게임 분류
-  ...Object.fromEntries(CATALOG_V11_IDS.map((id) => [id, 11])),
-  // 1.2.0: 게임·작품 속 검(원작 이름 그대로 본뜬 팬 재현품)
-  ...Object.fromEntries(CATALOG_V12_IDS.map((id) => [id, 12])),
-  // 1.3.0: Fate 시리즈와 다른 작품의 검 1차(사용자 지시 "모든 시리즈를 다 원작대로")
-  ...Object.fromEntries(CATALOG_V13_IDS.map((id) => [id, 13])),
-};
+/**
+ * 시드 데이터 묶음. 서버(시드 JSON 라우트·Node Mock 서버·테스트)는 seed-bundle.ts에서 모듈로 받고,
+ * 브라우저 Mock API는 카탈로그 코드를 화면 묶음에 싣지 않으려고 시드 JSON 라우트(/mock-seed.json)에서 받습니다.
+ */
+export interface SeedBundle {
+  /** 시드 버전(seed.ts의 SEED_VERSION). 저장된 데이터가 이보다 낮으면 migrateSeed로 맞춥니다. */
+  version: number;
+  swords: Sword[];
+  orders: Order[];
+  /** 처음 16점(1)·도검 목록 확장(3) 뒤에 더한 도검이 들어온 시드 버전 */
+  addedIn: Record<string, number>;
+}
 
-export function seedAddedIn(id: string): number {
-  return ADDED_IN[id] ?? (/^sw-\d{3}$/.test(id) ? 1 : 3);
+/** 도검이 처음 들어온 시드 버전. 처음 16점은 1, 도검 목록 확장은 3이고, 그 뒤에 더한 것은 addedIn에 적혀 있습니다. */
+export function seedAddedInFrom(addedIn: Record<string, number>, id: string): number {
+  return addedIn[id] ?? (/^sw-\d{3}$/.test(id) ? 1 : 3);
 }
 
 /**
@@ -99,11 +92,11 @@ const REMOVED_SEED_IDS = [
 
 const clone = <T>(value: T): T => structuredClone(value);
 
-const seedState = (): DbState => ({
-  swords: clone(SEED_SWORDS),
-  orders: clone(SEED_ORDERS),
+const seedState = (seed: SeedBundle): DbState => ({
+  swords: clone(seed.swords),
+  orders: clone(seed.orders),
   customs: clone(DEFAULT_CUSTOMS_CONFIG),
-  seedVersion: SEED_VERSION,
+  seedVersion: seed.version,
 });
 
 /**
@@ -111,54 +104,75 @@ const seedState = (): DbState => ({
  * - 시드 도검: 그림·형태·설명·이야기·번역·제원은 새 시드로 바꾸고, 이름·가격·재고 같은 판매 정보는 그대로 둡니다.
  * - 새 시드에만 있는 도검은 뒤에 더하고, 어드민에서 만든 도검과 주문은 건드리지 않습니다.
  */
-export function migrateSeed(state: DbState): DbState {
-  if ((state.seedVersion ?? 1) >= SEED_VERSION) return state;
+export function migrateSeed(state: DbState, seed: SeedBundle): DbState {
+  if ((state.seedVersion ?? 1) >= seed.version) return state;
   const byId = new Map(state.swords.map((sword) => [sword.id, sword]));
   const storedVersion = state.seedVersion ?? 1;
   const swords = state.swords.map((sword) => {
-    const seed = SEED_SWORDS.find((item) => item.id === sword.id);
-    if (!seed) return sword;
+    const seeded = seed.swords.find((item) => item.id === sword.id);
+    if (!seeded) return sword;
     return {
       ...sword,
       ...(storedVersion < (IDENTITY_FIXED_IN[sword.id] ?? 0)
-        ? { nameOriginal: seed.nameOriginal, nameEn: seed.nameEn, origin: seed.origin }
+        ? { nameOriginal: seeded.nameOriginal, nameEn: seeded.nameEn, origin: seeded.origin }
         : {}),
-      kind: seed.kind,
-      category: seed.category,
-      era: seed.era,
-      summary: seed.summary,
-      description: seed.description,
-      stories: clone(seed.stories),
-      specs: { ...clone(seed.specs) },
-      art: clone(seed.art),
-      ...(seed.translations ? { translations: clone(seed.translations) } : {}),
+      kind: seeded.kind,
+      category: seeded.category,
+      era: seeded.era,
+      summary: seeded.summary,
+      description: seeded.description,
+      stories: clone(seeded.stories),
+      specs: { ...clone(seeded.specs) },
+      art: clone(seeded.art),
+      ...(seeded.translations ? { translations: clone(seeded.translations) } : {}),
       // 할인은 판매 정보라 어드민 값을 지키고, 할인이 생기기 전(버전 10 미만) 데이터에만 시드 할인을 채웁니다.
-      ...(storedVersion < 10 && seed.discount && sword.discount === undefined
-        ? { discount: clone(seed.discount) }
+      ...(storedVersion < 10 && seeded.discount && sword.discount === undefined
+        ? { discount: clone(seeded.discount) }
         : {}),
     };
   });
   // 저장된 데이터보다 나중 시드 버전에 들어온 도검만 더합니다. 어드민에서 지운 예전 시드 도검은 되살리지 않습니다.
   // 삼인검이 남아 있으면 본국검으로 바꾸기 전 데이터라, 그때 없던 본국검을 채웁니다(지운 것이 아님).
   const beforeBongukgeom = byId.has('sw-samingeom');
-  const added = SEED_SWORDS.filter(
-    (seed) =>
-      !byId.has(seed.id) && (seedAddedIn(seed.id) > storedVersion || (beforeBongukgeom && seed.id === 'sw-bongukgeom')),
-  ).map(clone);
+  const added = seed.swords
+    .filter(
+      (item) =>
+        !byId.has(item.id) &&
+        (seedAddedInFrom(seed.addedIn, item.id) > storedVersion || (beforeBongukgeom && item.id === 'sw-bongukgeom')),
+    )
+    .map(clone);
   const kept = swords.filter((sword) => !REMOVED_SEED_IDS.includes(sword.id));
   // 시드 가격을 바꾼 도검은, 저장된 가격이 옛 기본값 그대로일 때만 새 가격으로 맞춥니다(어드민에서 고친 가격은 둠).
   const repriced = kept.map((sword) => {
     const fix = PRICE_FIXES[sword.id];
     return fix && storedVersion < fix.before && sword.price === fix.from ? { ...sword, price: fix.to } : sword;
   });
-  return { ...state, swords: [...repriced, ...added], seedVersion: SEED_VERSION };
+  return { ...state, swords: [...repriced, ...added], seedVersion: seed.version };
+}
+
+/**
+ * 번역 속성이 없는 시드 도검(번역을 두기 전에 저장된 데이터)에 시드 번역을 채웁니다.
+ * 화면이 번역 보정표를 따로 싣지 않도록 Mock API가 돌려주기 전에 맞춥니다.
+ * 어드민에서 비운 번역({})과 어드민에서 만든 도검은 그대로 두고, 채운 것이 없으면 같은 상태를 돌려줍니다.
+ */
+function withSeedTranslations(state: DbState, seed: SeedBundle): DbState {
+  let filled = false;
+  const swords = state.swords.map((sword) => {
+    if (sword.translations !== undefined) return sword;
+    const translations = seed.swords.find((item) => item.id === sword.id)?.translations;
+    if (!translations) return sword;
+    filled = true;
+    return { ...sword, translations: clone(translations) };
+  });
+  return filled ? { ...state, swords } : state;
 }
 
 /**
  * 메모리 DB. storageKey를 주면 브라우저 localStorage에 저장해 새로고침 후에도 유지합니다.
  * 저장소에 접근할 수 없는 환경(사생활 보호 모드 등)에서는 메모리로만 동작합니다.
+ * 시드는 인자로 받습니다(브라우저는 시드 JSON, 서버·테스트는 seed-bundle.ts의 createDb).
  */
-export function createDb(options: { storageKey?: string } = {}): Db {
+export function createDbWithSeed(seed: SeedBundle, options: { storageKey?: string } = {}): Db {
   const { storageKey } = options;
 
   let needsSave = false;
@@ -175,12 +189,14 @@ export function createDb(options: { storageKey?: string } = {}): Db {
       const parsed = JSON.parse(raw) as Partial<DbState> | null;
       if (parsed && Array.isArray(parsed.swords) && Array.isArray(parsed.orders) && parsed.customs) {
         const stored = parsed as DbState;
-        if ((stored.seedVersion ?? 1) < SEED_VERSION) {
+        if ((stored.seedVersion ?? 1) < seed.version) {
           // 예전 시드로 저장된 데이터는 새 시드에 맞추고, 저장은 persist가 준비된 뒤에 합니다.
           needsSave = true;
-          return migrateSeed(stored);
+          return migrateSeed(stored, seed);
         }
-        return stored;
+        const filled = withSeedTranslations(stored, seed);
+        if (filled !== stored) needsSave = true;
+        return filled;
       }
     } catch {
       // 저장소를 못 쓰거나 JSON이 깨졌으면 메모리 상태를 씁니다.
@@ -188,7 +204,7 @@ export function createDb(options: { storageKey?: string } = {}): Db {
     return null;
   };
 
-  let state = loadStored() ?? seedState();
+  let state = loadStored() ?? seedState(seed);
 
   /** 저장된 값이 있을 때만 메모리 상태를 바꿉니다. 없으면 지금 상태를 유지합니다. */
   const refresh = () => {
@@ -225,7 +241,7 @@ export function createDb(options: { storageKey?: string } = {}): Db {
       return state;
     },
     reset: () => {
-      state = seedState();
+      state = seedState(seed);
       persist();
     },
   };

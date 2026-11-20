@@ -14,7 +14,8 @@ sequenceDiagram
     participant DB as Mock DB<br/>(localStorage snb-db-v1, 사진은 IndexedDB)
 
     손님->>쇼핑몰: / 열기
-    쇼핑몰->>워커: 첫 API 요청 전에 startMockApi
+    쇼핑몰->>쇼핑몰: 첫 API 요청 전에 startMockApi가<br/>시드 JSON(/mock-seed.json)을 받아 DB를 만듦
+    쇼핑몰->>워커: MSW 워커 켜기
     운영자->>쇼핑몰: /admin 열기
     쇼핑몰->>어드민: rewrite (같은 출처)
     어드민->>워커: 같은 워커, 같은 저장소 키

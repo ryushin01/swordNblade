@@ -2,8 +2,8 @@
 import { beforeEach, describe, expect, it } from 'vitest';
 
 import { CATALOG_V11_IDS, CATALOG_V12_IDS, CATALOG_V13_IDS } from './catalog';
-import { createDb } from './db';
 import { SEED_SWORDS } from './seed';
+import { createDb } from './seed-bundle';
 
 import type { Sword } from '@snb/domain';
 
@@ -248,5 +248,36 @@ describe('migrateSeed (시드 버전)', () => {
         .read()
         .swords.some((sword) => sword.discount),
     ).toBe(false);
+  });
+});
+
+describe('번역을 두기 전 데이터', () => {
+  beforeEach(() => localStorage.clear());
+
+  it('번역 속성이 없는 시드 도검은 읽을 때 시드 번역을 채우고, 비운 번역과 어드민에서 만든 도검은 둔다', () => {
+    const fresh = createDb({ storageKey: 'test-db' }).read();
+    const withoutTranslations = (sword: Sword): Sword => {
+      const copy = { ...sword };
+      delete copy.translations;
+      return copy;
+    };
+    const legacy = {
+      ...fresh,
+      swords: [
+        withoutTranslations(fresh.swords[0]!),
+        { ...fresh.swords[1]!, translations: {} },
+        ...fresh.swords.slice(2),
+        withoutTranslations({ ...fresh.swords[0]!, id: 'sw-custom' }),
+      ],
+    };
+    localStorage.setItem('test-db', JSON.stringify(legacy));
+
+    const swords = createDb({ storageKey: 'test-db' }).read().swords;
+    expect(swords[0]?.translations).toEqual(SEED_SWORDS[0]?.translations);
+    expect(swords[1]?.translations).toEqual({});
+    expect(swords.at(-1)?.translations).toBeUndefined();
+    expect((JSON.parse(localStorage.getItem('test-db')!) as { swords: Sword[] }).swords[0]?.translations).toEqual(
+      SEED_SWORDS[0]?.translations,
+    );
   });
 });

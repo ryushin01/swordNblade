@@ -35,7 +35,6 @@ import {
   SWORD_KINDS,
   type SwordArt,
 } from '@snb/domain';
-import { SEED_TRANSLATIONS_EN } from '@snb/mocks';
 import { SwordRelief } from '@snb/sword-art';
 
 import { type SwordInput, useSaveSword, useSwords } from '@/entities/sword';
@@ -208,8 +207,8 @@ export function ProductForm({ initial }: { initial?: Sword }) {
   const initialValues: Partial<SwordInput> | undefined = initial
     ? {
         ...initial,
-        // 예전에 저장된 데이터에 영어 글이 없으면 같은 상품의 시드 번역을 채워 둡니다.
-        translations: { en: initial.translations ? initial.translations.en : SEED_TRANSLATIONS_EN[initial.id] },
+        // 번역이 없던 예전 데이터는 Mock DB가 읽을 때 시드 번역을 채워 둡니다.
+        translations: { en: initial.translations?.en },
       }
     : template
       ? {

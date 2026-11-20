@@ -3,7 +3,7 @@
     "name": "전체 JS(Storybook 제외)",
     "path": ".next/static/chunks/**/*.js",
     "gzip": true,
-    "limit": "575 kB"
+    "limit": "490 kB"
   },
   {
     "name": "CSS",

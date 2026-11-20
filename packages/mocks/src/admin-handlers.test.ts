@@ -2,8 +2,8 @@ import { setupServer } from 'msw/node';
 import { afterAll, beforeAll, describe, expect, it } from 'vitest';
 
 import { ADMIN_DEMO_ACCOUNT } from './admin-handlers';
-import { createDb } from './db';
 import { createHandlers } from './handlers';
+import { createDb } from './seed-bundle';
 
 const BASE = 'http://localhost';
 const server = setupServer(...createHandlers(createDb(), { requireAdmin: true }));

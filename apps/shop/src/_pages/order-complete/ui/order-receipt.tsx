@@ -5,7 +5,7 @@ import { useLocale, useTranslations } from 'next-intl';
 import { countryName, formatKRW, type Locale, orderStatusLabel } from '@snb/domain';
 
 import { useOrder } from '@/entities/order';
-import { swordNameFor } from '@/entities/sword';
+import { orderLineName } from '@/entities/sword';
 import { Link } from '@/shared/i18n';
 import { Button, OrnamentHeading, PriceTag } from '@/shared/ui';
 
@@ -60,7 +60,7 @@ export function OrderReceipt({ id }: { id: string }) {
           {order.lines.map((line) => (
             <li key={line.swordId} className="flex justify-between gap-4">
               <span>
-                {swordNameFor(line.swordId, line.name, locale)} × {line.quantity}{' '}
+                {orderLineName(line, locale)} × {line.quantity}{' '}
                 <span className="text-sm text-ink-muted">
                   {t('shippedFrom', { country: countryName(line.origin, locale) })}
                 </span>

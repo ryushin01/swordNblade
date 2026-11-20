@@ -1,5 +1,6 @@
 import { http, HttpResponse } from 'msw';
 
+import { ADMIN_DEMO_ACCOUNT } from './admin-account';
 import { ADMIN_SESSION_TTL_MS, isFreshSession } from './sessions';
 
 import type { AdminSession, Db } from './db';
@@ -10,9 +11,6 @@ const freshAdminSessions = (sessions: Array<AdminSession | string> | undefined):
     (session): session is AdminSession =>
       typeof session === 'object' && isFreshSession(session.createdAt, ADMIN_SESSION_TTL_MS),
   );
-
-/** 어드민 데모 계정. 로그인 화면에 공개하는 값이며 실제 비밀이 아닙니다. */
-export const ADMIN_DEMO_ACCOUNT = { email: 'admin@example.com', password: 'demo1234' };
 
 export function isAdmin(db: Db, request: Request): boolean {
   const token = request.headers.get('Authorization')?.replace(/^Bearer\s+/i, '');
@@ -47,3 +45,5 @@ export function createAdminHandlers(db: Db, wait: () => Promise<unknown>) {
     }),
   ];
 }
+
+export { ADMIN_DEMO_ACCOUNT } from './admin-account';

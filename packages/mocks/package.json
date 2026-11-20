@@ -5,8 +5,10 @@
   "type": "module",
   "exports": {
     ".": "./src/index.ts",
+    "./admin-account": "./src/admin-account.ts",
     "./browser": "./src/browser.ts",
-    "./node": "./src/node.ts"
+    "./node": "./src/node.ts",
+    "./seed-bundle": "./src/seed-bundle.ts"
   },
   "scripts": {
     "test": "vitest run",

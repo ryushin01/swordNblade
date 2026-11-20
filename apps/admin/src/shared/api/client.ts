@@ -41,7 +41,7 @@ async function ensureMockApi() {
   if (typeof window === 'undefined' || process.env.NEXT_PUBLIC_API_MOCKING === 'off') return;
   if (!mockReady) {
     mockReady = Promise.all([import('@snb/mocks/browser'), findServiceWorker()]).then(([{ startMockApi }, worker]) =>
-      startMockApi({ storageKey: SITE.mockStorageKey, ...worker }),
+      startMockApi({ storageKey: SITE.mockStorageKey, seedUrl: '/admin/mock-seed.json', ...worker }),
     );
   }
   try {

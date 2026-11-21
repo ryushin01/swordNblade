@@ -39,7 +39,7 @@ pnpm install
 pnpm dev   # 쇼핑몰 http://localhost:3000 · 어드민 http://localhost:3000/admin
 ```
 
-- 환경 변수(이름만): `ADMIN_ORIGIN`(쇼핑몰이 `/admin`을 넘길 주소, 빌드 시), `NEXT_PUBLIC_SENTRY_DSN`(있을 때만 Sentry), `NEXT_PUBLIC_API_MOCKING`(테스트에서 `off`), `E2E_BASE_URL`, `E2E_PORT`, `NEXT_TELEMETRY_DISABLED`.
+- 환경 변수(이름만): `ADMIN_ORIGIN`(쇼핑몰이 `/admin`을 넘길 주소, 빌드 시. 없으면 Vercel 빌드(`VERCEL=1`)만 운영 어드민 주소, 그 밖의 개발·로컬 빌드는 `http://localhost:3001`), `NEXT_PUBLIC_SENTRY_DSN`(있을 때만 Sentry), `NEXT_PUBLIC_API_MOCKING`(테스트에서 `off`), `E2E_BASE_URL`, `E2E_PORT`, `NEXT_TELEMETRY_DISABLED`.
 - pnpm 12는 허용하지 않은 빌드 스크립트가 있으면 설치가 실패합니다. 필요하면 `pnpm approve-builds <패키지>`로 `pnpm-workspace.yaml`의 `allowBuilds`에 넣습니다.
 
 ## 4. 검사·테스트 명령
@@ -53,23 +53,22 @@ pnpm dev   # 쇼핑몰 http://localhost:3000 · 어드민 http://localhost:3000/
 | `pnpm test:storybook` | 모든 스토리를 Chromium에서 렌더링 + axe(위반 시 실패) |
 | `pnpm build` | 두 앱 빌드(Storybook 포함) |
 | `pnpm --filter @snb/shop size` | 번들 크기(JS 490 kB, CSS 12 kB) |
-| `pnpm --filter @snb/shop e2e` / `pnpm --filter @snb/admin e2e` | 프로덕션 빌드 E2E(데스크톱·모바일, axe). 쇼핑몰 E2E는 `ADMIN_ORIGIN=http://localhost:3102 pnpm build` 후 |
+| `pnpm --filter @snb/shop e2e` / `pnpm --filter @snb/admin e2e` | 프로덕션 빌드 E2E(데스크톱·모바일, axe). 쇼핑몰 E2E는 `ADMIN_ORIGIN=http://localhost:3102 pnpm build` 후. 오프라인 검사(`apps/*/e2e/offline.spec.ts`) 포함 |
 | `pnpm --filter @snb/shop lhci` | Lighthouse 기준(빌드 후) |
 
 - CI(`.github/workflows/ci.yml`, PR·main 푸시): 바뀐 파일 분류 → [Lint·Format·Typecheck·Test(`lint` → `format:check` → `typecheck` → `test:coverage`)] · [Storybook] · [Build·Size]를 동시에 → 빌드 결과물로 E2E(쇼핑몰) · E2E(어드민) · Lighthouse. Markdown만 바뀌면 Storybook·E2E·Lighthouse를 건너뜁니다.
 - `live-check.yml`: main 푸시 뒤 Vercel 배포를 기다렸다가 운영 주소에 E2E를 돌립니다.
 - husky pre-commit: lint-staged(ESLint·Prettier) → `pnpm typecheck` → `pnpm test`.
+- 오프라인 E2E는 사이트 밖 요청을 모두 끊고 쇼핑몰·어드민이 내용과 함께 뜨는지, 바깥 요청이 0건인지 봅니다. 글꼴(`apps/shop/src/_app/fonts/`, `next/font/local`)을 포함해 자료는 모두 저장소 파일이므로 CDN·Google Fonts 같은 바깥 요청을 새로 넣지 않습니다.
 - **테스트 원칙: Testing Library.** 구현 세부가 아니라 사용자가 보는 동작을 검사하고, 요소는 역할·이름(`getByRole`)으로 찾습니다. 도구: 단위·컴포넌트는 Vitest + Testing Library(`renderWithProviders`), 화면 흐름은 Playwright E2E, 접근성은 axe(`@axe-core/playwright`로 E2E 매 페이지 WCAG 2.2 AA 태그, Storybook addon-a11y로 스토리마다).
 
 ## 5. 코드 스타일
 
-- Prettier: 작은따옴표, 한 줄 120자. `*.md`는 표를 손으로 맞춰 Prettier에서 제외합니다.
+- **서식:** Prettier(`.prettierrc.json`: 작은따옴표, 한 줄 120자)를 그대로 따릅니다(Biome 없음). `*.md`는 표를 손으로 맞춰 Prettier에서 제외합니다.
 - import 순서: react → next → 외부 → `@snb/` → `@/` → 상대 경로 → `import type` → CSS(자동 정렬).
 - 버그를 고치면 고치기 전에 실패하는 테스트를 함께 넣습니다.
-- 접근성(KWCAG 2.2): 네이티브 요소 우선(`<button type="button">`, `<a href>`), 텍스트 대비 4.5:1 이상(쇼핑몰 5.35:1, 어드민은 대비가 모자란 Ant Design 토큰을 진하게), 모든 기능 키보드, 초점 표시 유지(`outline: none` 단독 금지), 조작 크기 24px 이상(링크·버튼은 `min-h-11` 44px), 입력 레이블과 오류의 `aria-invalid`·`aria-describedby` 연결·오류 칸으로 초점, 바뀌는 안내는 `role="status"`, 항목 삭제 뒤 초점 이동(`useRemovalFocus`), `prefers-reduced-motion`이면 전환 끄기. 줄 그은 정가에는 숨긴 글자로 '정가'·'할인가'를 붙입니다.
+- **접근성: WCAG 2.2·KWCAG 2.2.** 자동 검사는 eslint-plugin-jsx-a11y(recommended 전체를 켬)와 axe(Storybook·Playwright)이고, axe 통과가 KWCAG 준수는 아니므로 `docs/development.md`의 '접근성 점검 (KWCAG 2.2)' 표를 함께 지킵니다. 네이티브 요소 우선(`<button type="button">`, `<a href>`), 텍스트 대비 4.5:1 이상(쇼핑몰 5.35:1, 어드민은 대비가 모자란 Ant Design 토큰을 진하게), 모든 기능 키보드, 초점 표시 유지(`outline: none` 단독 금지), 조작 크기 24px 이상(링크·버튼은 `min-h-11` 44px), 입력 레이블과 오류의 `aria-invalid`·`aria-describedby` 연결·오류 칸으로 초점, 바뀌는 안내는 `role="status"`, 항목 삭제 뒤 초점 이동(`useRemovalFocus`), `prefers-reduced-motion`이면 전환 끄기. 줄 그은 정가에는 숨긴 글자로 '정가'·'할인가'를 붙입니다.
 - **타입: TypeScript strict.** `tsconfig.base.json`에서 `strict`와 `noUncheckedIndexedAccess`를 켭니다. `any`·`as` 단언·`@ts-ignore`는 피하고, 외부 입력(Mock API 요청 본문, 저장값, URL)은 서버·불러오기 쪽에서 모양을 검사합니다.
-- **서식:** Prettier(`.prettierrc.json`)를 그대로 따릅니다(Biome 없음).
-- **접근성 기준: WCAG 2.2·KWCAG 2.2.** 자동 검사는 eslint-plugin-jsx-a11y(recommended 전체를 켬)와 axe(Storybook·Playwright)입니다. axe 통과가 KWCAG 준수는 아니므로 `docs/development.md`의 '접근성 점검 (KWCAG 2.2)' 표를 함께 지킵니다.
 
 ## 6. Git·PR
 
@@ -87,17 +86,17 @@ pnpm dev   # 쇼핑몰 http://localhost:3000 · 어드민 http://localhost:3000/
 
 ## 7. 배포·릴리스
 
-- Vercel 프로젝트: `swordnblade`(Root `apps/shop`), `swordnblade-admin`(Root `apps/admin`). **main만 배포**하고 PR 미리보기는 끔(`vercel.json`의 `git.deploymentEnabled`). 쇼핑몰이 `/admin`을 어드민 앱으로 넘깁니다(multi-zones).
+- Vercel 프로젝트: `swordnblade`(Root `apps/shop`), `swordnblade-admin`(Root `apps/admin`). **main만 배포**하고 PR 미리보기는 끔(`vercel.json`의 `git.deploymentEnabled`). 쇼핑몰이 `/admin`을 어드민 앱으로 넘깁니다(multi-zones). 넘길 주소는 Vercel 빌드가 넣는 `VERCEL=1`로 운영 어드민 주소가 되므로, Vercel 밖에서 운영용으로 빌드하면 `ADMIN_ORIGIN`을 꼭 줍니다.
 - `scripts/vercel-ignore.sh`(Ignored Build Step): 직전 배포 이후 문서·테스트·스토리·`.github`만 바뀌면 빌드를 건너뜁니다. Vercel Hobby는 계정 전체 하루 100회 한도라 푸시를 모읍니다.
 - 데모 모드: 별도 플래그 없이 항상 브라우저 Mock API(localStorage `snb-db-v1`)로 동작합니다. 비밀값이 없습니다.
 - 릴리스: 병합 뒤 태그 `vX.Y.Z`, 제목 `vX.Y.Z`, 대상은 병합 커밋 전체 SHA, 본문은 CHANGELOG의 해당 절. 그 뒤 백업 `bash ~/Documents/Archive/Backup/backup.sh`.
-- 배포 뒤 운영·어드민·Storybook 주소가 200인지, `/version.txt`가 병합 커밋인지 확인합니다.
+- 배포 뒤 운영·어드민·Storybook(`/storybook/`, `/admin/storybook/`) 주소가 200인지, 두 앱의 `/version.txt`가 병합 커밋인지 확인합니다(`live-check.yml`도 같은 것을 봄).
 - 보관함 계획 문서(`~/Documents/Obsidian Vault/`): `swordnblade v1.0.0 고도화 계획.md`, `swordnblade 가공의 도검 목록.md`, `swordnblade 가공의 도검 전체 수록 계획.md`, `swordnblade 도검 자료 확장 계획.md`. 진행 기록을 날짜와 함께 남깁니다.
 - 소개가 크게 바뀌면 프로필 저장소 `ryushin01/ryushin01` README 프로젝트 표(내용·기술·실행 칸)를 고칩니다. 버전 숫자는 Actions가 자동으로 고칩니다.
 
 ## 8. 보안·주의사항
 
-- 비밀값·`.env`를 커밋하지 않습니다. 공개 데모에 실제 DB·유료 API 키를 넣지 않습니다.
+- 공개 데모에 실제 DB·유료 API 키를 넣지 않습니다.
 - Mock 인증(회원 SHA-256 해시, 어드민 데모 토큰)은 브라우저 안에만 있어 실제 보안이 아닙니다. 주문 금액은 Mock 서버가 다시 계산하고, 주문 확인은 주문 키·회원·어드민만 엽니다. 이 보호를 약하게 만들지 않습니다.
 - 보안 헤더(CSP `frame-ancestors 'self'` 등, `next.config.ts`)를 유지합니다. E2E가 운영에서도 확인합니다.
 - Sentry에는 오류 내용만 보내고 사용자 정보·쿠키·쿼리·브레드크럼은 모으지 않습니다.
@@ -105,6 +104,9 @@ pnpm dev   # 쇼핑몰 http://localhost:3000 · 어드민 http://localhost:3000/
 - 글꼴은 SIL OFL 1.1 판만 씁니다. KoPub바탕은 예약 이름 때문에 줄인 파일을 SnbBatang으로 부릅니다. 새 자료를 넣으면 README 출처 표에 저작자·라이선스·원본을 적습니다.
 - `patches/@ssgoi__core@7.5.0.patch`: SSGOI를 올릴 때는 업스트림이 고쳤는지 보고 패치를 지우거나 `pnpm patch @ssgoi/core`로 다시 만듭니다.
 - Dependabot: TypeScript 6.1 이상, `@types/node` 23 이상은 받지 않습니다.
+- CI·배포·릴리스 상태는 명령 결과(`gh run`, `gh pr checks`, `curl`)로 확인한 것만 말합니다.
+- 먼저 묻기: 새 런타임 의존성 추가, 빌드·배포 설정(`next.config.ts`, `apps/*/vercel.json`, `turbo.json`, `scripts/vercel-ignore.sh`) 변경.
+- 절대 금지: 비밀값을 `NEXT_PUBLIC_*`에 넣기, `.env` 커밋, `eslint-disable`·`--no-verify`로 검사 우회, `main` 직접 푸시.
 
 ## 9. 공통 규칙
 

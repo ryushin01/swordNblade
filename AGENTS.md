@@ -5,7 +5,7 @@ AI 코딩 에이전트(Codex, Claude Code 등)가 이 저장소에서 일할 때
 ## 1. 프로젝트 개요
 
 - 석고 부조처럼 진열한 도검 쇼핑몰과 관리자 화면입니다. 배송 국가별 관세·부가세를 미리 계산합니다. 실제로 판매하지 않는 포트폴리오이며, 백엔드 없이 브라우저 Mock API(MSW)와 가상 데이터로 동작합니다.
-- 화면 축 2개: 쇼핑몰(`apps/shop`) · 어드민(`apps/admin`)
+- 화면 축: 쇼핑몰(`apps/shop`) · 어드민(`apps/admin`)
 - 운영: 쇼핑몰 https://swordnblade-ryushin01.vercel.app/ (영어 `/en`) · 어드민 https://swordnblade-ryushin01.vercel.app/admin · Storybook `/storybook`, `/admin/storybook`. 로그인 없이 바로 볼 수 있고, 어드민은 로그인 화면에 공개한 데모 계정으로 들어갑니다.
 
 ## 2. 기술 스택과 구조
@@ -87,7 +87,7 @@ pnpm dev   # 쇼핑몰 http://localhost:3000 · 어드민 http://localhost:3000/
 
 ## 7. 배포·릴리스
 
-- Vercel 프로젝트 2개: `swordnblade`(Root `apps/shop`), `swordnblade-admin`(Root `apps/admin`). **main만 배포**하고 PR 미리보기는 끔(`vercel.json`의 `git.deploymentEnabled`). 쇼핑몰이 `/admin`을 어드민 앱으로 넘깁니다(multi-zones).
+- Vercel 프로젝트: `swordnblade`(Root `apps/shop`), `swordnblade-admin`(Root `apps/admin`). **main만 배포**하고 PR 미리보기는 끔(`vercel.json`의 `git.deploymentEnabled`). 쇼핑몰이 `/admin`을 어드민 앱으로 넘깁니다(multi-zones).
 - `scripts/vercel-ignore.sh`(Ignored Build Step): 직전 배포 이후 문서·테스트·스토리·`.github`만 바뀌면 빌드를 건너뜁니다. Vercel Hobby는 계정 전체 하루 100회 한도라 푸시를 모읍니다.
 - 데모 모드: 별도 플래그 없이 항상 브라우저 Mock API(localStorage `snb-db-v1`)로 동작합니다. 비밀값이 없습니다.
 - 릴리스: 병합 뒤 태그 `vX.Y.Z`, 제목 `vX.Y.Z`, 대상은 병합 커밋 전체 SHA, 본문은 CHANGELOG의 해당 절. 그 뒤 백업 `bash ~/Documents/Archive/Backup/backup.sh`.

@@ -59,6 +59,7 @@ pnpm dev   # 쇼핑몰 http://localhost:3000 · 어드민 http://localhost:3000/
 - CI(`.github/workflows/ci.yml`, PR·main 푸시): 바뀐 파일 분류 → [Lint·Format·Typecheck·Test(`lint` → `format:check` → `typecheck` → `test:coverage`)] · [Storybook] · [Build·Size]를 동시에 → 빌드 결과물로 E2E(쇼핑몰) · E2E(어드민) · Lighthouse. Markdown만 바뀌면 Storybook·E2E·Lighthouse를 건너뜁니다.
 - `live-check.yml`: main 푸시 뒤 Vercel 배포를 기다렸다가 운영 주소에 E2E를 돌립니다.
 - husky pre-commit: lint-staged(ESLint·Prettier) → `pnpm typecheck` → `pnpm test`.
+- **테스트 원칙: Testing Library.** 구현 세부가 아니라 사용자가 보는 동작을 검사하고, 요소는 역할·이름(`getByRole`)으로 찾습니다. 도구: 단위·컴포넌트는 Vitest + Testing Library(`renderWithProviders`), 화면 흐름은 Playwright E2E, 접근성은 axe(`@axe-core/playwright`로 E2E 매 페이지 WCAG 2.2 AA 태그, Storybook addon-a11y로 스토리마다).
 
 ## 5. 코드 스타일
 
@@ -66,12 +67,19 @@ pnpm dev   # 쇼핑몰 http://localhost:3000 · 어드민 http://localhost:3000/
 - import 순서: react → next → 외부 → `@snb/` → `@/` → 상대 경로 → `import type` → CSS(자동 정렬).
 - 버그를 고치면 고치기 전에 실패하는 테스트를 함께 넣습니다.
 - 접근성(KWCAG 2.2): 네이티브 요소 우선(`<button type="button">`, `<a href>`), 텍스트 대비 4.5:1 이상(쇼핑몰 5.35:1, 어드민은 대비가 모자란 Ant Design 토큰을 진하게), 모든 기능 키보드, 초점 표시 유지(`outline: none` 단독 금지), 조작 크기 24px 이상(링크·버튼은 `min-h-11` 44px), 입력 레이블과 오류의 `aria-invalid`·`aria-describedby` 연결·오류 칸으로 초점, 바뀌는 안내는 `role="status"`, 항목 삭제 뒤 초점 이동(`useRemovalFocus`), `prefers-reduced-motion`이면 전환 끄기. 줄 그은 정가에는 숨긴 글자로 '정가'·'할인가'를 붙입니다.
+- **타입: TypeScript strict.** `tsconfig.base.json`에서 `strict`와 `noUncheckedIndexedAccess`를 켭니다. `any`·`as` 단언·`@ts-ignore`는 피하고, 외부 입력(Mock API 요청 본문, 저장값, URL)은 서버·불러오기 쪽에서 모양을 검사합니다.
+- **서식:** Prettier(`.prettierrc.json`)를 그대로 따릅니다(Biome 없음).
+- **접근성 기준: WCAG 2.2·KWCAG 2.2.** 자동 검사는 eslint-plugin-jsx-a11y(recommended 전체를 켬)와 axe(Storybook·Playwright)입니다. axe 통과가 KWCAG 준수는 아니므로 `docs/development.md`의 '접근성 점검 (KWCAG 2.2)' 표를 함께 지킵니다.
 
 ## 6. Git·PR
 
-- `main`에 직접 커밋·푸시하지 않습니다. 최신 `main`에서 `feat/…`, `fix/…`, `docs/…`, `ci/…`, `chore/…` 브랜치를 만들고 PR을 올립니다.
-- 커밋·PR 제목: `<type>: 한국어 요약 <버전>` 예) `feat: 미뤘던 「가공의 도검」 5점과 열쇠 이빨 렌더러 1.10.0`. 본문 끝에 `Co-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>`. PR 본문은 `## 요약` 목록, 끝에 `🤖 Generated with [Claude Code](https://claude.com/claude-code)`.
-- 버전: 기능·수정 PR마다 `CHANGELOG.md`에 `## x.y.z - YYYY-MM-DD` 절을 더하고 README 버전 배지를 맞춥니다. 문서만 바뀐 PR은 보통 버전을 올리지 않습니다.
+- **흐름: GitHub Flow.** `main`에 직접 커밋·푸시하지 않습니다. 최신 `main`에서 브랜치를 만들어 PR로만 병합합니다. PR은 목적 하나로 작게, 본문에 무엇·왜·검사 결과(`## 요약`)를 적습니다.
+- **브랜치 이름:** `feat/…`, `fix/…`, `refactor/…`, `docs/…`, `test/…`, `chore/…`, `release/…`. 이 저장소는 CI 변경에 `ci/…`도 썼습니다(예: `ci/split-jobs`).
+- **커밋 메시지: Conventional Commits.** `<타입>: <한국어 요약>`, 타입은 `feat`, `fix`, `refactor`, `perf`, `docs`, `test`, `style`, `chore`, `ci`, `build`. 호환이 깨지면 본문에 `BREAKING CHANGE:`. 실제 예: `feat: 미뤘던 「가공의 도검」 5점과 열쇠 이빨 렌더러 1.10.0`, `ci: 검사를 작업 여러 개로 나눠 동시에 돌리기 1.11.1`.
+  - 표준과 다른 점: 이 저장소는 버전을 괄호 없이 제목 끝에 붙입니다(`… 1.11.1`, 표준은 `(1.11.1)`). 기존 관례를 따릅니다.
+  - 커밋 끝에 `Co-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>`, PR 본문 끝에 `🤖 Generated with [Claude Code](https://claude.com/claude-code)`.
+- **버전: Semantic Versioning.** 호환이 깨지면 주, 기능 추가는 부, 버그 수정·작은 개선은 수. 버전을 맞추는 곳은 두 앱의 `package.json`(`apps/shop`, `apps/admin`의 `version`), `CHANGELOG.md`, README 버전 배지(`version-x.y.z`)입니다. 루트에는 `version`이 없고, `packages/*`는 0.1.0 그대로 둡니다. 문서만 바뀐 PR은 보통 버전을 올리지 않습니다.
+- **변경 기록: Keep a Changelog.** `CHANGELOG.md`에 최신 버전을 위에 `## x.y.z - YYYY-MM-DD`로 적습니다. 표준과 다른 점: 추가·변경·수정·제거 소제목 대신 요약 한 문단과 `영역: 내용` 목록으로 적고, `[Unreleased]` 절은 쓰지 않습니다(PR마다 바로 버전을 붙임).
 - 병합은 squash(제목 끝 `(#번호)`). **CI가 통과하면 바로 병합**하고 CodeRabbit 리뷰는 기다리지 않습니다(이미 달린 맞는 지적은 반영). 원격 브랜치 삭제는 저장소 설정에 맡깁니다.
 - 공개 저장소라 Actions가 돕니다. Actions가 막히면 CI와 같은 검사를 로컬에서 돌려 대신합니다.
 

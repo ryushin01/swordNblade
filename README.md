@@ -1,7 +1,7 @@
 # Sword & Blade - 도검의 벽
 
 [![CI](https://github.com/ryushin01/swordNblade/actions/workflows/ci.yml/badge.svg)](https://github.com/ryushin01/swordNblade/actions/workflows/ci.yml)
-![version](https://img.shields.io/badge/version-1.11.1-7a4a35)
+![version](https://img.shields.io/badge/version-1.11.2-7a4a35)
 ![Storybook](https://img.shields.io/badge/Storybook-10-FF4785?logo=storybook&logoColor=white)
 
 동양 도검부터 신화 속 검까지, 석고 벽에 새긴 부조처럼 진열한 도검 쇼핑몰과 관리자 화면입니다. 배송 국가에 따라 관세·부가세를 미리 계산합니다.
@@ -93,6 +93,8 @@ pnpm install
 pnpm dev    # 쇼핑몰 http://localhost:3000 · 어드민 http://localhost:3000/admin
 ```
 
+`.env`나 비밀값 없이 바로 실행됩니다(`NEXT_PUBLIC_SENTRY_DSN`은 오류 수집용 선택 값). 도검 자료는 브라우저 Mock API(MSW)와 시드 JSON, 일러스트는 코드(SVG), 글꼴은 저장소 파일이라 인터넷이 없어도 설치를 마친 뒤에는 `pnpm dev`와 `pnpm build` → `pnpm --filter @snb/shop start`·`pnpm --filter @snb/admin start`(쇼핑몰 http://localhost:3000, 어드민은 같은 주소의 `/admin`)으로 쇼핑몰과 어드민을 모두 볼 수 있습니다. 로컬 빌드의 쇼핑몰은 `/admin`을 옆에서 띄운 어드민(3001)으로 넘기고, 운영 어드민 주소는 Vercel에서 빌드할 때만 씁니다. 바깥 주소는 링크와 공유 미리보기 주소뿐입니다.
+
 | 명령 | 설명 |
 |---|---|
 | `pnpm build` | 두 앱 프로덕션 빌드 |
@@ -139,14 +141,14 @@ docs/          문서와 스크린샷
 | KoPub바탕 (SIL OFL판, 줄인 파일 이름 SnbBatang) | 한글 (제목·본문) | 400 (굵은 글씨는 브라우저가 두껍게 그림) |
 | 나눔손글씨 붓 | 칼 이름의 한글 | 400 |
 
-저작자·라이선스·원본은 아래 출처 표에 있습니다. 모두 같은 사이트에서 제공합니다. KoPub바탕은 Google Fonts가 SIL OFL 1.1로 배포하는 판을 씁니다. 화면에 쓰는 글자만 담은 파일(약 118 KB)을 첫 화면과 함께 받고, 도검 설명·이야기에만 쓰인 글자는 상세 글자 파일(약 55 KB)로 나눠 도검 상세에서만 받으며, 나머지 글자는 글자 묶음별 조각으로 나눠 페이지를 다 받은 뒤 필요한 조각만 받습니다(`pnpm --filter @snb/shop fonts`). OFL의 예약 이름 때문에 줄인 파일은 SnbBatang이라는 이름으로 씁니다.
+저작자·라이선스·원본은 아래 출처 표에 있습니다. 모두 저장소에 넣은 파일을 같은 사이트에서 제공하며, 빌드할 때도 글꼴을 내려받지 않습니다. Spectral·Pirata One은 Google Fonts의 라틴 글자 묶음을 그대로 담은 Fontsource 판 파일(`apps/shop/src/_app/fonts`, 라이선스 `OFL-*.txt`)입니다. KoPub바탕은 Google Fonts가 SIL OFL 1.1로 배포하는 판을 씁니다. 화면에 쓰는 글자만 담은 파일(약 118 KB)을 첫 화면과 함께 받고, 도검 설명·이야기에만 쓰인 글자는 상세 글자 파일(약 55 KB)로 나눠 도검 상세에서만 받으며, 나머지 글자는 글자 묶음별 조각으로 나눠 페이지를 다 받은 뒤 필요한 조각만 받습니다(`pnpm --filter @snb/shop fonts`). OFL의 예약 이름 때문에 줄인 파일은 SnbBatang이라는 이름으로 씁니다.
 
 ## 출처
 
 | 자료 | 저작자 | 사용 허락 | 원본 |
 |---|---|---|---|
-| Spectral 글꼴 | Production Type | SIL OFL 1.1 | [Google Fonts](https://fonts.google.com/specimen/Spectral) |
-| Pirata One 글꼴 | Rodrigo Fuenzalida, Nicolas Massi | SIL OFL 1.1 | [Google Fonts](https://fonts.google.com/specimen/Pirata+One) |
+| Spectral 글꼴 (라틴 400·500·600, Fontsource 5.3.0) | Production Type | SIL OFL 1.1 | [Google Fonts](https://fonts.google.com/specimen/Spectral), [Fontsource](https://fontsource.org/fonts/spectral) |
+| Pirata One 글꼴 (라틴 400, Fontsource 5.3.0) | Rodrigo Fuenzalida, Nicolas Massi | SIL OFL 1.1 (예약 이름 Pirata) | [Google Fonts](https://fonts.google.com/specimen/Pirata+One), [Fontsource](https://fontsource.org/fonts/pirata-one) |
 | KoPub바탕 글꼴 (화면·상세 글자 파일과 조각으로 줄여 SnbBatang으로 이름을 바꿈) | 문화체육관광부, 한국출판인회의 | SIL OFL 1.1 (예약 이름 KoPub Batang) | [google/fonts](https://github.com/google/fonts/tree/main/ofl/kopubbatang) |
 | Nanum Brush Script(나눔손글씨 붓) 글꼴 (쓰는 글자만 남긴 `sword-brush.woff2`) | NHN(네이버), 디자인 산돌커뮤니케이션 | SIL OFL 1.1 | [Google Fonts](https://fonts.google.com/specimen/Nanum+Brush+Script) |
 

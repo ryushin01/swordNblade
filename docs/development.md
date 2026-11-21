@@ -15,7 +15,7 @@
 ## 쇼핑몰과 어드민을 한 주소로 (multi-zones)
 
 - 어드민은 `basePath: '/admin'`으로 빌드하고, 쇼핑몰이 `/admin` 요청을 어드민 앱으로 넘깁니다(`apps/shop/next.config.ts`의 rewrites). 그래서 두 앱이 **같은 출처(origin)** 에서 열립니다.
-- 넘길 주소는 빌드할 때 `ADMIN_ORIGIN`으로 정합니다. 기본값은 개발 `http://localhost:3001`, 프로덕션 `https://swordnblade-admin-ryushin01.vercel.app`입니다.
+- 넘길 주소는 빌드할 때 `ADMIN_ORIGIN`으로 정합니다. 기본값은 Vercel에서 빌드할 때(`VERCEL=1`) `https://swordnblade-admin-ryushin01.vercel.app`, 그 밖(개발 서버, 로컬 프로덕션 빌드)에는 `http://localhost:3001`입니다. 로컬 빌드가 운영 주소로 나가지 않아 인터넷 없이도 `/admin`이 열립니다.
 - `pnpm dev`로 두 앱을 함께 띄우고 `http://localhost:3000/admin`으로 엽니다. 어드민만 따로 열려면 `http://localhost:3001/admin`입니다.
 - 쇼핑몰과 어드민 사이의 이동은 다른 앱으로 넘어가므로 `next/link`가 아닌 일반 `a` 링크를 씁니다.
 
@@ -104,6 +104,8 @@
 | E2E | `apps/*/e2e` | `pnpm build` 후 `pnpm --filter @snb/shop e2e` |
 
 E2E는 `next start`(프로덕션 빌드)를 띄워 데스크톱·모바일(Pixel 7) 두 화면에서 실행합니다. 쇼핑몰은 3101, 어드민은 3102 포트를 씁니다(`E2E_PORT`로 바꿀 수 있음). `E2E_BASE_URL`을 주면 로컬 서버를 띄우지 않고 그 주소(배포된 사이트)를 검사합니다. 매 페이지에서 axe(WCAG 2.2 AA 태그)를 돌리고, 쇼핑몰은 가로 넘침도 검사합니다. 쇼핑몰 E2E는 어드민 서버도 함께 띄워 두 앱의 데이터 공유를 검사하므로, 쇼핑몰을 `ADMIN_ORIGIN=http://localhost:3102`로 빌드해야 합니다.
+
+오프라인 검사(`apps/shop/e2e/offline.spec.ts`, `apps/admin/e2e/offline.spec.ts`)는 사이트 밖으로 나가는 요청을 모두 끊은 채 쇼핑몰(도검의 벽·상세·영어 화면)과 어드민(데모 로그인·대시보드·상품·상품 수정·주문)이 내용과 함께 뜨고 axe를 통과하는지, 바깥 요청이 하나도 없는지 봅니다. 운영 주소를 검사할 때(`E2E_BASE_URL`)는 그 주소만 열어 둡니다. 실행 중에 부르는 바깥 API·CDN은 없고(Sentry는 DSN이 있을 때만), 글꼴도 저장소 파일이라 빌드에도 인터넷이 필요 없습니다(설치 제외).
 
 스토리 테스트는 모든 스토리를 실제 브라우저(Chromium)에서 렌더링하고 axe를 돌립니다. 접근성 위반이 하나라도 있으면 실패합니다(`a11y: { test: 'error' }`).
 

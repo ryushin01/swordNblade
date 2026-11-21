@@ -1,4 +1,3 @@
-import { Pirata_One, Spectral } from 'next/font/google';
 import localFont from 'next/font/local';
 import { notFound } from 'next/navigation';
 import { hasLocale, NextIntlClientProvider } from 'next-intl';
@@ -34,18 +33,25 @@ const swordBrush = localFont({
 });
 
 // 영문·숫자 본문과 제목은 Spectral, 영어 화면의 큰 제목만 다크 판타지 글꼴 Pirata One(굵기 하나).
-// Spectral은 쓰는 굵기만 받습니다(본문 400, 버튼 500, 굵은 글씨 600). 700은 쓰는 곳이 없어 모든 화면에서 미리 받던 것을 뺐습니다.
-const spectral = Spectral({
-  subsets: ['latin'],
-  weight: ['400', '500', '600'],
+// 두 글꼴 모두 Google Fonts의 라틴 글자 묶음(Fontsource 판, SIL OFL 1.1) 파일을 저장소에 두고 씁니다.
+// next/font/google은 빌드할 때 Google Fonts에서 받아 오므로, 인터넷이 없으면 빌드가 실패해 로컬 파일로 바꿨습니다.
+// Spectral은 쓰는 굵기만 둡니다(본문 400, 버튼 500, 굵은 글씨 600).
+const spectral = localFont({
+  src: [
+    { path: '../fonts/spectral-latin-400-normal.woff2', weight: '400', style: 'normal' },
+    { path: '../fonts/spectral-latin-500-normal.woff2', weight: '500', style: 'normal' },
+    { path: '../fonts/spectral-latin-600-normal.woff2', weight: '600', style: 'normal' },
+  ],
   variable: '--font-spectral',
   display: 'swap',
+  adjustFontFallback: 'Times New Roman',
 });
 // Pirata One은 영어 화면의 h1·h2에만 쓰여, 모든 화면(한국어 포함)에서 미리 받지 않고 그 제목을 그릴 때 받습니다.
 // 받기 전에는 next/font가 만든 크기 보정 대체 글꼴로 그려 글자 자리가 크게 움직이지 않습니다.
-const pirata = Pirata_One({
-  subsets: ['latin'],
+const pirata = localFont({
+  src: '../fonts/pirata-one-latin-400-normal.woff2',
   weight: '400',
+  style: 'normal',
   variable: '--font-pirata',
   display: 'swap',
   preload: false,

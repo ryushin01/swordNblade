@@ -7,10 +7,12 @@ const withNextIntl = createNextIntlPlugin('./src/shared/i18n/request.ts');
 /**
  * 어드민 앱 주소. /admin 요청을 이 주소로 넘겨 같은 출처에서 어드민을 엽니다(Next.js multi-zones).
  * 빌드할 때 정해지며, 로컬 E2E처럼 다른 어드민 서버를 쓸 때는 ADMIN_ORIGIN으로 바꿉니다.
+ * 운영 어드민 주소는 Vercel에서 빌드할 때(VERCEL=1)만 씁니다. 로컬 빌드는 옆에서 띄운 어드민(`pnpm --filter @snb/admin start`, 3001)으로
+ * 넘겨, 인터넷이 없어도 `/admin`이 열립니다.
  */
 const ADMIN_ORIGIN =
   process.env.ADMIN_ORIGIN ??
-  (process.env.NODE_ENV === 'production' ? 'https://swordnblade-admin-ryushin01.vercel.app' : 'http://localhost:3001');
+  (process.env.VERCEL === '1' ? 'https://swordnblade-admin-ryushin01.vercel.app' : 'http://localhost:3001');
 
 /**
  * 보안 헤더(두 앱이 같은 값을 씁니다). Storybook(/storybook)이 같은 출처의 iframe으로 스토리를 그리므로 같은 출처의 프레임만 허용합니다.

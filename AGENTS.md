@@ -77,7 +77,9 @@ pnpm dev   # 쇼핑몰 http://localhost:3000 · 어드민 http://localhost:3000/
 - **브랜치 이름:** `feat/…`, `fix/…`, `refactor/…`, `docs/…`, `test/…`, `chore/…`, `release/…`. 이 저장소는 CI 변경에 `ci/…`도 썼습니다(예: `ci/split-jobs`).
 - **커밋 메시지: Conventional Commits.** `<타입>: <한국어 요약>`, 타입은 `feat`, `fix`, `refactor`, `perf`, `docs`, `test`, `style`, `chore`, `ci`, `build`. 호환이 깨지면 본문에 `BREAKING CHANGE:`. 실제 예: `feat: 미뤘던 「가공의 도검」 5점과 열쇠 이빨 렌더러 1.10.0`, `ci: 검사를 작업 여러 개로 나눠 동시에 돌리기 1.11.1`.
   - 표준과 다른 점: 이 저장소는 버전을 괄호 없이 제목 끝에 붙입니다(`… 1.11.1`, 표준은 `(1.11.1)`). 기존 관례를 따릅니다.
-  - 커밋 끝에 `Co-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>`, PR 본문 끝에 `🤖 Generated with [Claude Code](https://claude.com/claude-code)`.
+- **기여자는 ryushin01만 남깁니다(2026-11-21 사용자 결정).** 커밋 작성자는 늘 `ryushin0 <141554987+ryushin01@users.noreply.github.com>`입니다. 이 저장소는 백엔드 코드가 없으므로 `Co-Authored-By` 줄을 넣지 않습니다(백엔드 저장소만 `Co-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>`). PR 본문 끝에는 `🤖 Generated with [Claude Code](https://claude.com/claude-code)`를 적습니다.
+  - GitHub Actions가 커밋하는 워크플로는 작성자를 ryushin01로 설정합니다(`github-actions[bot]` 금지)(지금은 커밋하는 워크플로 없음).
+  - Dependabot PR은 그대로 병합하지 않고, 같은 변경을 ryushin01 커밋으로 다시 만들어 PR로 병합합니다.
 - **버전: Semantic Versioning.** 호환이 깨지면 주, 기능 추가는 부, 버그 수정·작은 개선은 수. 버전을 맞추는 곳은 두 앱의 `package.json`(`apps/shop`, `apps/admin`의 `version`), `CHANGELOG.md`, README 버전 배지(`version-x.y.z`)입니다. 루트에는 `version`이 없고, `packages/*`는 0.1.0 그대로 둡니다. 문서만 바뀐 PR은 보통 버전을 올리지 않습니다.
 - **변경 기록: Keep a Changelog.** `CHANGELOG.md`에 최신 버전을 위에 `## x.y.z - YYYY-MM-DD`로 적습니다. 표준과 다른 점: 추가·변경·수정·제거 소제목 대신 요약 한 문단과 `영역: 내용` 목록으로 적고, `[Unreleased]` 절은 쓰지 않습니다(PR마다 바로 버전을 붙임).
 - 병합은 squash(제목 끝 `(#번호)`). **CI가 통과하면 바로 병합**하고 CodeRabbit 리뷰는 기다리지 않습니다(이미 달린 맞는 지적은 반영). 원격 브랜치 삭제는 저장소 설정에 맡깁니다.
